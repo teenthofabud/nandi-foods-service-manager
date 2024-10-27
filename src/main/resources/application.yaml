@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: "@project.build.finalName@"
+    version: "@project.version@"
+    description: "@project.description@"
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  datasource:
+    ## PostgreSQL
+    url: jdbc:postgresql://localhost:5432/nandi_foods?currentSchema=settings
+    username: app_psettingsmanager
+    password: 2fFUCWuyY48L
+    ## default connection pool
+    hikari:
+      connection-test-query: SELECT 1
+      minimum-idle: 1
+      idleTimeout: 30000
+      connectionTimeout: 5000
+      pool-name: @project.build.finalName@JPAHikariCP
+      maximumPoolSize: 5
+  jpa:
+    open-in-view: false
+    generate-ddl: false
+    #generate-ddl: true
+    hibernate:
+      # tables expected to be created
+      ddl-auto: none
+      #ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      # http://docs.jboss.org/hibernate/core/3.3/reference/en/html/session-configuration.html#configuration-optional
+      show_sql: true
+      format_sql: true
+      # https://docs.jboss.org/hibernate/stable/orm/userguide/html_single/chapters/batch/Batching.html
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 25
+        batch_versioned_data: true
+        time_zone: UTC
+    properties:
+      jakarta:
+        persistence:
+          schema-generation:
+            create-source: metadata
+            scripts:
+              action: none
+              #action: drop-and-create
+              drop-target: src/main/resources/sql/dev-pg-drop.sql
+              create-target: src/main/resources/sql/dev-pg-ddl.sql
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+
+server:
+  forward-headers-strategy: FRAMEWORK
+  port: 8081
+  shutdown: graceful
+
+inventory:
+  settings:
+    unit:
+      approvalTimeFormat: yyy-MM-dd
+      creationTimeFormat: yyy-MM-dd
+      modificationTimeFormat: yyy-MM-dd
+
+logging:
+  level:
+    com.teenthofabud.wizard.nandifoods.wms: DEBUG
+    com.teenthofabud.wizard.nandifoods.wms.settings: DEBUG
+    org.hibernate.orm.jdbc.bind: trace
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
