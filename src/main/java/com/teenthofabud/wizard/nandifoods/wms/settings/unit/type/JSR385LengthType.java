@@ -18,6 +18,13 @@ import java.util.Properties;
 
 public class JSR385LengthType implements UserType<Unit<Length>>, ParameterizedType {
 
+    private Unit<Length> parseUnit(String symbol) {
+        try {
+            return SimpleUnitFormat.getInstance().parse(symbol).asType(Length.class);
+        } catch (MeasurementParseException e) {
+            return USCustomary.getInstance().getUnit(symbol).asType(Length.class);
+        }
+    }
 
     @Override
     public void setParameterValues(Properties parameters) {
@@ -47,11 +54,7 @@ public class JSR385LengthType implements UserType<Unit<Length>>, ParameterizedTy
     @Override
     public Unit<Length> nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
         String symbol = rs.getString(position);
-        try {
-            return SimpleUnitFormat.getInstance().parse(symbol).asType(Length.class);
-        } catch (MeasurementParseException e) {
-            return USCustomary.getInstance().getUnit(symbol).asType(Length.class);
-        }
+        return parseUnit(symbol);
     }
 
     @Override
@@ -66,7 +69,6 @@ public class JSR385LengthType implements UserType<Unit<Length>>, ParameterizedTy
 
     @Override
     public Unit<Length> deepCopy(Unit<Length> value) {
-        //return Units.getInstance().getUnit(value.toString()).asType(Length.class);
         return SimpleUnitFormat.getInstance(SimpleUnitFormat.Flavor.ASCII).parse(value.toString()).asType(Length.class);
     }
 
