@@ -19,9 +19,6 @@ import org.hibernate.validator.constraints.Length;
 @SuperBuilder
 public abstract class UnitClassForm {
 
-    @EnumValidator(enumClazz = UnitClassType.class, message = "Class type is invalid")
-    protected String type;
-
 
     @EnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
     protected String level;

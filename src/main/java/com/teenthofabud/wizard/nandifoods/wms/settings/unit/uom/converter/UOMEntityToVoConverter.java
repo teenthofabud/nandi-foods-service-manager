@@ -30,7 +30,6 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
                 .longName(source.getLongName())
                 .shortName(source.getShortName())
                 .level(source.getLevelType().getLevel())
-                .type(source.getLevelType().getType())
                 .description(source.getDescription())
                 .bulkCode(source.getBulkCode())
                 .dateCreated(ObjectUtils.isEmpty(source.getAudit().getCreationTime()) ?

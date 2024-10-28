@@ -1,11 +1,9 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLinkVo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -15,18 +13,8 @@ import java.util.List;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UOMVo extends UnitClassVo {
+public class UOMSelfLinkageVo extends UnitClassLinkVo {
 
-    private Long bulkCode;
-
-    private Boolean isInventory;
-
-    private Boolean isPurchase;
-
-    private Boolean isSales;
-
-    private Boolean isProduction;
-
-    private List<UOMSelfLinkageVo> selfLinksTo;
+    private UOMVo to;
 
 }

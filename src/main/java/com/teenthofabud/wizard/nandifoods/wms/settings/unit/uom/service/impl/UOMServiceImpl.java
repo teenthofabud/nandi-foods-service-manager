@@ -14,6 +14,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJp
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import jakarta.validation.Validator;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,7 +42,7 @@ public class UOMServiceImpl implements UOMService {
     private ObjectMapper objectMapper;
     private UOMSelfLinkageEntityReducer uomSelfLinkageEntityReducer;
     private UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository;
-    private Validator validator;
+    private UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter;
 
 
     @Autowired
@@ -53,7 +55,7 @@ public class UOMServiceImpl implements UOMService {
                           ObjectMapper objectMapper,
                           UOMSelfLinkageEntityReducer uomSelfLinkageEntityReducer,
                           UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository,
-                          Validator validator) {
+                          UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
@@ -63,7 +65,7 @@ public class UOMServiceImpl implements UOMService {
         this.objectMapper = objectMapper;
         this.uomSelfLinkageEntityReducer = uomSelfLinkageEntityReducer;
         this.uomSelfLinkageJpaRepository = uomSelfLinkageJpaRepository;
-        this.validator = validator;
+        this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
     }
 
     private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
@@ -143,6 +145,10 @@ public class UOMServiceImpl implements UOMService {
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
         uomVo.setImperial(getUnitClassMeasuredValuesFor(uomEntity, MetricSystem.IMPERIAL));
         uomVo.setMetric(getUnitClassMeasuredValuesFor(uomEntity, MetricSystem.SI));
+        List<UOMSelfLinkageVo> uomSelfLinkageVos = uomEntity.getToUOMs().stream()
+                .map(e -> uomSelfLinkageEntityToVoConverter.convert(e))
+                .collect(Collectors.toList());
+        uomVo.setSelfLinksTo(uomSelfLinkageVos);
         return uomVo;
     }
 

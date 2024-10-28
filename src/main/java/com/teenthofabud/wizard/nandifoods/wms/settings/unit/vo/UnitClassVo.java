@@ -13,8 +13,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 public abstract class UnitClassVo {
 
-    protected String type;
-
     protected String level;
 
     protected String name;

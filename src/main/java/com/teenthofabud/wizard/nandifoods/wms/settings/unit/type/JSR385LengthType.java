@@ -3,9 +3,11 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.type;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
+import systems.uom.common.USCustomary;
 import tech.units.indriya.format.SimpleUnitFormat;
 
 import javax.measure.Unit;
+import javax.measure.format.MeasurementParseException;
 import javax.measure.quantity.Length;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -45,7 +47,11 @@ public class JSR385LengthType implements UserType<Unit<Length>>, ParameterizedTy
     @Override
     public Unit<Length> nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
         String symbol = rs.getString(position);
-        return symbol != null ? SimpleUnitFormat.getInstance(SimpleUnitFormat.Flavor.ASCII).parse(symbol).asType(Length.class): null;
+        try {
+            return SimpleUnitFormat.getInstance().parse(symbol).asType(Length.class);
+        } catch (MeasurementParseException e) {
+            return USCustomary.getInstance().getUnit(symbol).asType(Length.class);
+        }
     }
 
     @Override
