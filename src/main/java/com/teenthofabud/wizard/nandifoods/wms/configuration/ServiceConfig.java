@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -39,8 +41,8 @@ public class ServiceConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = JsonMapper.builder()
-                                        //.addModule(new Jdk8Module())
-                                        //.addModule(new JavaTimeModule())
+                                        .addModule(new Jdk8Module())
+                                        .addModule(new JavaTimeModule())
                                         //.addModule(new JSR353Module())
                                         .serializationInclusion(JsonInclude.Include.NON_NULL)
                                         .serializationInclusion(JsonInclude.Include.NON_ABSENT)

@@ -1,35 +1,38 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassDto;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @SuperBuilder
-@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 public class UOMDto extends UnitClassDto {
 
-    @NotNull
-    @Min(value = 1)
-    @Builder.Default
-    private Long bulkCode = 0l;
+    private Optional<Boolean> isInventory;
 
-    @Builder.Default
-    private Boolean isInventory = false;
+    private Optional<Boolean> isPurchase;
 
-    @Builder.Default
-    private Boolean isPurchase = false;
+    private Optional<Boolean> isSales;
 
-    @Builder.Default
-    private Boolean isSales = false;
+    private Optional<Boolean> isProduction;
 
-    @Builder.Default
-    private Boolean isProduction = false;
+    private Optional<List<@Valid UOMSelfLinkageDto>> linkedUOMs;
 
+    public UOMDto() {
+        super();
+        this.isInventory = Optional.empty();
+        this.isPurchase = Optional.empty();
+        this.isSales = Optional.empty();
+        this.isProduction = Optional.empty();
+        this.linkedUOMs = Optional.of(new ArrayList<>());
+    }
 }

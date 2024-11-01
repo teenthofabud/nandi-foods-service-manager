@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -81,22 +82,25 @@ public class UOMController implements UOMAPI {
 
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody JsonPatch jsonPatch) {
-        try {
-            UOMDto blankDto = UOMDto.builder().build();
-            JsonNode blankDtoNode = mapper.convertValue(blankDto, JsonNode.class);
-            JsonNode patchedJsonNode = jsonPatch.apply(blankDtoNode);
-            UOMDto patchedDto = mapper.treeToValue(patchedJsonNode, UOMDto.class);
-            log.debug("patchedDto: {}", mapper.writeValueAsString(patchedDto));
-            Javers javers = JaversBuilder.javers().build();
-            Diff dtoUpdates = javers.compare(blankDto, patchedDto);
-            dtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
-                    log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
-            );
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonPatchException e) {
-            throw new RuntimeException(e);
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        Optional<UOMDto> optionalPatchedDto = Optional.empty();
+        UOMDto blankDto = new UOMDto();
+        blankDto.getMetric().get().getLengthValue();
+        JsonNode blankDtoNode = mapper.convertValue(blankDto, JsonNode.class);
+        JsonNode patchedJsonNode = jsonPatch.apply(blankDtoNode);
+        UOMDto patchedDto = mapper.treeToValue(patchedJsonNode, UOMDto.class);
+        optionalPatchedDto = Optional.of(patchedDto);
+        log.debug("patchedDto: {}", mapper.writeValueAsString(patchedDto));
+        Javers javers = JaversBuilder.javers().build();
+        Diff dtoUpdates = javers.compare(blankDto, patchedDto);
+        dtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
+                log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
+        );
+        if(optionalPatchedDto.isPresent()) {
+            Set<ConstraintViolation<UOMDto>> violations = validator.validate(optionalPatchedDto.get());
+            if (!violations.isEmpty()) {
+                throw new ConstraintViolationException(violations);
+            }
         }
         //uomService.updateExistingUOMByCode(code, dto);
         return ResponseEntity.noContent().build();

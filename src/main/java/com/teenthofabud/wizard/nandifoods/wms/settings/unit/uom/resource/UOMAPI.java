@@ -1,6 +1,8 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
@@ -40,7 +42,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
             content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
                     array = @ArraySchema(
                             schema = @Schema(implementation = JsonPatchOperation.class)
-                    ))) JsonPatch jsonPatch);
+                    ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
 
 
     @Operation(method = "GET", summary = "Get UOM by Id", description = "getUOMById")

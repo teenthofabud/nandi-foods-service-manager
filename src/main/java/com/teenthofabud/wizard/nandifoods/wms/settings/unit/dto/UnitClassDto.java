@@ -1,15 +1,19 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.EnumValidator;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.OptionalEnumValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.validator.constraints.Length;
+
+import java.util.Optional;
 
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Getter
@@ -17,43 +21,32 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public abstract class UnitClassDto {
 
-    @EnumValidator(enumClazz = UnitClassType.class, message = "Class type is invalid")
-    @Builder.Default
-    protected String type = "";
+    @OptionalEnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
+    protected Optional<String> level;
 
-    @EnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
-    @Builder.Default
-    protected String level = "";
+    protected Optional<String> name;
 
-    @NotBlank
-    @Builder.Default
-    protected String name = "";
+    protected Optional<String> description;
 
-    @Builder.Default
-    protected String code = "";
+    protected Optional<String> longName;
 
-    @NotBlank
-    @Builder.Default
-    protected String description = "";
+    protected Optional<String> shortName;
 
-    @NotBlank
-    @Builder.Default
-    protected String longName = "";
+    @OptionalEnumValidator(enumClazz = UnitClassStatus.class, message = "Status is invalid")
+    protected Optional<String> status;
 
-    @NotBlank
-    @Builder.Default
-    protected String shortName = "";
+    protected Optional<@Valid UnitClassMeasuredValuesDto> metric;
 
-    @NotBlank
-    @Builder.Default
-    protected String status = "";
+    protected Optional<@Valid UnitClassMeasuredValuesDto> imperial;
 
-    @Valid
-    @Builder.Default
-    protected UnitClassMeasuredValuesDto metric = new UnitClassMeasuredValuesDto();
-
-    @Valid
-    @Builder.Default
-    protected UnitClassMeasuredValuesDto imperial = new UnitClassMeasuredValuesDto();
-
+    public UnitClassDto() {
+        this.level = Optional.empty();
+        this.name = Optional.empty();
+        this.description = Optional.empty();
+        this.longName = Optional.empty();
+        this.shortName = Optional.empty();
+        this.status = Optional.empty();
+        this.metric = Optional.of(new UnitClassMeasuredValuesDto());
+        this.imperial = Optional.of(new UnitClassMeasuredValuesDto());
+    }
 }

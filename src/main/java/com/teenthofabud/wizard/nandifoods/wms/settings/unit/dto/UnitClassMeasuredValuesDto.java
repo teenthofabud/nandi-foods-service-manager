@@ -1,42 +1,34 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Optional;
+
 @EqualsAndHashCode
 @SuperBuilder
-@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Getter
 @Setter
 public class UnitClassMeasuredValuesDto {
 
-    @NotNull
-    @DecimalMin("0.1")
-    @Builder.Default
-    private Double lengthValue = 0.0d;
+    private Optional<@DecimalMin(value = "0.1", message = "length cannot be zero or less") Double> lengthValue;
 
-    @NotNull
-    @DecimalMin("0.1")
-    @Builder.Default
-    private Double widthValue = 0.0d;
+    private Optional<@DecimalMin(value = "0.1", message = "width cannot be zero or less") Double>  widthValue;
 
-    @NotNull
-    @DecimalMin("0.1")
-    @Builder.Default
-    private Double heightValue = 0.0d;
+    private Optional<@DecimalMin(value = "0.1", message = "height cannot be zero or less") Double>  heightValue;
 
-    @NotNull
-    @DecimalMin("0.1")
-    @Builder.Default
-    private Double volumeValue = 0.0d;
+    private Optional<@DecimalMin(value = "0.1", message = "volume cannot be zero or less") Double>  volumeValue;
 
-    @NotNull
-    @DecimalMin("0.1")
-    @Builder.Default
-    private Double weightValue = 0.0d;
+    private Optional<@DecimalMin(value = "0.1", message = "weight cannot be zero or less") Double>  weightValue;
 
+    public UnitClassMeasuredValuesDto() {
+        this.lengthValue = Optional.empty();
+        this.widthValue = Optional.empty();
+        this.heightValue = Optional.empty();
+        this.volumeValue = Optional.empty();
+        this.weightValue = Optional.empty();
+    }
 }

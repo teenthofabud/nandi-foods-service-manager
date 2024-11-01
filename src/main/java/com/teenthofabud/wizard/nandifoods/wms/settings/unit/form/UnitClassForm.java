@@ -26,7 +26,6 @@ public abstract class UnitClassForm {
     @NotBlank(message = "name is required")
     protected String name;
 
-    @NotNull
     @NotBlank(message = "description is required")
     @Length(min = 1, message = "description should be at least 1 character long")
     protected String description;

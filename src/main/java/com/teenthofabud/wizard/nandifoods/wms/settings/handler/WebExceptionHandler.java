@@ -1,5 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -48,6 +50,23 @@ public class WebExceptionHandler {
         ErrorVo errorVo = ErrorVo.builder()
                 .message(errors.get(0).getMessage())
                 .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorVo);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorVo);
     }
+
+    @ExceptionHandler(value = JsonPatchException.class)
+    public ResponseEntity<ErrorVo> handleJsonPatchException(JsonPatchException e) {
+        ErrorVo errorVo = ErrorVo.builder()
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorVo);
+    }
+
+    @ExceptionHandler(value = JsonProcessingException.class)
+    public ResponseEntity<ErrorVo> handleJsonProcessingException(JsonProcessingException e) {
+        ErrorVo errorVo = ErrorVo.builder()
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorVo);
+    }
+
 }
