@@ -1,7 +1,9 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teenthofabud.wizard.nandifoods.wms.dto.PageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassPageDtoToPageableConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.MetricSystemContext;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
@@ -17,11 +19,13 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMServi
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +47,7 @@ public class UOMServiceImpl implements UOMService {
     private UOMSelfLinkageEntityReducer uomSelfLinkageEntityReducer;
     private UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository;
     private UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter;
+    private UnitClassPageDtoToPageableConverter unitClassPageDtoToPageableConverter;
 
 
     @Autowired
@@ -55,7 +60,8 @@ public class UOMServiceImpl implements UOMService {
                           ObjectMapper objectMapper,
                           UOMSelfLinkageEntityReducer uomSelfLinkageEntityReducer,
                           UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository,
-                          UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter) {
+                          UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
+                          UnitClassPageDtoToPageableConverter unitClassPageDtoToPageableConverter) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
@@ -66,6 +72,7 @@ public class UOMServiceImpl implements UOMService {
         this.uomSelfLinkageEntityReducer = uomSelfLinkageEntityReducer;
         this.uomSelfLinkageJpaRepository = uomSelfLinkageJpaRepository;
         this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
+        this.unitClassPageDtoToPageableConverter = unitClassPageDtoToPageableConverter;
     }
 
     private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
@@ -150,6 +157,15 @@ public class UOMServiceImpl implements UOMService {
                 .collect(Collectors.toList());
         uomVo.setSelfLinksTo(uomSelfLinkageVos);
         return uomVo;
+    }
+
+    @Override
+    public List<UOMVo> retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
+        Pageable pageable = unitClassPageDtoToPageableConverter.convert(pageDto);
+        Page<UOMEntity> uomEntityPage = uomJpaRepository.findAll(pageable);
+        List<UOMVo> uomVoList = uomEntityPage.stream().map(p -> uomEntityToVoConverter.convert(p)).collect(Collectors.toList());
+        log.debug("Found {} UOM in page {} of size {}", uomVoList.size(), pageDto.getSize(), pageDto.getSize());
+        return uomVoList;
     }
 
     @Transactional

@@ -5,6 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.googlecode.jmapper.api.JMapperAPI;
+import com.googlecode.jmapper.api.MappedClass;
+import com.googlecode.jmapper.api.Attribute;
+import com.googlecode.jmapper.api.TargetAttribute;
+import com.teenthofabud.wizard.nandifoods.wms.dto.PageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
@@ -23,12 +28,14 @@ import org.javers.core.JaversBuilder;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,6 +109,14 @@ public class UOMController implements UOMAPI {
                 throw new ConstraintViolationException(violations);
             }
         }
+        JMapperAPI api = new JMapperAPI();
+        MappedClass clazz = new MappedClass(UOMDto.class);
+        api.add(clazz);
+        Attribute attribute = new Attribute("attributeName");
+        clazz.add(attribute);
+        TargetAttribute targetAttribute = new TargetAttribute("targetAttributeName");
+        attribute.value(targetAttribute);
+
         //uomService.updateExistingUOMByCode(code, dto);
         return ResponseEntity.noContent().build();
     }
@@ -111,6 +126,17 @@ public class UOMController implements UOMAPI {
     public ResponseEntity<UOMVo> getUOMByCode(@PathVariable(name = "id") String code) {
         UOMVo uomVo = uomService.retrieveExistingUOMByCode(code);
         return ResponseEntity.ok(uomVo);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<List<UOMVo>> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Integer size) {
+        PageDto pageDto = PageDto.builder()
+                .offset(offset)
+                .size(size)
+                .build();
+        List<UOMVo> uomVoList = uomService.retrieveAllUOMWithinRange(pageDto);
+        return ResponseEntity.ok(uomVoList);
     }
 
     @Override

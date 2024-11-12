@@ -10,6 +10,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +21,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 @Tag(name = "UOMAPI", description = "UOM Management")
 public interface UOMAPI extends BaseUnitClassAPI {
@@ -59,5 +62,17 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     )))
     })*/
     public ResponseEntity<UOMVo> getUOMByCode(String code);
+
+    @Operation(method = "GET", summary = "Get all UOM within range", description = "getAllUOMWithinRange")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all UOM within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Page index", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true),
+            @Parameter(description = "Page size", name = "size", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true)
+    })
+    public ResponseEntity<List<UOMVo>> getAllUOMWithinRange(Integer offset, Integer size);
 
 }
