@@ -76,8 +76,9 @@ public class UOMEntity extends UnitClassEntity {
             mappedBy = "fromUOM",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
+    @Getter
     @ToString.Include
     private List<UOMSelfLinkageEntity> fromUOMs;
 
@@ -85,7 +86,7 @@ public class UOMEntity extends UnitClassEntity {
             mappedBy = "toUOM",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @Getter
     @ToString.Include

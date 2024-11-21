@@ -45,12 +45,12 @@ public class UOMSelfLinkageEntity implements Auditable {
     @ToString.Include
     protected Short version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("fromId")
     @JoinColumn(name = "from_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "conversion_from_uom_fk"))
     protected UOMEntity fromUOM;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("toId")
     @JoinColumn(name = "to_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "conversion_to_uom_fk"))
     protected UOMEntity toUOM;

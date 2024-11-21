@@ -166,7 +166,12 @@ public class UOMServiceImpl implements UOMService {
     public UOMPagedModelVo retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
         Pageable pageable = unitClassPageDtoToPageableConverter.convert(pageDto);
         Page<UOMEntity> uomEntityPage = uomJpaRepository.findAll(pageable);
-        List<UOMVo> uomVoList = uomEntityPage.stream().map(p -> uomEntityToVoConverter.convert(p)).collect(Collectors.toList());
+        List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
+            List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            UOMVo uomVo = uomEntityToVoConverter.convert(i);
+            uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            return uomVo;
+        }).collect(Collectors.toList());
         Page<UOMVo> uomVoPage = new PageImpl<>(uomVoList, pageable, uomVoList.size());
         UOMPagedModelVo uomPagedModelVo = new UOMPagedModelVo(uomVoPage);
         log.debug("Found {} UOM in page {}", uomPagedModelVo.getMetadata().size(), uomPagedModelVo.getMetadata().number());
