@@ -16,6 +16,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJp
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPagedModelVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
@@ -25,7 +26,9 @@ import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,12 +163,14 @@ public class UOMServiceImpl implements UOMService {
     }
 
     @Override
-    public List<UOMVo> retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
+    public UOMPagedModelVo retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
         Pageable pageable = unitClassPageDtoToPageableConverter.convert(pageDto);
         Page<UOMEntity> uomEntityPage = uomJpaRepository.findAll(pageable);
         List<UOMVo> uomVoList = uomEntityPage.stream().map(p -> uomEntityToVoConverter.convert(p)).collect(Collectors.toList());
-        log.debug("Found {} UOM in page {} of size {}", uomVoList.size(), pageDto.getSize(), pageDto.getSize());
-        return uomVoList;
+        Page<UOMVo> uomVoPage = new PageImpl<>(uomVoList, pageable, uomVoList.size());
+        UOMPagedModelVo uomPagedModelVo = new UOMPagedModelVo(uomVoPage);
+        log.debug("Found {} UOM in page {}", uomPagedModelVo.getMetadata().size(), uomPagedModelVo.getMetadata().number());
+        return uomPagedModelVo;
     }
 
     @Transactional

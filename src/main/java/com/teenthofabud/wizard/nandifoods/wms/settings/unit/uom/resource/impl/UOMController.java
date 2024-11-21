@@ -17,6 +17,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPagedModelVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -28,14 +29,12 @@ import org.javers.core.JaversBuilder;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -130,13 +129,13 @@ public class UOMController implements UOMAPI {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<List<UOMVo>> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Integer size) {
+    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Integer size) {
         PageDto pageDto = PageDto.builder()
                 .offset(offset)
                 .size(size)
                 .build();
-        List<UOMVo> uomVoList = uomService.retrieveAllUOMWithinRange(pageDto);
-        return ResponseEntity.ok(uomVoList);
+        UOMPagedModelVo uomPagedModelVo = uomService.retrieveAllUOMWithinRange(pageDto);
+        return ResponseEntity.ok(uomPagedModelVo);
     }
 
     @Override

@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Profile;
  * http://localhost:8080/swagger-ui.html
  */
 @Profile("!test")
-public class OpenApiConfig {
+public class OpenApiConfiguration {
 
      //private static final String SERVICE_DESCRIPTION = "Inventory Management";
 
