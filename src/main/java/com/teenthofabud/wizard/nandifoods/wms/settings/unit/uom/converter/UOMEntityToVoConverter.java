@@ -31,6 +31,7 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
     @Override
     public UOMVo convert(UOMEntity source) {
         UOMVo target = UOMVo.builder()
+                .name(source.getShortName())
                 .longName(source.getLongName())
                 .shortName(source.getShortName())
                 .level(source.getLevelType().getLevel())
