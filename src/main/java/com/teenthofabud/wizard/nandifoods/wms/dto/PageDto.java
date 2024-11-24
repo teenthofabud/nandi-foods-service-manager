@@ -18,9 +18,9 @@ public class PageDto {
     @Builder.Default
     private Integer offset = 0;
     @Min(1)
-    @Max(Integer.MAX_VALUE)
+    @Max(1000)
     @Builder.Default
-    private Integer size = Integer.MAX_VALUE;
+    private Long limit = 1000l;
     @Builder.Default
     private String sort = "";
     @Builder.Default

@@ -129,10 +129,10 @@ public class UOMController implements UOMAPI {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Integer size) {
+    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Long limit) {
         PageDto pageDto = PageDto.builder()
                 .offset(offset)
-                .size(size)
+                .limit(limit)
                 .build();
         UOMPagedModelVo uomPagedModelVo = uomService.retrieveAllUOMWithinRange(pageDto);
         return ResponseEntity.ok(uomPagedModelVo);

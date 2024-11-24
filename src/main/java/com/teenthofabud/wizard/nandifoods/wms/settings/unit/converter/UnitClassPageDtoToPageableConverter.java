@@ -15,7 +15,7 @@ public class UnitClassPageDtoToPageableConverter implements Converter<PageDto, P
     public Pageable convert(PageDto source) {
         Sort.Direction direction = source.getAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = StringUtils.hasText(source.getSort()) ? Sort.by(direction, source.getSort()) : Sort.by(direction, "code");
-        Pageable target = PageRequest.of(source.getOffset(), source.getSize(), sort);
+        Pageable target = PageRequest.of(source.getOffset(), source.getLimit().intValue(), sort);
         return target;
     }
 }

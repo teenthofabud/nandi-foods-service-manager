@@ -62,16 +62,16 @@ public interface UOMAPI extends BaseUnitClassAPI {
     })*/
     public ResponseEntity<UOMVo> getUOMByCode(String code);
 
-    @Operation(method = "GET", summary = "Get all UOM within range", description = "getAllUOMWithinRange")
+    @Operation(method = "GET", summary = "Search UOM by query within range", description = "getAllUOMByQueryWithinRange")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieved all UOM within range",
+            @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching query within range",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPagedModelVo.class))
             )
     })
     @Parameters(value = {
-            @Parameter(description = "Page index", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true),
-            @Parameter(description = "Page size", name = "size", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true)
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true)
     })
-    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(Integer offset, Integer size);
+    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(Integer offset, Long limit);
 
 }
