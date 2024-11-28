@@ -57,7 +57,9 @@ server:
   port: 8081
   shutdown: graceful
 
-inventory:
+wms:
+  cors:
+    allowedOrigins: http://localhost, http://localhost:4200
   settings:
     unit:
       approvalTimeFormat: yyy-MM-dd

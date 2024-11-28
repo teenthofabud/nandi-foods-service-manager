@@ -18,9 +18,9 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
     private DateTimeFormatter creationTimeFormat;
     private UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
 
-    public UOMEntityToVoConverter(@Value("${inventory.settings.unit.approvalTimeFormat}") String approvalTimeFormat,
-                                  @Value("${inventory.settings.unit.modificationTimeFormat}") String modificationTimeFormat,
-                                  @Value("${inventory.settings.unit.creationTimeFormat}") String creationTimeFormat,
+    public UOMEntityToVoConverter(@Value("${wms.settings.unit.approvalTimeFormat}") String approvalTimeFormat,
+                                  @Value("${wms.settings.unit.modificationTimeFormat}") String modificationTimeFormat,
+                                  @Value("${wms.settings.unit.creationTimeFormat}") String creationTimeFormat,
                                   UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter) {
         this.approvalTimeFormat = DateTimeFormatter.ofPattern(approvalTimeFormat);
         this.modificationTimeFormat = DateTimeFormatter.ofPattern(modificationTimeFormat);

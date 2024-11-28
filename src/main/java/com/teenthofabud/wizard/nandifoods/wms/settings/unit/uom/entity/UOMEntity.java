@@ -38,7 +38,7 @@ public class UOMEntity extends UnitClassEntity {
     @Getter
     @Setter
     @ToString.Include
-    private Long bulkCode;
+    private String bulkCode;
 
     @Column(name = "is_inventory", nullable = false)
     @ColumnDefault("true")

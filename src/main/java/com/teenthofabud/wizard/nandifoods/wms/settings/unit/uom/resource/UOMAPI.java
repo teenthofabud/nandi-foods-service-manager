@@ -7,7 +7,7 @@ import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPagedModelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -65,13 +65,13 @@ public interface UOMAPI extends BaseUnitClassAPI {
     @Operation(method = "GET", summary = "Search UOM by query within range", description = "getAllUOMByQueryWithinRange")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching query within range",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPagedModelVo.class))
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPageImplVo.class))
             )
     })
     @Parameters(value = {
             @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true),
             @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, required = true)
     })
-    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(Integer offset, Long limit);
+    public ResponseEntity<UOMPageImplVo> getAllUOMWithinRange(Integer offset, Long limit);
 
 }

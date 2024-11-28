@@ -22,9 +22,8 @@ public class UOMForm extends UnitClassForm {
     @Pattern(regexp = "U(100[1-9]|10[1-9][0-9]|1[1-9][0-9]{2}|[2-4][0-9]{3})", message = "id value is invalid")
     protected String code;
 
-    @NotNull(message = "bulk code value is required")
-    @Min(value = 1, message = "bulk code cannot be zero or less")
-    private Long bulkCode;
+    @NotBlank(message = "bulk code value is required")
+    private String bulkCode;
 
     private Boolean isInventory;
 

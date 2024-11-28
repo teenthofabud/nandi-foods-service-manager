@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings;
+package com.teenthofabud.wizard.nandifoods.wms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -14,10 +14,9 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPagedModelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -37,7 +36,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -63,10 +61,11 @@ public class UOMController implements UOMAPI {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Override
     public ResponseEntity<Void> postUOM(@RequestBody @Valid UOMForm form) {
-        Set<ConstraintViolation<UOMSelfLinkageForm>> violations = form.getLinkedUOMs().stream().map(e -> validator.validate(e)).flatMap(e -> e.stream()).collect(Collectors.toSet());
+        // only applicable to approve process
+        /*Set<ConstraintViolation<UOMSelfLinkageForm>> violations = form.getLinkedUOMs().stream().map(e -> validator.validate(e)).flatMap(e -> e.stream()).collect(Collectors.toSet());
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
-        }
+        }*/
         UOMVo uomVo = uomService.createNewUOM(form);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -129,13 +128,13 @@ public class UOMController implements UOMAPI {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPagedModelVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Long limit) {
+    public ResponseEntity<UOMPageImplVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Long limit) {
         PageDto pageDto = PageDto.builder()
                 .offset(offset)
                 .limit(limit)
                 .build();
-        UOMPagedModelVo uomPagedModelVo = uomService.retrieveAllUOMWithinRange(pageDto);
-        return ResponseEntity.ok(uomPagedModelVo);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(pageDto);
+        return ResponseEntity.ok(uomPageImplVo);
     }
 
     @Override

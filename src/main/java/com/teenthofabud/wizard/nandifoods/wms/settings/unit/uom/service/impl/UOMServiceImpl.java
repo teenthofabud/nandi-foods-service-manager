@@ -21,7 +21,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJp
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPagedModelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
@@ -31,10 +31,10 @@ import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,20 +94,21 @@ public class UOMServiceImpl implements UOMService {
         return uomEntity;
     }
 
-    private UOMEntity linkAllUOMs(UOMEntity from, List<UOMSelfLinkageForm> linkedUOMs) {
-        for(UOMSelfLinkageForm e : linkedUOMs) {
-            Optional<UOMEntity> to = uomJpaRepository.findByCode(e.getCode());
-            if(to.isEmpty()) {
-                throw new IllegalArgumentException("UOM does not exist with code: " + e.getCode());
+    private void linkAllUOMs(UOMEntity from, List<UOMSelfLinkageForm> linkedUOMs) {
+        if(!CollectionUtils.isEmpty(linkedUOMs)) {
+            for(UOMSelfLinkageForm e : linkedUOMs) {
+                Optional<UOMEntity> to = uomJpaRepository.findByCode(e.getCode());
+                if(to.isEmpty()) {
+                    throw new IllegalArgumentException("UOM does not exist with code: " + e.getCode());
+                }
+                UOMSelfLinkageEntity uomSelfLinkageEntity = uomSelfLinkageEntityReducer.reduce(e, from, to.get());
+                uomSelfLinkageEntity = uomSelfLinkageJpaRepository.save(uomSelfLinkageEntity);
+                from.addConversionFromUOM(uomSelfLinkageEntity);
+                from.addConversionToUOM(uomSelfLinkageEntity);
+                from = uomJpaRepository.save(from);
+                log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUOM().getCode());
             }
-            UOMSelfLinkageEntity uomSelfLinkageEntity = uomSelfLinkageEntityReducer.reduce(e, from, to.get());
-            uomSelfLinkageEntity = uomSelfLinkageJpaRepository.save(uomSelfLinkageEntity);
-            from.addConversionFromUOM(uomSelfLinkageEntity);
-            from.addConversionToUOM(uomSelfLinkageEntity);
-            from = uomJpaRepository.save(from);
-            log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUOM().getCode());
         }
-        return from;
     }
 
     private UnitClassMeasuredValuesVo getUnitClassMeasuredValuesFor(UOMEntity uomEntity, MetricSystem metricSystem) {
@@ -167,7 +168,7 @@ public class UOMServiceImpl implements UOMService {
     }
 
     @Override
-    public UOMPagedModelVo retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
+    public UOMPageImplVo retrieveAllUOMWithinRange(@Valid PageDto pageDto) {
         Pageable pageable = unitClassPageDtoToPageableConverter.convert(pageDto);
         Page<UOMEntity> uomEntityPage = uomJpaRepository.findAll(pageable);
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
@@ -176,10 +177,9 @@ public class UOMServiceImpl implements UOMService {
             uomVo.setSelfLinksTo(uomSelfLinkageVoList);
             return uomVo;
         }).collect(Collectors.toList());
-        Page<UOMVo> uomVoPage = new PageImpl<>(uomVoList, pageable, uomVoList.size());
-        UOMPagedModelVo uomPagedModelVo = new UOMPagedModelVo(uomVoPage);
-        log.debug("Found {} UOM in page {}", uomPagedModelVo.getMetadata().size(), uomPagedModelVo.getMetadata().number());
-        return uomPagedModelVo;
+        UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
+        log.debug("Found {} UOM in page {}", uomEntityPage.getTotalElements(), uomPageImplVo.getNumber());
+        return uomPageImplVo;
     }
 
     @Transactional

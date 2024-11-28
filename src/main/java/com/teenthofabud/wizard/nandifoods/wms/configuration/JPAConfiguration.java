@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories(basePackages = {
-        "com.teenthofabud.wizard.nandifoods.wms.settings.unit"
+        "com.teenthofabud.wizard.nandifoods.wms"
+        //"com.teenthofabud.wizard.nandifoods.wms.settings.unit"
 } )
-@EnableJpaAuditing(auditorAwareRef = "auditListener")
 public class JPAConfiguration {
 
     /**

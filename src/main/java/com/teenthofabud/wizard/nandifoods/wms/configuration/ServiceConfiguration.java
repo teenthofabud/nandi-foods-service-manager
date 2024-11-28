@@ -16,10 +16,13 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.hibernate.validator.HibernateValidator;
 import org.reflections.Reflections;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
+import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -28,10 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -39,11 +39,18 @@ import static org.reflections.scanners.Scanners.ConstructorsSignature;
 
 @EnableWebMvc
 @Configuration
+@EnableSpringDataWebSupport(
+        pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO
+)
 public class ServiceConfiguration implements WebMvcConfigurer {
+
+    @Value("#{'${wms.cors.allowedOrigins}'.split(',')}")
+    private List<String> allowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+        CorsRegistration corsRegistration = registry.addMapping("/**");
+        allowedOrigins.stream().forEach(f -> corsRegistration.allowedOrigins(f));
     }
 
     @Bean
