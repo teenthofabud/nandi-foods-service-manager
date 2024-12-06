@@ -15,7 +15,7 @@ public interface UOMService {
 
     public UOMVo retrieveExistingUOMByCode(String code);
 
-    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<UOMSearchDto> optionalUOMSearchDto, UOMPageDto uomPageDto);
+    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, UOMPageDto uomPageDto);
 
     public UOMVo updateExistingUOMByCode(String code, Diff dtoUpdates);
 }

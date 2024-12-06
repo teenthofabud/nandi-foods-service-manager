@@ -75,7 +75,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
             @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
     })
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(description = "UOM search form",
-            content = @Content(schema = @Schema(implementation = UOMSearchDto.class))) UOMSearchDto searchDto, String sort, Boolean ascending, Integer offset, Long limit);
+    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(description = "UOM search query",
+            content = @Content(schema = @Schema(implementation = String.class))) String query, String sort, Boolean ascending, Integer offset, Long limit);
 
 }

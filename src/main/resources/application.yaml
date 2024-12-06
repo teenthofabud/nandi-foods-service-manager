@@ -59,7 +59,7 @@ server:
 
 wms:
   cors:
-    allowedOrigins: http://localhost,http://localhost:4200
+    allowedOrigins: http://localhost
   settings:
     unit:
       approvalTimeFormat: yyy-MM-dd
@@ -67,6 +67,7 @@ wms:
       modificationTimeFormat: yyy-MM-dd
     uom:
       search:
+        fields: id,longName,shortName,description,type
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3

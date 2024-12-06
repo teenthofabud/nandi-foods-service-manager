@@ -116,9 +116,9 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.ok(uomVo);
     }
 
-    @PostMapping(path = "/search", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/search", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(required = false) UOMSearchDto searchDto,
+    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(required = false) String query,
                                                                                  @RequestParam(required = false) String sort,
                                                                                  @RequestParam(required = false) Boolean ascending,
                                                                                  @RequestParam(required = false) Integer offset,
@@ -129,7 +129,7 @@ public class UOMController implements UOMAPI {
                 .sort(Optional.ofNullable(sort))
                 .ascending(Optional.ofNullable(ascending))
                 .build();
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(searchDto), pageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(query), pageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

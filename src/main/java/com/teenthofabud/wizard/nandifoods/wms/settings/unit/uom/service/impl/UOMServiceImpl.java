@@ -12,7 +12,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSel
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
@@ -28,11 +27,13 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,8 +64,8 @@ public class UOMServiceImpl implements UOMService {
     private UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter;
     private UOMPageDtoToPageableConverter uomPageDtoToPageableConverter;
     private BeanUtilsBean beanUtilsBean;
-    private Validator validator;
 
+    private List<String> searchFields;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -76,7 +79,8 @@ public class UOMServiceImpl implements UOMService {
                           UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository,
                           UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
                           UOMPageDtoToPageableConverter uomPageDtoToPageableConverter,
-                          BeanUtilsBean beanUtilsBean) {
+                          BeanUtilsBean beanUtilsBean,
+                          @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
@@ -89,6 +93,7 @@ public class UOMServiceImpl implements UOMService {
         this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
         this.uomPageDtoToPageableConverter = uomPageDtoToPageableConverter;
         this.beanUtilsBean = beanUtilsBean;
+        this.searchFields = searchFields;
     }
 
     private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
@@ -179,28 +184,16 @@ public class UOMServiceImpl implements UOMService {
     }
 
     @Override
-    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<UOMSearchDto> optionalUOMSearchDto, @Valid UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<@NotBlank(message = "UOM search query is required") String> optionalQuery, @Valid UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
         Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
-        if(optionalUOMSearchDto.isPresent()) {
-            UOMSearchDto searchDto = optionalUOMSearchDto.get();
-            Specification<UOMEntity> codeSpecification = searchDto.getCode().map(f -> uomJpaRepository.likeCode(f))
-                    .orElse(this.uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-            Specification<UOMEntity> longNameSpecification = searchDto.getLongName().map(f -> uomJpaRepository.likeLongName(f))
-                    .orElse(this.uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-            Specification<UOMEntity> shortNameSpecification = searchDto.getShortName().map(f -> uomJpaRepository.likeShortName(f))
-                    .orElse(this.uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-            Specification<UOMEntity> descriptionSpecification = searchDto.getDescription().map(f -> uomJpaRepository.likeDescription(f))
-                    .orElse(this.uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-            Specification<UOMEntity> typeSpecification = searchDto.getType().map(f -> uomJpaRepository.likeType(f))
-                    .orElse(this.uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-            Specification<UOMEntity> uomSearchQuerySpecification = Specification
-                    .where(codeSpecification)
-                    .and(longNameSpecification)
-                    .and(shortNameSpecification)
-                    .and(descriptionSpecification)
-                    .and(typeSpecification);
-            log.debug("Created specification for UOMEntity having filter: {}", searchDto);
+        if(optionalQuery.isPresent()) {
+            String q = optionalQuery.get();
+            List<Specification<UOMEntity>> uomEntitySpecifications = searchFields.stream()
+                    .flatMap(k -> Arrays.stream(q.split("\\s+"))
+                            .map(v -> uomJpaRepository.likeProperty(k, v))).collect(Collectors.toList());
+            Specification<UOMEntity> uomSearchQuerySpecification = Specification.anyOf(uomEntitySpecifications);
+            log.debug("Created specification for UOMEntity using query: {}", q);
             uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
         } else {
             log.debug("Searching UOMEntity with page: {}", pageable);
