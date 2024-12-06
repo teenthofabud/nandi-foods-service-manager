@@ -3,27 +3,25 @@ package com.teenthofabud.wizard.nandifoods.wms.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import java.util.Optional;
 
 @EqualsAndHashCode
+@AllArgsConstructor
 @ToString
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PageDto {
+@SuperBuilder
+public abstract class PageDto {
 
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
     @Builder.Default
-    private Integer offset = 0;
-    @Min(1)
-    @Max(1000)
+    private Optional<@Min(0) @Max(Integer.MAX_VALUE) Integer> offset = Optional.of(0);
+
     @Builder.Default
-    private Long limit = 1000l;
+    private Optional<@Min(1) @Max(1000) Long> limit = Optional.of(-1l);
+
     @Builder.Default
-    private String sort = "";
-    @Builder.Default
-    private Boolean ascending = true;
+    private Optional<Boolean> ascending = Optional.of(true);
 
 }

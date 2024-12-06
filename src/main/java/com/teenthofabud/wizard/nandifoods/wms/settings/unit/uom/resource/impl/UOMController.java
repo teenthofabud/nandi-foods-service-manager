@@ -5,14 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import com.googlecode.jmapper.api.JMapperAPI;
-import com.googlecode.jmapper.api.MappedClass;
-import com.googlecode.jmapper.api.Attribute;
-import com.googlecode.jmapper.api.TargetAttribute;
-import com.teenthofabud.wizard.nandifoods.wms.dto.PageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
@@ -107,13 +104,6 @@ public class UOMController implements UOMAPI {
                 throw new ConstraintViolationException(violations);
             }
         }
-        JMapperAPI api = new JMapperAPI();
-        MappedClass clazz = new MappedClass(UOMDto.class);
-        api.add(clazz);
-        Attribute attribute = new Attribute("attributeName");
-        clazz.add(attribute);
-        TargetAttribute targetAttribute = new TargetAttribute("targetAttributeName");
-        attribute.value(targetAttribute);
 
         //uomService.updateExistingUOMByCode(code, dto);
         return ResponseEntity.noContent().build();
@@ -126,14 +116,20 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.ok(uomVo);
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/search", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPageImplVo> getAllUOMWithinRange(@RequestParam Integer offset, @RequestParam Long limit) {
-        PageDto pageDto = PageDto.builder()
-                .offset(offset)
-                .limit(limit)
+    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(required = false) UOMSearchDto searchDto,
+                                                                                 @RequestParam(required = false) String sort,
+                                                                                 @RequestParam(required = false) Boolean ascending,
+                                                                                 @RequestParam(required = false) Integer offset,
+                                                                                 @RequestParam(required = false) Long limit) {
+        UOMPageDto pageDto = UOMPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .ascending(Optional.ofNullable(ascending))
                 .build();
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(pageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(searchDto), pageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

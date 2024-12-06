@@ -57,7 +57,7 @@ public class OpenApiConfiguration {
     };
     return GroupedOpenApi
       .builder()
-      .group("Inventory API")
+      .group("WMS API")
       .pathsToMatch(paths)
       .packagesToScan(packagedToMatch)
       .addOpenApiCustomizer(openApi ->  {

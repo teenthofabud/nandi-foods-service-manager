@@ -14,16 +14,29 @@ public interface UOMJpaRepository extends JpaRepository<UOMEntity, Long>, Paging
 
     public Optional<UOMEntity> findByCode(String code);
 
-    default Specification<UOMEntity> likeShortName(UOMEntity uomEntity) {
-        return (root, query, builder) -> builder.like(root.get("shortName").as(String.class), String.format("%%%s%%", uomEntity.getShortName()));
+    default Specification<UOMEntity> likeShortName(String shortName) {
+        return (root, query, builder) -> builder.like(root.get("shortName").as(String.class), String.format("%%%s%%", shortName));
     }
 
-    default Specification<UOMEntity> equalsId(UOMEntity uomEntity) {
-        return (root, query, builder) -> builder.equal(root.get("code").as(String.class), uomEntity.getCode());
+    default Specification<UOMEntity> likeLongName(String longName) {
+        return (root, query, builder) -> builder.like(root.get("longName").as(String.class), String.format("%%%s%%", longName));
     }
 
-    default Specification<UOMEntity> equalsType(UOMEntity uomEntity) {
-        return (root, query, builder) -> builder.equal(root.get("type").as(String.class), uomEntity.getType());
+    default Specification<UOMEntity> likeDescription(String description) {
+        return (root, query, builder) -> builder.like(root.get("description").as(String.class), String.format("%%%s%%", description));
     }
+
+    default Specification<UOMEntity> likeCode(String code) {
+        return (root, query, builder) -> builder.equal(root.get("code").as(String.class), code);
+    }
+
+    default Specification<UOMEntity> likeType(String type) {
+        return (root, query, builder) -> builder.equal(root.get("type").as(String.class), type);
+    }
+
+    default Specification<UOMEntity> skipThisSpecificationWithEmptyCriteriaConjunction() {
+        return (root, query, builder) -> builder.conjunction();
+    }
+
 
 }

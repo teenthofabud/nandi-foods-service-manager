@@ -14,6 +14,8 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.hibernate.validator.HibernateValidator;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +84,11 @@ public class ServiceConfiguration implements WebMvcConfigurer {
         JsonNode root = mapper.valueToTree(instance);
         Map<String, JsonNode> flattenedMap = new JsonFlattener(root).flatten();
 
+    }
+
+    @Bean
+    public BeanUtilsBean beanUtilsBean() {
+        return BeanUtilsBean2.getInstance();
     }
 
     private static final class JsonFlattener {

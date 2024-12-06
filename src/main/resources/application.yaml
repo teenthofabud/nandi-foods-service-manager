@@ -59,12 +59,17 @@ server:
 
 wms:
   cors:
-    allowedOrigins: http://localhost, http://localhost:4200
+    allowedOrigins: http://localhost,http://localhost:4200
   settings:
     unit:
       approvalTimeFormat: yyy-MM-dd
       creationTimeFormat: yyy-MM-dd
       modificationTimeFormat: yyy-MM-dd
+    uom:
+      search:
+        defaultSort: code
+        defaultOffset: 0
+        defaultLimit: 3
 
 logging:
   level:

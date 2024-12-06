@@ -50,12 +50,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.googlecode.jmapper-framework/jmapper-core -->
-		<dependency>
-			<groupId>com.googlecode.jmapper-framework</groupId>
-			<artifactId>jmapper-core</artifactId>
-			<version>1.6.1.CR2</version>
-		</dependency>
+<!--		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>2.13.3</version>
+		</dependency>-->
 		<dependency>
 			<groupId>com.github.java-json-tools</groupId>
 			<artifactId>json-patch</artifactId>
