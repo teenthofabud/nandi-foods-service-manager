@@ -1,13 +1,13 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMSelfLinkageForm;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UOMSelfLinkageEntityReducer {
-    public UOMSelfLinkageEntity reduce(UOMSelfLinkageForm source, UOMEntity from, UOMEntity to) {
+public class UnitClassSelfLinkageToUOMSelfLinkageEntityReducer {
+    public UOMSelfLinkageEntity reduce(UnitClassSelfLinkageForm source, UOMEntity from, UOMEntity to) {
         UOMSelfLinkageEntity target = UOMSelfLinkageEntity.builder()
                 .fromUOM(from)
                 .toUOM(to)

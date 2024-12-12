@@ -1,12 +1,15 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassForm;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -33,6 +36,10 @@ public class UOMForm extends UnitClassForm {
 
     private Boolean isProduction;
 
-    private List<UOMSelfLinkageForm> linkedUOMs;
+    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<UnitClassSelfLinkageForm>> linkedUOMs;
+
+    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<UnitClassCrossLinkageForm>> linkedPUHUs;
+
+
 
 }

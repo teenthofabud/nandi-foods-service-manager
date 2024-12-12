@@ -10,6 +10,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -47,7 +48,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
                             schema = @Schema(implementation = JsonPatchOperation.class)
                     ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
 
-
+    @Hidden
     @Operation(method = "GET", summary = "Get UOM by Id", description = "getUOMById")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved UOM by Id",
@@ -63,6 +64,23 @@ public interface UOMAPI extends BaseUnitClassAPI {
     })*/
     public ResponseEntity<UOMVo> getUOMByCode(String code);
 
+    @Operation(method = "GET", summary = "Search UOM by long name within range", description = "searchAllUOMByLongNameWithinRange")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching long name within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPageImplVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Long Name", name = "longName", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Sort by", name = "sort", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Is ascending", name = "ascending", schema = @Schema(implementation = Boolean.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
+    })
+    public ResponseEntity<UOMPageImplVo> searchAllUOMByLongNameWithinRange(String longName, String sort, Boolean ascending, Integer offset, Long limit);
+
+
+    @Hidden
     @Operation(method = "POST", summary = "Search UOM by query parameter within range", description = "searchAllUOMByQueryParameterWithinRange")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching query parameter within range",

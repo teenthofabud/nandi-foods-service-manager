@@ -9,7 +9,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
@@ -19,6 +18,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
@@ -27,6 +27,7 @@ import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -59,7 +60,7 @@ public class UOMController implements UOMAPI {
     @Override
     public ResponseEntity<Void> postUOM(@RequestBody @Valid UOMForm form) {
         // only applicable to approve process
-        /*Set<ConstraintViolation<UOMSelfLinkageForm>> violations = form.getLinkedUOMs().stream().map(e -> validator.validate(e)).flatMap(e -> e.stream()).collect(Collectors.toSet());
+        /*Set<ConstraintViolation<UnitClassSelfLinkageForm>> violations = form.getLinkedUOMs().stream().map(e -> validator.validate(e)).flatMap(e -> e.stream()).collect(Collectors.toSet());
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }*/
@@ -88,6 +89,7 @@ public class UOMController implements UOMAPI {
         Optional<UOMDto> optionalPatchedDto = Optional.empty();
         UOMDto blankDto = new UOMDto();
         blankDto.getMetric().get().getLengthValue();
+        String json = mapper.writeValueAsString(blankDto);
         JsonNode blankDtoNode = mapper.convertValue(blankDto, JsonNode.class);
         JsonNode patchedJsonNode = jsonPatch.apply(blankDtoNode);
         UOMDto patchedDto = mapper.treeToValue(patchedJsonNode, UOMDto.class);
@@ -105,7 +107,7 @@ public class UOMController implements UOMAPI {
             }
         }
 
-        //uomService.updateExistingUOMByCode(code, dto);
+        uomService.updateExistingUOMByCode(code, dtoUpdates);
         return ResponseEntity.noContent().build();
     }
 
@@ -116,6 +118,26 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.ok(uomVo);
     }
 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<UOMPageImplVo> searchAllUOMByLongNameWithinRange(@RequestParam(required = false) String longName,
+                                                                        @RequestParam(required = false) String sort,
+                                                                        @RequestParam(required = false) Boolean ascending,
+                                                                        @RequestParam(required = false) Integer offset,
+                                                                        @RequestParam(required = false) Long limit) {
+        UOMPageDto uomPageDto = UOMPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .ascending(Optional.ofNullable(ascending))
+                .build();
+        if (!StringUtils.hasText(longName)) {
+            throw new IllegalArgumentException("long name is required");
+        }
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(longName, uomPageDto);
+        return ResponseEntity.ok(uomPageImplVo);
+    }
+
     @PostMapping(path = "/search", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
     public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(required = false) String query,
@@ -123,13 +145,23 @@ public class UOMController implements UOMAPI {
                                                                                  @RequestParam(required = false) Boolean ascending,
                                                                                  @RequestParam(required = false) Integer offset,
                                                                                  @RequestParam(required = false) Long limit) {
-        UOMPageDto pageDto = UOMPageDto.builder()
+        UOMPageDto uomPageDto = UOMPageDto.builder()
                 .offset(Optional.ofNullable(offset))
                 .limit(Optional.ofNullable(limit))
                 .sort(Optional.ofNullable(sort))
                 .ascending(Optional.ofNullable(ascending))
                 .build();
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(query), pageDto);
+        Optional<@NotBlank(message = "UOM search query is required") String> optionalQuery = Optional.ofNullable(query);
+        Set<ConstraintViolation<UOMPageDto>> uomPageDtoViolations = validator.validate(uomPageDto);
+        if (!uomPageDtoViolations.isEmpty()) {
+            throw new ConstraintViolationException(uomPageDtoViolations);
+        }
+        Set<ConstraintViolation<Optional<String>>> optionalQueryViolations = validator.validate(optionalQuery);
+        if (!uomPageDtoViolations.isEmpty()) {
+            throw new ConstraintViolationException(uomPageDtoViolations);
+        }
+        //UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(query), uomPageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(optionalQuery, uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

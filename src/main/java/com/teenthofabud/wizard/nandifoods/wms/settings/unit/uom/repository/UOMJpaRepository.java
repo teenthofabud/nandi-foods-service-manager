@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

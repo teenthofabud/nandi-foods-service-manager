@@ -1,5 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
@@ -15,31 +17,42 @@ import java.util.Optional;
 
 @EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Getter
 @Setter
 @SuperBuilder
 public abstract class UnitClassDto {
 
-    @OptionalEnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
-    protected Optional<String> level;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<@EnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid") String> level = Optional.empty();
 
-    protected Optional<String> name;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<String> name = Optional.empty();
 
-    protected Optional<String> description;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<String> description = Optional.empty();
 
-    protected Optional<String> longName;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<String> longName = Optional.empty();
 
-    protected Optional<String> shortName;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<String> shortName = Optional.empty();
 
-    @OptionalEnumValidator(enumClazz = UnitClassStatus.class, message = "Status is invalid")
-    protected Optional<String> status;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<@Valid UnitClassMeasuredValuesDto> metric = Optional.of(new UnitClassMeasuredValuesDto());
 
-    protected Optional<@Valid UnitClassMeasuredValuesDto> metric;
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<@Valid UnitClassMeasuredValuesDto> imperial = Optional.of(new UnitClassMeasuredValuesDto());
 
-    protected Optional<@Valid UnitClassMeasuredValuesDto> imperial;
-
-    public UnitClassDto() {
+    /*public UnitClassDto() {
         this.level = Optional.empty();
         this.name = Optional.empty();
         this.description = Optional.empty();
@@ -48,5 +61,5 @@ public abstract class UnitClassDto {
         this.status = Optional.empty();
         this.metric = Optional.of(new UnitClassMeasuredValuesDto());
         this.imperial = Optional.of(new UnitClassMeasuredValuesDto());
-    }
+    }*/
 }

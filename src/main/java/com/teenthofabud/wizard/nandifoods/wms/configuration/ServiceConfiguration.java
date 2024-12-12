@@ -58,11 +58,11 @@ public class ServiceConfiguration implements WebMvcConfigurer {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = JsonMapper.builder()
-                                        .addModule(new Jdk8Module())
-                                        .addModule(new JavaTimeModule())
+                                        .addModule(new Jdk8Module().configureAbsentsAsNulls(false))
+                                        //.addModule(new JavaTimeModule())
                                         //.addModule(new JSR353Module())
                                         .serializationInclusion(JsonInclude.Include.NON_NULL)
-                                        .serializationInclusion(JsonInclude.Include.NON_ABSENT)
+                                        //.serializationInclusion(JsonInclude.Include.NON_ABSENT)
                                         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                                         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                                         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
