@@ -84,27 +84,27 @@ public class UOMController implements UOMAPI {
         return o;
     }
 
+    private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
+        UOMDto blankUOMDto = new UOMDto();
+        JsonNode blankUOMDtoNode = mapper.convertValue(blankUOMDto, JsonNode.class);
+        JsonNode patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
+        UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, UOMDto.class);
+        log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
+        Set<ConstraintViolation<UOMDto>> violations = validator.validate(patcheUOMDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        return patcheUOMDto;
+    }
+
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
     public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         if(ObjectUtils.isEmpty(jsonPatch)) {
             throw new IllegalArgumentException("Json patch with changes is required");
         }
-        UOMDto blankDto = new UOMDto();
-        JsonNode blankDtoNode = mapper.convertValue(blankDto, JsonNode.class);
-        JsonNode patchedJsonNode = jsonPatch.apply(blankDtoNode);
-        UOMDto patchedDto = mapper.treeToValue(patchedJsonNode, UOMDto.class);
-        log.debug("patchedDto: {}", mapper.writeValueAsString(patchedDto));
-        Javers javers = JaversBuilder.javers().build();
-        Diff dtoUpdates = javers.compare(blankDto, patchedDto);
-        dtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
-                log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
-        );
-        Set<ConstraintViolation<UOMDto>> violations = validator.validate(patchedDto);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-        uomService.updateExistingUOMByCode(code, dtoUpdates);
+        UOMDto patcheUOMDto = patchUOM(jsonPatch);
+        uomService.updateExistingUOMByCode(code, patcheUOMDto);
         return ResponseEntity.noContent().build();
     }
 

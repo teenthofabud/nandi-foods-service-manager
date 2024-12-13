@@ -17,6 +17,8 @@ import jakarta.validation.ValidatorFactory;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.hibernate.validator.HibernateValidator;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -89,6 +91,11 @@ public class ServiceConfiguration implements WebMvcConfigurer {
     @Bean
     public BeanUtilsBean beanUtilsBean() {
         return BeanUtilsBean2.getInstance();
+    }
+
+    @Bean
+    public Javers javers() {
+        return JaversBuilder.javers().build();
     }
 
     private static final class JsonFlattener {

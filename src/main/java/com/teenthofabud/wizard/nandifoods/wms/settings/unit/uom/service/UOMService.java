@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
@@ -18,7 +19,7 @@ public interface UOMService {
 
     public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, UOMPageDto uomPageDto);
 
-    public void updateExistingUOMByCode(String code, Diff dtoUpdates);
+    public void updateExistingUOMByCode(String code, UOMDto patcheUOMDto);
 
     //public void updateExistingUOMByCode(String code, UOMDto uomDto);
 }

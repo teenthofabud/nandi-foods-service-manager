@@ -25,6 +25,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMea
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
@@ -41,6 +42,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +82,7 @@ public class UOMServiceImpl implements UOMService {
     private PURepository puRepository;
     private UOMPULinkageJpaRepository uomPULinkageJpaRepository;
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
+    private Javers javers;
 
     private List<String> searchFields;
 
@@ -103,6 +106,7 @@ public class UOMServiceImpl implements UOMService {
                           UnitClassCrossLinkageToUOMHULinkageEntityReducer unitClassCrossLinkageToUOMHULinkageEntityReducer,
                           UOMPULinkageJpaRepository uomPULinkageJpaRepository,
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
+                          Javers javers,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
@@ -123,6 +127,7 @@ public class UOMServiceImpl implements UOMService {
         this.unitClassCrossLinkageToUOMHULinkageEntityReducer = unitClassCrossLinkageToUOMHULinkageEntityReducer;
         this.uomPULinkageJpaRepository = uomPULinkageJpaRepository;
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
+        this.javers = javers;
         this.searchFields = searchFields;
     }
 
@@ -297,17 +302,21 @@ public class UOMServiceImpl implements UOMService {
         return uomPageImplVo;
     }
 
-    @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, Diff dtoUpdates) {
+    public void updateExistingUOMByCode(String code, UOMDto patcheUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
         }
+        UOMDto blankUOMDto = UOMDto.builder().build();
+        Diff rawDtoUpdates = javers.compare(blankUOMDto, patcheUOMDto);
+        rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
+                log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
+        );
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
         log.debug("Mapping updates from patched UOMDto to UOMEntity");
-        dtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
+        rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
             log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
             beanUtilsBean.copyProperty(uomEntity, p.getPropertyName(), p.getRight());
         }));
