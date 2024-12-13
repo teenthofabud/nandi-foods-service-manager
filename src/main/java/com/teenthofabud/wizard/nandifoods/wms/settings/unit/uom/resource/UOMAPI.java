@@ -59,8 +59,6 @@ public interface UOMAPI extends BaseUnitClassAPI {
                             schema = @Schema(implementation = JsonPatchOperation.class)
                     ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
 
-
-    @Hidden
     @Operation(method = "GET", summary = "Get UOM by Id", description = "getUOMById")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved UOM by Id",
@@ -68,13 +66,14 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     )
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-/*    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieved UOM by Id",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                            schema = @Schema(implementation = UOMVo.class)
-                    )))
-    })*/
     public ResponseEntity<UOMVo> getUOMByCode(String code);
+
+    @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "UOM edited")
+    })
+    @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> deleteUOMById(String code);
 
     @Operation(method = "GET", summary = "Search UOM by long name within range", description = "searchAllUOMByLongNameWithinRange")
     @ApiResponses(value = {

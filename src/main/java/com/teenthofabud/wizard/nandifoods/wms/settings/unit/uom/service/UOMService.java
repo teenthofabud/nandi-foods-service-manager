@@ -14,6 +14,8 @@ public interface UOMService {
 
     public UOMVo retrieveExistingUOMByCode(String code);
 
+    public void deleteExistingUOMByCode(String code);
+
     public UOMPageImplVo retrieveAllUOMByLongName(String longName, UOMPageDto uomPageDto);
 
     public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, UOMPageDto uomPageDto);

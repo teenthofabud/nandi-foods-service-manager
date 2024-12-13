@@ -108,6 +108,13 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.ok(uomVo);
     }
 
+    @DeleteMapping(path = "/{id}")
+    @Override
+    public ResponseEntity<Void> deleteUOMById(@PathVariable(name = "id") String code) {
+        uomService.deleteExistingUOMByCode(code);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
     public ResponseEntity<UOMPageImplVo> searchAllUOMByLongNameWithinRange(@RequestParam(required = false) String longName,

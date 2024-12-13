@@ -3,7 +3,6 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
-import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
@@ -262,6 +261,19 @@ public class UOMServiceImpl implements UOMService {
                 .collect(Collectors.toList());
         uomVo.setSelfLinksTo(uomSelfLinkageVos);
         return uomVo;
+    }
+
+    @Transactional
+    @Override
+    public void deleteExistingUOMByCode(String code) {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
+        if(optionalUOMEntity.isEmpty()) {
+            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+        }
+        UOMEntity uomEntity = optionalUOMEntity.get();
+        log.debug("UOM found with code: {}", uomEntity.getCode());
+        uomJpaRepository.delete(uomEntity);
+        log.debug("UOM deleted with code: {}", uomEntity.getCode());
     }
 
     @Transactional
