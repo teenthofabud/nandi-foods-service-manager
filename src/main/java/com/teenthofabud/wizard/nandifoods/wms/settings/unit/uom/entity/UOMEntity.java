@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Entity(name = "UOMEntity")
+@DynamicUpdate
 @Table(name = "uom",
         indexes = {
                 @Index(columnList = "short_name", name = "idx_uom_short_name"),

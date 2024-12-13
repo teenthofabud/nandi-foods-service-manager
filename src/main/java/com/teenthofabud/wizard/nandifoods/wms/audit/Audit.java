@@ -2,11 +2,13 @@ package com.teenthofabud.wizard.nandifoods.wms.audit;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
 @Embeddable
 @Access(AccessType.FIELD)
+@DynamicUpdate
 @Getter
 @Setter
 @AllArgsConstructor

@@ -2,7 +2,10 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
+import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
@@ -40,6 +43,8 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Javers;
@@ -54,6 +59,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -235,6 +241,7 @@ public class UOMServiceImpl implements UOMService {
 
         // Prepare UOM for display
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
+        log.info("Saved UOMEntity with id: {}", uomEntity.getId());
         return uomVo;
     }
 
@@ -275,8 +282,9 @@ public class UOMServiceImpl implements UOMService {
         return uomPageImplVo;
     }
 
+    @Transactional
     @Override
-    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveAllUOMWithinRange(@Valid Optional<@NotBlank(message = "UOM search query is required") String> optionalQuery, @Valid UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
         Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
         if(optionalQuery.isPresent()) {
@@ -302,25 +310,54 @@ public class UOMServiceImpl implements UOMService {
         return uomPageImplVo;
     }
 
+    private void uomUpdateHelper(UOMEntity uomEntity, Optional<UOMDto> optionallyPatchedUOMDto) {
+        if(optionallyPatchedUOMDto.isPresent()) {
+            UOMDto patchedUOMDto = optionallyPatchedUOMDto.get();
+            UOMDto blankUOMDto = UOMDto.builder().build();
+            Diff rawDtoUpdates = javers.compare(blankUOMDto, patchedUOMDto);
+            rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
+                    log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
+            );
+            log.debug("UOM found with code: {}", uomEntity.getCode());
+            log.debug("Mapping updates from patched UOMDto to UOMEntity");
+            rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
+                log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
+                beanUtilsBean.copyProperty(uomEntity, p.getPropertyName(), p.getRight());
+            }));
+        }
+    }
+
+    @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, UOMDto patcheUOMDto) {
+    public void updateExistingUOMByCode(String code, @Valid UOMDto patchedUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
         }
-        UOMDto blankUOMDto = UOMDto.builder().build();
-        Diff rawDtoUpdates = javers.compare(blankUOMDto, patcheUOMDto);
-        rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
-                log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
-        );
         UOMEntity uomEntity = optionalUOMEntity.get();
-        log.debug("UOM found with code: {}", uomEntity.getCode());
-        log.debug("Mapping updates from patched UOMDto to UOMEntity");
-        rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
-            log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
-            beanUtilsBean.copyProperty(uomEntity, p.getPropertyName(), p.getRight());
-        }));
+        uomUpdateHelper(uomEntity, Optional.of(patchedUOMDto));
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
+    }
+
+    @Transactional
+    @Override
+    public void approveSavedUOMByCode(String code, Optional<@Valid UOMDto> optionallyPatchedUOMDto) {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
+        if(optionalUOMEntity.isEmpty()) {
+            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+        }
+        UOMEntity uomEntity = optionalUOMEntity.get();
+        if(uomEntity.getStatus().compareTo(UnitClassStatus.ACTIVE) == 0) {
+            throw new IllegalStateException("UOM already approved with id: " + code);
+        }
+        uomUpdateHelper(uomEntity, optionallyPatchedUOMDto);
+        Audit audit = uomEntity.getAudit();
+        audit.setApprovalTime(LocalDateTime.now());
+        uomEntity.setAudit(audit);
+        uomEntity.setStatus(UnitClassStatus.ACTIVE);
+        log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
+        uomJpaRepository.save(uomEntity);
+        log.info("Approved UOMEntity with id: {}", uomEntity.getId());
     }
 }

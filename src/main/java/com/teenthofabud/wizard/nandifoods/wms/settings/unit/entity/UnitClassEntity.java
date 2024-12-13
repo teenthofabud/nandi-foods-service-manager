@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditListener.class)

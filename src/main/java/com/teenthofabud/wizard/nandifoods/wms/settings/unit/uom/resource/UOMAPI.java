@@ -48,6 +48,18 @@ public interface UOMAPI extends BaseUnitClassAPI {
                             schema = @Schema(implementation = JsonPatchOperation.class)
                     ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
 
+    @Operation(method = "PATCH", summary = "UOM approval", description = "approveSavedUOMById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "UOM approved")
+    })
+    @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> approveSavedUOMById(String code, @RequestBody(description = "JsonPatch", required = false,
+            content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = JsonPatchOperation.class)
+                    ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
+
+
     @Hidden
     @Operation(method = "GET", summary = "Get UOM by Id", description = "getUOMById")
     @ApiResponses(value = {
