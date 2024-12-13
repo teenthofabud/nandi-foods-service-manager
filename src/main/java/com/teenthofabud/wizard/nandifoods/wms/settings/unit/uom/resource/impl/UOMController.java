@@ -27,6 +27,7 @@ import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -85,28 +86,24 @@ public class UOMController implements UOMAPI {
 
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
-        Optional<UOMDto> optionalPatchedDto = Optional.empty();
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        if(ObjectUtils.isEmpty(jsonPatch)) {
+            throw new IllegalArgumentException("Json patch with changes is required");
+        }
         UOMDto blankDto = new UOMDto();
-        blankDto.getMetric().get().getLengthValue();
-        String json = mapper.writeValueAsString(blankDto);
         JsonNode blankDtoNode = mapper.convertValue(blankDto, JsonNode.class);
         JsonNode patchedJsonNode = jsonPatch.apply(blankDtoNode);
         UOMDto patchedDto = mapper.treeToValue(patchedJsonNode, UOMDto.class);
-        optionalPatchedDto = Optional.of(patchedDto);
         log.debug("patchedDto: {}", mapper.writeValueAsString(patchedDto));
         Javers javers = JaversBuilder.javers().build();
         Diff dtoUpdates = javers.compare(blankDto, patchedDto);
         dtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
                 log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
         );
-        if(optionalPatchedDto.isPresent()) {
-            Set<ConstraintViolation<UOMDto>> violations = validator.validate(optionalPatchedDto.get());
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
+        Set<ConstraintViolation<UOMDto>> violations = validator.validate(patchedDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
         }
-
         uomService.updateExistingUOMByCode(code, dtoUpdates);
         return ResponseEntity.noContent().build();
     }
@@ -160,7 +157,6 @@ public class UOMController implements UOMAPI {
         if (!uomPageDtoViolations.isEmpty()) {
             throw new ConstraintViolationException(uomPageDtoViolations);
         }
-        //UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(Optional.ofNullable(query), uomPageDto);
         UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(optionalQuery, uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }

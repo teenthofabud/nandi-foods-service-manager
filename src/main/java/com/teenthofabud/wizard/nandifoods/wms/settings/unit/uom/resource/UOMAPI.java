@@ -42,7 +42,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @ApiResponse(responseCode = "204", description = "UOM edited")
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "JsonPatch", required = true,
+    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "JsonPatch", required = false,
             content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
                     array = @ArraySchema(
                             schema = @Schema(implementation = JsonPatchOperation.class)

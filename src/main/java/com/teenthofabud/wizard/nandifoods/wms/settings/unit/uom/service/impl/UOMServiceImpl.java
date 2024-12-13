@@ -51,9 +51,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -138,25 +136,6 @@ public class UOMServiceImpl implements UOMService {
         uomEntity = uomJpaRepository.save(uomEntity);
         log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), metricSystem, uomMeasuredValuesEntity.getId());
         return uomEntity;
-    }
-
-    private void linkAllUOMs(UOMEntity from, List<UnitClassSelfLinkageForm> linkedUOMs) {
-        if(CollectionUtils.isEmpty(linkedUOMs)) {
-            log.debug("No UOMs linked! Skipping UOM linkage logic");
-           return;
-        }
-        for(UnitClassSelfLinkageForm e : linkedUOMs) {
-            Optional<UOMEntity> to = uomJpaRepository.findByCode(e.getCode());
-            if(to.isEmpty()) {
-                throw new IllegalArgumentException("UOM does not exist with code: " + e.getCode());
-            }
-            UOMSelfLinkageEntity uomSelfLinkageEntity = unitClassSelfLinkageToUOMSelfLinkageEntityReducer.reduce(e, from, to.get());
-            uomSelfLinkageEntity = uomSelfLinkageJpaRepository.save(uomSelfLinkageEntity);
-            from.addConversionFromUOM(uomSelfLinkageEntity);
-            from.addConversionToUOM(uomSelfLinkageEntity);
-            from = uomJpaRepository.save(from);
-            log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUOM().getCode());
-        }
     }
 
     private void selfLink(UOMEntity from, Optional<List<UnitClassSelfLinkageForm>> optionalUnitClassSelfLinkageForms) {
@@ -320,28 +299,19 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public UOMVo updateExistingUOMByCode(String code, Diff dtoUpdates) {
+    public void updateExistingUOMByCode(String code, Diff dtoUpdates) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
+        log.debug("Mapping updates from patched UOMDto to UOMEntity");
         dtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
             log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
             beanUtilsBean.copyProperty(uomEntity, p.getPropertyName(), p.getRight());
         }));
-        /*try {
-            JsonNode patched = dto.apply(objectMapper.convertValue(uomEntity, JsonNode.class));
-            uomEntity = objectMapper.treeToValue(patched, UOMEntity.class);
-        } catch (JsonPatchException e) {
-            throw new UnsupportedOperationException("Failed to apply patch: " + e.getMessage());
-            log.error("Failed to apply patch", e);
-        } catch (JsonProcessingException e) {
-            throw new UnsupportedOperationException("Content does not match target type: " + e.getMessage());
-            log.error("Content does not match target type", e);
-        }*/
         uomJpaRepository.save(uomEntity);
-        return null;
+        log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 }
