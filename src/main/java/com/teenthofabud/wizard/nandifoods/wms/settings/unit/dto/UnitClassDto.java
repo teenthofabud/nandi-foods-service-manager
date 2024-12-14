@@ -30,6 +30,10 @@ public abstract class UnitClassDto {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
+    protected Optional<@EnumValidator(enumClazz = UnitClassStatus.class, message = "Status is invalid") String> status = Optional.empty();
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
     protected Optional<String> name = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
