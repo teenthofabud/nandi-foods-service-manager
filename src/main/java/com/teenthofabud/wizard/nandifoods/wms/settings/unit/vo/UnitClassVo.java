@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.opencsv.bean.CsvBindByName;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -31,6 +32,7 @@ public abstract class UnitClassVo {
     protected Long id;
 
     @JsonProperty("id")
+    @CsvBindByName(column = "id")
     protected String code;
 
     protected String status;

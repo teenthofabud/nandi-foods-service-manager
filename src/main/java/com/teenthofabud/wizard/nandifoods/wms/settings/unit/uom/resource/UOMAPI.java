@@ -10,6 +10,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,8 +23,12 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "UOMAPI", description = "UOM Management")
 public interface UOMAPI extends BaseUnitClassAPI {
@@ -32,7 +37,10 @@ public interface UOMAPI extends BaseUnitClassAPI {
 
     @Operation(method = "POST", summary = "UOM creation", description = "postUOM")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "UOM created")
+            @ApiResponse(responseCode = "201", description = "UOM created"),
+            @ApiResponse(
+                    responseCode = "409", description = "UOM already created",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     public ResponseEntity<Void> postUOM(@RequestBody(description = "UOM form", required = true,
             content = @Content(schema = @Schema(implementation = UOMForm.class))) UOMForm form);
@@ -50,7 +58,10 @@ public interface UOMAPI extends BaseUnitClassAPI {
 
     @Operation(method = "PATCH", summary = "UOM approval", description = "approveSavedUOMById")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "UOM approved")
+            @ApiResponse(responseCode = "204", description = "UOM approved"),
+            @ApiResponse(
+                    responseCode = "409", description = "UOM already approved",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<Void> approveSavedUOMById(String code, @RequestBody(description = "JsonPatch", required = false,
@@ -67,6 +78,17 @@ public interface UOMAPI extends BaseUnitClassAPI {
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<UOMVo> getUOMByCode(String code);
+
+    @Operation(method = "GET", summary = "Download UOM List", description = "downloadAllUOM")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Downloaded UOM List",
+                    content = {
+                            @Content(mediaType = HttpMediaType.TEXT_CSV),
+                            @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)
+                    }
+            )
+    })
+    public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response);
 
     @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")
     @ApiResponses(value = {

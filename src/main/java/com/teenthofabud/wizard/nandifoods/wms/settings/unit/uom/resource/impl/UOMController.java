@@ -14,19 +14,24 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.swing.text.html.Option;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
+
+import static org.springframework.util.StreamUtils.BUFFER_SIZE;
 
 @Slf4j
 @RestController
@@ -108,6 +113,33 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.ok(uomVo);
     }
 
+    @GetMapping(path = "/download",
+            produces = { MediaType.APPLICATION_PDF_VALUE, HttpMediaType.TEXT_CSV })
+    @Override
+    public StreamingResponseBody downloadAllUOM(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) {
+        IllegalArgumentException e = new IllegalArgumentException("Accept type header should be either " + MediaType.APPLICATION_PDF_VALUE + " or " + HttpMediaType.TEXT_CSV);
+        if(!StringUtils.hasText(accept)) {
+            throw e;
+        }
+        switch (accept) {
+            case MediaType.APPLICATION_PDF_VALUE : return null;
+            case HttpMediaType.TEXT_CSV : return null;
+            default: throw e;
+        }
+        /*response.setContentType(fileInfo.getContentType());
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileInfo.getFilename() + "\"");
+
+        return outputStream -> {
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            InputStream inputStream = fileInfo.getInputStream();
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        };*/
+    }
+
     @DeleteMapping(path = "/{id}")
     @Override
     public ResponseEntity<Void> deleteUOMById(@PathVariable(name = "id") String code) {
@@ -128,10 +160,7 @@ public class UOMController implements UOMAPI {
                 .sort(Optional.ofNullable(sort))
                 .ascending(Optional.ofNullable(ascending))
                 .build();
-        if (!StringUtils.hasText(longName)) {
-            throw new IllegalArgumentException("long name is required");
-        }
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(longName, uomPageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(Optional.of(longName), uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

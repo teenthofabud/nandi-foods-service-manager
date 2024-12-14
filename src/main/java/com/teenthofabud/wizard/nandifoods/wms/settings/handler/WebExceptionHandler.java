@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @ControllerAdvice
 public class WebExceptionHandler {
+
+    @ExceptionHandler(value = IOException.class)
+    public ResponseEntity<ErrorVo> handleIOException(IOException e) {
+        String message = "Unable to process output";
+        log.error(message, e);
+        ErrorVo errorVo = ErrorVo.builder()
+                .message(message + ": " + e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorVo);
+    }
 
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<ErrorVo> handleIllegalArgumentException(IllegalArgumentException e) {

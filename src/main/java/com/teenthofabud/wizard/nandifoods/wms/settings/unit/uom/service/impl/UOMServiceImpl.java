@@ -2,6 +2,11 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
@@ -27,6 +32,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMea
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.CSVDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
@@ -58,6 +64,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -278,11 +285,18 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public UOMPageImplVo retrieveAllUOMByLongName(String longName, UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveAllUOMByLongName(Optional<String> optionalLongName, UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
-        Specification<UOMEntity> uomSearchQuerySpecification = uomJpaRepository.likeProperty("longName", longName);
-        log.debug("Created specification for UOMEntity using long name: {}", longName);
-        Page<UOMEntity> uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
+        Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
+        if(optionalLongName.isPresent()) {
+            String longName = optionalLongName.get();
+            Specification<UOMEntity> uomSearchQuerySpecification = uomJpaRepository.likeProperty("longName", longName);
+            log.debug("Created specification for UOMEntity using long name: {}", longName);
+            uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
+        } else {
+            log.debug("Searching UOMEntity with page: {}", pageable);
+            uomEntityPage = uomJpaRepository.findAll(pageable);
+        }
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
             List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
@@ -371,5 +385,33 @@ public class UOMServiceImpl implements UOMService {
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
         uomJpaRepository.save(uomEntity);
         log.info("Approved UOMEntity with id: {}", uomEntity.getId());
+    }
+
+    @Transactional
+    @Override
+    public CSVDto downloadAllUOMInCSV() throws IOException {
+        //Writer writer = new StringWriter();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Writer streamWriter = new OutputStreamWriter(stream);
+        CSVWriter writer = new CSVWriter(streamWriter);
+        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
+        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
+        StatefulBeanToCsv<UOMVo> sbc = new StatefulBeanToCsvBuilder<UOMVo>(writer)
+                .withQuotechar('\'')
+                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                .build();
+        try {
+            sbc.write(uomVoList);
+            streamWriter.flush();
+            CSVDto csvDto = CSVDto.builder()
+                    .fileName("UOMList.csv")
+                    .rawContent(stream.toByteArray())
+                    .build();
+            return csvDto;
+        } catch (CsvDataTypeMismatchException e) {
+            throw new IllegalArgumentException("CSV bean field not configured properly", e);
+        } catch (CsvRequiredFieldEmptyException e) {
+            throw new IllegalArgumentException("CSV bean field is empty", e);
+        }
     }
 }

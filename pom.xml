@@ -71,11 +71,17 @@
 			<artifactId>durian</artifactId>
 			<version>3.3.0</version>
 		</dependency>
-<!--		<dependency>
-			<groupId>com.github.java-json-tools</groupId>
-			<artifactId>json-patch</artifactId>
-			<version>1.13</version>
-		</dependency>-->
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.9</version>
+		</dependency>
+
+		<!--		<dependency>
+                    <groupId>com.github.java-json-tools</groupId>
+                    <artifactId>json-patch</artifactId>
+                    <version>1.13</version>
+                </dependency>-->
 		<!-- https://mvnrepository.com/artifact/org.apache.johnzon/johnzon-core -->
 		<!-- https://mvnrepository.com/artifact/com.github.wnameless.json/json-flattener -->
 <!--		<dependency>

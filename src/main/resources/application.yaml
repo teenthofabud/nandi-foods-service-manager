@@ -51,6 +51,9 @@ spring:
     default-property-inclusion: non_null
     deserialization:
       fail-on-unknown-properties: false
+  mvc:
+    media-types:
+      csv: text/csv
 
 server:
   forward-headers-strategy: FRAMEWORK
