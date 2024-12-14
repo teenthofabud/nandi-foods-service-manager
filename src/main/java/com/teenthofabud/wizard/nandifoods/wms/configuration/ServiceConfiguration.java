@@ -25,6 +25,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpMethod;
 import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
 import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -54,6 +55,7 @@ public class ServiceConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         CorsRegistration corsRegistration = registry.addMapping("/**");
+        Arrays.stream(HttpMethod.values()).forEach(f -> corsRegistration.allowedMethods(f.name()));
         allowedOrigins.stream().forEach(f -> corsRegistration.allowedOrigins(f));
     }
 
