@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.reflections.scanners.Scanners.ConstructorsSignature;
@@ -54,9 +55,12 @@ public class ServiceConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        CorsRegistration corsRegistration = registry.addMapping("/**");
-        Arrays.stream(HttpMethod.values()).forEach(f -> corsRegistration.allowedMethods(f.name()));
-        allowedOrigins.stream().forEach(f -> corsRegistration.allowedOrigins(f));
+       CorsRegistration corsRegistration = registry.addMapping("/**");
+       String[] allowedMethods = Arrays.stream(HttpMethod.values())
+               .map(HttpMethod::name)
+               .toArray(String[]::new);
+       corsRegistration.allowedMethods(allowedMethods);
+       corsRegistration.allowedOrigins(allowedOrigins.toArray(String[]::new));
     }
 
     @Bean
