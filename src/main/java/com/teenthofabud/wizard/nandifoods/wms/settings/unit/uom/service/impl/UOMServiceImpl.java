@@ -63,6 +63,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -310,7 +311,7 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public UOMPageImplVo retrieveAllUOMWithinRange(@Valid Optional<@NotBlank(message = "UOM search query is required") String> optionalQuery, @Valid UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, @Valid UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
         Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
         if(optionalQuery.isPresent()) {
@@ -341,9 +342,6 @@ public class UOMServiceImpl implements UOMService {
             UOMDto patchedUOMDto = optionallyPatchedUOMDto.get();
             UOMDto blankUOMDto = UOMDto.builder().build();
             Diff rawDtoUpdates = javers.compare(blankUOMDto, patchedUOMDto);
-            rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(p ->
-                    log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight())
-            );
             log.debug("UOM found with code: {}", uomEntity.getCode());
             log.debug("Mapping updates from patched UOMDto to UOMEntity");
             rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
@@ -355,11 +353,12 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, @Valid UOMDto patchedUOMDto) {
+    public void updateExistingUOMByCode(String code, UOMDto patchedUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
         }
+        log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         uomUpdateHelper(uomEntity, Optional.of(patchedUOMDto));
         uomJpaRepository.save(uomEntity);
@@ -368,7 +367,7 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public void approveSavedUOMByCode(String code, Optional<@Valid UOMDto> optionallyPatchedUOMDto) {
+    public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
