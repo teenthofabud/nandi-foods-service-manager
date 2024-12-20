@@ -215,7 +215,7 @@ public class UOMServiceImpl implements UOMService {
 
     private void crossLink(UOMEntity from, Optional<List<UnitClassCrossLinkageForm>> optionalUnitClassCrossLinkageForms) {
         if(optionalUnitClassCrossLinkageForms.isEmpty()) {
-            log.debug("No PU/HU linked! Skipping {} cross linkage logic");
+            log.debug("No PU/HU linked! Skipping UOM cross linkage logic");
             return;
         }
         List<UnitClassCrossLinkageForm> linkedPUHUs = optionalUnitClassCrossLinkageForms.get();
@@ -243,18 +243,11 @@ public class UOMServiceImpl implements UOMService {
 
         // Save UOM
         final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
-        //uomEntity = uomJpaRepository.save(uomEntity);
         uomJpaRepository.save(uomEntity);
         log.debug("UOM saved with id: {}", uomEntity.getId());
 
         // Save measured values for all metric systems
         form.getMeasuredValues().stream().forEach(f -> createNewUOMMeasuredValues(uomEntity, f));
-
-
-        // Save Imperial measure values
-        //uomEntity = createNewUOMMeasuredValues(uomEntity, form.getImperial(), MetricSystem.IMPERIAL);
-        // Save Metric measure values
-        //uomEntity = createNewUOMMeasuredValues(uomEntity, form.getMetric(), MetricSystem.SI);
 
         // Save linked UOMs
         selfLink(uomEntity, form.getLinkedUOMs());
@@ -396,9 +389,15 @@ public class UOMServiceImpl implements UOMService {
             throw new IllegalStateException("UOM already approved with id: " + code);
         }
         uomUpdateHelper(uomEntity, optionallyPatchedUOMDto);
-        Audit audit = uomEntity.getAudit();
-        audit.setApprovalTime(LocalDateTime.now());
-        uomEntity.setAudit(audit);
+        LocalDateTime approvalTime = LocalDateTime.now();
+        uomEntity.getUomMeasuredValues().stream().forEach(f -> {
+            Audit uomMeasuredValueAudit = f.getAudit();
+            uomMeasuredValueAudit.setApprovalTime(approvalTime);
+            f.setAudit(uomMeasuredValueAudit);
+        });
+        Audit uomAudit = uomEntity.getAudit();
+        uomAudit.setApprovalTime(approvalTime);
+        uomEntity.setAudit(uomAudit);
         uomEntity.setStatus(UnitClassStatus.ACTIVE);
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
         uomJpaRepository.save(uomEntity);
