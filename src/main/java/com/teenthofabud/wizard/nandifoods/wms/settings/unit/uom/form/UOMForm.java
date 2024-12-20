@@ -36,9 +36,11 @@ public class UOMForm extends UnitClassForm {
 
     private Boolean isProduction;
 
-    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<UnitClassSelfLinkageForm>> linkedUOMs;
+    @Builder.Default
+    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<UnitClassSelfLinkageForm>> linkedUOMs = Optional.empty();
 
-    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<UnitClassCrossLinkageForm>> linkedPUHUs;
+    @Builder.Default
+    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<UnitClassCrossLinkageForm>> linkedPUHUs = Optional.empty();
 
 
 

@@ -1,5 +1,8 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.EnumValidator;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -13,6 +16,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 public class UnitClassMeasuredValuesForm {
+
+    @EnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
+    protected String metricSystem;
 
     @NotNull(message = "length is required")
     @DecimalMin(value = "0.1", message = "length cannot be zero or less")

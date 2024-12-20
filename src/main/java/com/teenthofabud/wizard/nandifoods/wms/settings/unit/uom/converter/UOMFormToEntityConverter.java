@@ -18,9 +18,9 @@ public class UOMFormToEntityConverter implements Converter<UOMForm, UOMEntity> {
     @Override
     public UOMEntity convert(UOMForm source) {
         String longName = StringUtils.hasText(source.getLongName()) ? source.getLongName()
-                : String.format("%s %s (%s)", source.getCode(), source.getName(), source.getDescription());
+                : String.format("%s %s (%s)", source.getCode(), source.getType(), source.getDescription());
         String shortName = StringUtils.hasText(source.getShortName()) ? source.getShortName()
-                : String.format("%s (%s)", source.getCode(), source.getName());
+                : String.format("%s (%s)", source.getType(), source.getCode());
         UOMEntity target = UOMEntity.builder()
                 .code(source.getCode())
                 .type(UnitClassType.UOM)

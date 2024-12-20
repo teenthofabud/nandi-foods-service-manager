@@ -21,7 +21,8 @@ public class UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter imple
                 //.audit() -> automatically set by JPA for first time creation wrt creation related attributes
                 .heightValue(source.getHeightValue())
                 .lengthValue(source.getLengthValue())
-                .metricSystem(MetricSystemContext.get())
+                //.metricSystem(MetricSystemContext.get())
+                .metricSystem(MetricSystem.valueOf(source.getMetricSystem()))
                 .volumeValue(source.getVolumeValue())
                 .widthValue(source.getWidthValue())
                 .weightValue(source.getWeightValue())

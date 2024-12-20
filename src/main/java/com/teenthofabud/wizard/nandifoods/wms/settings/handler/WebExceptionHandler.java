@@ -107,4 +107,12 @@ public class WebExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorVo);
     }
 
+    @ExceptionHandler(value = UnsupportedOperationException.class)
+    public ResponseEntity<ErrorVo> handleUnsupportedOperationException(UnsupportedOperationException e) {
+        log.error("Unable to perform operation", e);
+        ErrorVo errorVo = ErrorVo.builder()
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorVo);
+    }
 }

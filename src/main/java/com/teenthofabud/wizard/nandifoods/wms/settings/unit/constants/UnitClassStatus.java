@@ -15,6 +15,11 @@ public enum UnitClassStatus {
     @FieldNameConstants.Include HOLD(2),
     @FieldNameConstants.Include CLOSED(3);
 
+    @Override
+    public String toString() {
+        return name();
+    }
+
     private Integer ordinal;
 
     private UnitClassStatus(Integer ordinal) {

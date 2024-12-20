@@ -3,7 +3,10 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants;
 import lombok.Getter;
 import lombok.experimental.FieldNameConstants;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @FieldNameConstants(onlyExplicitlyIncluded = true)
 @Getter
@@ -29,6 +32,14 @@ public enum UnitClassLevelType {
     @Override
     public String toString() {
         return level;
+    }
+
+    public static List<String> getAllLevels() {
+        return Arrays.stream(values()).map(v -> v.getLevel()).collect(Collectors.toList());
+    }
+
+    public static List<String> getAllTypes() {
+        return Arrays.stream(values()).map(v -> v.getType()).collect(Collectors.toList());
     }
 
     public static UnitClassLevelType getByLevel(String level) throws NoSuchElementException {

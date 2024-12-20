@@ -2,6 +2,9 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.OptionalEnumValidator;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -16,6 +19,11 @@ import java.util.Optional;
 @Getter
 @Setter
 public class UnitClassMeasuredValuesDto {
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    @OptionalEnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
+    protected Optional<String> metricSystem = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default

@@ -9,6 +9,13 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToBooleanTypeUtilsConverter;
+import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToDoubleTypeUtilsConverter;
+import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToEnumTypeUtilsConverter;
+import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToIntegerTypeUtilsConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -94,7 +101,15 @@ public class ServiceConfiguration implements WebMvcConfigurer {
 
     @Bean
     public BeanUtilsBean beanUtilsBean() {
-        return BeanUtilsBean2.getInstance();
+        OptionalStringToEnumTypeUtilsConverter optionalStringToEnumTypeUtilsConverter = OptionalStringToEnumTypeUtilsConverter.builder().build();
+        BeanUtilsBean beanUtilsBean = BeanUtilsBean2.getInstance();
+        beanUtilsBean.getConvertUtils().register(OptionalStringToBooleanTypeUtilsConverter.builder().build(), Boolean.class);
+        beanUtilsBean.getConvertUtils().register(OptionalStringToDoubleTypeUtilsConverter.builder().build(), Double.class);
+        beanUtilsBean.getConvertUtils().register(OptionalStringToIntegerTypeUtilsConverter.builder().build(), Integer.class);
+        beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, UnitClassLevelType.class);
+        beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, UnitClassStatus.class);
+        beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, MetricSystem.class);
+        return beanUtilsBean;
     }
 
     @Bean

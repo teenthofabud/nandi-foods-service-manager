@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
@@ -66,6 +67,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -144,7 +147,7 @@ public class UOMServiceImpl implements UOMService {
         this.searchFields = searchFields;
     }
 
-    private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
+    /*private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
         MetricSystemContext.set(metricSystem);
         UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
         MetricSystemContext.clear();
@@ -154,6 +157,15 @@ public class UOMServiceImpl implements UOMService {
         uomEntity = uomJpaRepository.save(uomEntity);
         log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), metricSystem, uomMeasuredValuesEntity.getId());
         return uomEntity;
+    }*/
+
+    private void createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form) {
+        UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
+        uomMeasuredValuesEntity.setUom(uomEntity);// because of bidirectional one to many strategy by vlad mihalcea the entire JPA relationship needs to be managed by hand
+        uomMeasuredValuesEntity = uomMeasuredValuesJpaRepository.save(uomMeasuredValuesEntity);
+        uomEntity.addUOMeasuredValue(uomMeasuredValuesEntity);
+        uomEntity = uomJpaRepository.save(uomEntity);
+        log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), form.getMetricSystem(), uomMeasuredValuesEntity.getId());
     }
 
     private void selfLink(UOMEntity from, Optional<List<UnitClassSelfLinkageForm>> optionalUnitClassSelfLinkageForms) {
@@ -230,15 +242,19 @@ public class UOMServiceImpl implements UOMService {
         }
 
         // Save UOM
-        UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
-        uomEntity = uomJpaRepository.save(uomEntity);
+        final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
+        //uomEntity = uomJpaRepository.save(uomEntity);
+        uomJpaRepository.save(uomEntity);
         log.debug("UOM saved with id: {}", uomEntity.getId());
 
-        // Save Imperial measure values
-        uomEntity = createNewUOMMeasuredValues(uomEntity, form.getImperial(), MetricSystem.IMPERIAL);
+        // Save measured values for all metric systems
+        form.getMeasuredValues().stream().forEach(f -> createNewUOMMeasuredValues(uomEntity, f));
 
+
+        // Save Imperial measure values
+        //uomEntity = createNewUOMMeasuredValues(uomEntity, form.getImperial(), MetricSystem.IMPERIAL);
         // Save Metric measure values
-        uomEntity = createNewUOMMeasuredValues(uomEntity, form.getMetric(), MetricSystem.SI);
+        //uomEntity = createNewUOMMeasuredValues(uomEntity, form.getMetric(), MetricSystem.SI);
 
         // Save linked UOMs
         selfLink(uomEntity, form.getLinkedUOMs());
@@ -344,9 +360,12 @@ public class UOMServiceImpl implements UOMService {
             Diff rawDtoUpdates = javers.compare(blankUOMDto, patchedUOMDto);
             log.debug("UOM found with code: {}", uomEntity.getCode());
             log.debug("Mapping updates from patched UOMDto to UOMEntity");
+            rawDtoUpdates.getChanges().forEach(Errors.rethrow().wrap(p -> {
+                log.debug("{}", p);
+            }));
             rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
                 log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
-                beanUtilsBean.copyProperty(uomEntity, p.getPropertyName(), p.getRight());
+                beanUtilsBean.copyProperty(uomEntity, p.getPropertyNameWithPath(), p.getRight());
             }));
         }
     }

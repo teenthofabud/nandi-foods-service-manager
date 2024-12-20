@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.EnumValidator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.OptionalEnumValidator;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @EqualsAndHashCode
@@ -26,35 +25,41 @@ public abstract class UnitClassDto {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<@EnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid") String> level = Optional.empty();
+    @OptionalEnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
+    protected Optional<String> levelType = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<@EnumValidator(enumClazz = UnitClassStatus.class, message = "Status is invalid") String> status = Optional.empty();
+    @OptionalEnumValidator(enumClazz = UnitClassStatus.class, message = "Status is invalid")
+    protected Optional<String> status = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> name = Optional.empty();
+    protected Optional<String> name = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> description = Optional.empty();
+    protected Optional<String> description = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> longName = Optional.empty();
+    protected Optional<String> longName = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> shortName = Optional.empty();
+    protected Optional<String> shortName = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> metric = Optional.of(new ArrayList<>());
+
+    /*@JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     protected Optional<@Valid UnitClassMeasuredValuesDto> metric = Optional.of(new UnitClassMeasuredValuesDto());
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<@Valid UnitClassMeasuredValuesDto> imperial = Optional.of(new UnitClassMeasuredValuesDto());
+    protected Optional<@Valid UnitClassMeasuredValuesDto> imperial = Optional.of(new UnitClassMeasuredValuesDto());*/
 
     /*public UnitClassDto() {
         this.level = Optional.empty();
