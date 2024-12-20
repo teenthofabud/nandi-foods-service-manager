@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -11,6 +12,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 public class UnitClassMeasuredValuesVo {
+
+    private String metricSystem;
 
     private Double lengthValue;
     private String lengthUnit;

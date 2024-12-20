@@ -17,24 +17,24 @@ public class UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter imple
 
     @Override
     public UOMMeasuredValuesEntity convert(UnitClassMeasuredValuesForm source) {
+        MetricSystem metricSystemContext = MetricSystem.valueOf(source.getMetricSystem());
         UOMMeasuredValuesEntity target = UOMMeasuredValuesEntity.builder()
                 //.audit() -> automatically set by JPA for first time creation wrt creation related attributes
                 .heightValue(source.getHeightValue())
                 .lengthValue(source.getLengthValue())
-                //.metricSystem(MetricSystemContext.get())
-                .metricSystem(MetricSystem.valueOf(source.getMetricSystem()))
+                .metricSystem(metricSystemContext)
                 .volumeValue(source.getVolumeValue())
                 .widthValue(source.getWidthValue())
                 .weightValue(source.getWeightValue())
-                .lengthUnit(MetricSystemContext.get().compareTo(MetricSystem.SI) == 0 ?
+                .lengthUnit(metricSystemContext.compareTo(MetricSystem.SI) == 0 ?
                         MetricPrefix.CENTI(METRE) : USCustomary.INCH)
-                .heightUnit(MetricSystemContext.get().compareTo(MetricSystem.SI) == 0 ?
+                .heightUnit(metricSystemContext.compareTo(MetricSystem.SI) == 0 ?
                         MetricPrefix.CENTI(METRE) : USCustomary.INCH)
-                .widthUnit(MetricSystemContext.get().compareTo(MetricSystem.SI) == 0 ?
+                .widthUnit(metricSystemContext.compareTo(MetricSystem.SI) == 0 ?
                         MetricPrefix.CENTI(METRE) : USCustomary.INCH)
-                .volumeUnit(MetricSystemContext.get().compareTo(MetricSystem.SI) == 0 ?
+                .volumeUnit(metricSystemContext.compareTo(MetricSystem.SI) == 0 ?
                         CUBIC_METRE : USCustomary.CUBIC_FOOT)
-                .weightUnit(MetricSystemContext.get().compareTo(MetricSystem.SI) == 0 ?
+                .weightUnit(metricSystemContext.compareTo(MetricSystem.SI) == 0 ?
                         MetricPrefix.KILO(GRAM) : USCustomary.POUND)
                 .build();
         return target;

@@ -1,9 +1,12 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.bean.CsvBindByName;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @EqualsAndHashCode
 @ToString
@@ -12,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class UnitClassVo {
 
     protected String level;
@@ -24,9 +28,7 @@ public abstract class UnitClassVo {
 
     protected String shortName;
 
-    protected UnitClassMeasuredValuesVo metric;
-
-    protected UnitClassMeasuredValuesVo imperial;
+    protected List<UnitClassMeasuredValuesVo> measuredValues;
 
     @JsonProperty("pk")
     protected Long id;

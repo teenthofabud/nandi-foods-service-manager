@@ -13,6 +13,7 @@ public class UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter impleme
     public UnitClassMeasuredValuesVo convert(UOMMeasuredValuesEntity source) {
         UnitClassMeasuredValuesVo target = UnitClassMeasuredValuesVo.builder()
                 //.audit() -> automatically set by JPA for first time creation wrt creation related attributes
+                .metricSystem(source.getMetricSystem().name())
                 .heightValue(source.getHeightValue())
                 .lengthValue(source.getLengthValue())
                 .volumeValue(source.getVolumeValue())

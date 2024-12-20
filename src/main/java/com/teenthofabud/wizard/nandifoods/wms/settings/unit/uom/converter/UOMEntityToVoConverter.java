@@ -1,14 +1,16 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
@@ -30,6 +32,7 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
 
     @Override
     public UOMVo convert(UOMEntity source) {
+        List<UnitClassMeasuredValuesVo> measuredValues = source.getUomMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(f)).collect(Collectors.toList());
         UOMVo target = UOMVo.builder()
                 .name(source.getLevelType().getType())
                 .longName(source.getLongName())
@@ -52,12 +55,7 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
                 .id(source.getId())
                 .status(source.getStatus().name())
                 .code(source.getCode())
-                .imperial(
-                        uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(
-                                source.getUomMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.IMPERIAL) == 0).findFirst().get()))
-                .metric(
-                        uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(
-                                source.getUomMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.SI) == 0).findFirst().get()))
+                .measuredValues(measuredValues)
                 .build();
         return target;
     }
