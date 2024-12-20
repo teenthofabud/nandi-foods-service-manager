@@ -28,6 +28,9 @@ public class MetricSystemVo {
     @Schema(example = "cm", description = "Name of the unit to measure length")
     private String lengthUnit;
 
+    @Schema(example = "cm", description = "Name of the unit to measure height")
+    private String heightUnit;
+
     @Schema(example = "cubic metre", description = "NName of the unit to measure volume")
     private String volumeUnit;
 
