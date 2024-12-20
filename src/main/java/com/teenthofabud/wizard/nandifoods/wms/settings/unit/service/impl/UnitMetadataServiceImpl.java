@@ -28,7 +28,7 @@ public class UnitMetadataServiceImpl implements UnitMetadataService {
                         .widthUnit(e.getWidthUnit().toString())
                         .weightUnit(e.getWeightUnit().toString())
                         .volumeUnit(e.getVolumeUnit().toString())
-                        .heightUnit(e.)
+                        .heightUnit(e.getHeightUnit().toString())
                         .build()).toList();
         return metricSystemVoList;
     }
