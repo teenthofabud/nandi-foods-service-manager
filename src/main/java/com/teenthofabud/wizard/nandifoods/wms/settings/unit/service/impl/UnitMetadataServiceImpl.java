@@ -1,9 +1,11 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.impl;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitMetadataService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
@@ -16,6 +18,19 @@ import java.util.List;
 @Slf4j
 @Service
 public class UnitMetadataServiceImpl implements UnitMetadataService {
+
+    @Override
+    public List<MetricSystemVo> retrieveExistingMetricSystems() {
+        List<MetricSystemVo> metricSystemVoList = Arrays.stream(MetricSystem.values()).map(
+                e -> MetricSystemVo.builder()
+                        .name(e.name())
+                        .lengthUnit(e.getLengthUnit().toString())
+                        .widthUnit(e.getWidthUnit().toString())
+                        .weightUnit(e.getWeightUnit().toString())
+                        .volumeUnit(e.getVolumeUnit().toString())
+                        .build()).toList();
+        return metricSystemVoList;
+    }
 
     @Override
     public List<UnitClassTypeVo> retrieveExistingUnitClassTypes() {

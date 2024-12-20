@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.impl;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.UnitMetadataAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitMetadataService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
@@ -31,6 +32,13 @@ public class UnitMetadataController implements UnitMetadataAPI {
     @Override
     public String getContext() {
         return "UnitMetadata";
+    }
+
+    @GetMapping(path = "/metricSystem", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<List<MetricSystemVo>> getMetricSystems() {
+        List<MetricSystemVo> metricSystemVoList = unitMetadataService.retrieveExistingMetricSystems();
+        return ResponseEntity.ok(metricSystemVoList);
     }
 
     @GetMapping(path = "/type", produces = MediaType.APPLICATION_JSON_VALUE)

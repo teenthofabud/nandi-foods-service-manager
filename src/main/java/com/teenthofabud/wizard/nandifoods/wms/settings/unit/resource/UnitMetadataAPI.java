@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource;
 
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
@@ -20,6 +21,15 @@ import java.util.List;
 public interface UnitMetadataAPI extends BaseUnitClassAPI {
 
     public static final String BASE_URI = BaseUnitClassAPI.BASE_URI + "/metadata";
+
+    @Operation(method = "GET", summary = "Get all metric systems and their units", description = "getMetricSystems")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved Metric Systems and their units",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                            schema = @Schema(implementation = MetricSystemVo.class)
+                    )))
+    })
+    public ResponseEntity<List<MetricSystemVo>> getMetricSystems();
 
     @Operation(method = "GET", summary = "Get all Unit Class types", description = "getUnitClassTypes")
     @ApiResponses(value = {
