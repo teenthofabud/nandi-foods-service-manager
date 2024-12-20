@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator;
+package com.teenthofabud.wizard.nandifoods.wms.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

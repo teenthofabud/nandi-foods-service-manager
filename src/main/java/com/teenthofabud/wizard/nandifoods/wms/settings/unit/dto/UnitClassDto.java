@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.OptionalEnumValidator;
+import com.teenthofabud.wizard.nandifoods.wms.validator.OptionalEnumValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.*;

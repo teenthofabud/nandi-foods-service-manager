@@ -22,9 +22,6 @@ public class Audit {
     @Column(name = "creation_time", nullable = false)
     private LocalDateTime creationTime;
 
-    @Column(name = "approval_time")
-    private LocalDateTime approvalTime;
-
     @Column(name = "modification_time")
     private LocalDateTime modificationTime;
 

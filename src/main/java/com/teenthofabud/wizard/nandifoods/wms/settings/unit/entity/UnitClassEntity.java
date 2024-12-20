@@ -15,6 +15,9 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditListener.class)
 @ToString(callSuper = true)
@@ -41,6 +44,10 @@ public abstract class UnitClassEntity implements Auditable {
     @Column(nullable = false)
     @EqualsAndHashCode.Include
     protected String code;
+
+    @Column(name = "approval_time", nullable = false)
+    @EqualsAndHashCode.Include
+    protected LocalDate effectiveDate;
 
     @Column(name = "class_type", nullable = false)
     @Convert(converter = UnitClassAttributeConverter.class)

@@ -1,12 +1,15 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.bean.CsvBindByName;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode
 @ToString
@@ -39,13 +42,16 @@ public abstract class UnitClassVo {
 
     protected String status;
 
-    protected String dateCreated;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    protected LocalDate dateCreated;
 
-    protected String effectiveDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    protected LocalDate effectiveDate;
 
-    protected String modifiedDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    protected Optional<LocalDate> modifiedDate;
 
-    protected String lastUpdated;
+    protected LocalDate lastUpdated;
 
     protected String updatedBy;
 

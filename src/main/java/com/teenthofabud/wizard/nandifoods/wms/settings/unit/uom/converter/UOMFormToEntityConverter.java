@@ -42,7 +42,7 @@ public class UOMFormToEntityConverter implements Converter<UOMForm, UOMEntity> {
                 .puLinks(new ArrayList<>())
                 .huLinks(new ArrayList<>())
                 .uomMeasuredValues(new ArrayList<>())*/
-                .audit(Audit.builder().approvalTime(source.getEffectiveDate().atStartOfDay()).build())
+                .effectiveDate(source.getEffectiveDate())
                 .build();
         // audit is set automatically for creation related attributes
         return target;

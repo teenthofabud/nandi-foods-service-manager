@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToBooleanTypeUtilsConverter;
 import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToDoubleTypeUtilsConverter;
 import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToEnumTypeUtilsConverter;
@@ -76,7 +77,7 @@ public class ServiceConfiguration implements WebMvcConfigurer {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = JsonMapper.builder()
                                         .addModule(new Jdk8Module().configureAbsentsAsNulls(false))
-                                        //.addModule(new JavaTimeModule())
+                                        .addModule(new JavaTimeModule())
                                         //.addModule(new JSR353Module())
                                         .serializationInclusion(JsonInclude.Include.NON_NULL)
                                         //.serializationInclusion(JsonInclude.Include.NON_ABSENT)

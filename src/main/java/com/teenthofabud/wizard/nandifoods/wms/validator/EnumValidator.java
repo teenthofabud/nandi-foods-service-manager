@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator;
+package com.teenthofabud.wizard.nandifoods.wms.validator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -8,12 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = OptionalEnumValidatorImpl.class)
+@Constraint(validatedBy = EnumValidatorImpl.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE_USE})
 @NotNull(message = "Value cannot be null")
 @ReportAsSingleViolation
-public @interface OptionalEnumValidator {
+public @interface EnumValidator {
 
     Class<? extends Enum<?>> enumClazz();
 

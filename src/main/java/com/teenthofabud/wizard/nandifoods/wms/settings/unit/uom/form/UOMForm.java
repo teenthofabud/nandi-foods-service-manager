@@ -43,6 +43,4 @@ public class UOMForm extends UnitClassForm {
     @Builder.Default
     private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<UnitClassCrossLinkageForm>> linkedPUHUs = Optional.empty();
 
-
-
 }

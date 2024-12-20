@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -40,12 +41,9 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
                 .level(source.getLevelType().getLevel())
                 .description(source.getDescription())
                 .bulkCode(source.getBulkCode())
-                .dateCreated(ObjectUtils.isEmpty(source.getAudit().getCreationTime()) ?
-                        "" : source.getAudit().getCreationTime().format(creationTimeFormat))
-                .effectiveDate(ObjectUtils.isEmpty(source.getAudit().getApprovalTime()) ?
-                        "" : source.getAudit().getApprovalTime().format(approvalTimeFormat))
-                .modifiedDate(ObjectUtils.isEmpty(source.getAudit().getModificationTime()) ?
-                        "" : source.getAudit().getModificationTime().format(modificationTimeFormat))
+                .dateCreated(source.getAudit().getCreationTime().toLocalDate())
+                .effectiveDate(source.getEffectiveDate())
+                .modifiedDate(Optional.ofNullable(Optional.ofNullable(source.getAudit().getModificationTime()).map(f -> f.toLocalDate()).orElse(null)))
                 .updatedBy(source.getAudit().getModifiedBy())
                 .updatedBy(source.getAudit().getModifiedBy())
                 .isInventory(source.getIsInventory())

@@ -1,8 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.EnumValidator;
+import com.teenthofabud.wizard.nandifoods.wms.validator.EnumValidator;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

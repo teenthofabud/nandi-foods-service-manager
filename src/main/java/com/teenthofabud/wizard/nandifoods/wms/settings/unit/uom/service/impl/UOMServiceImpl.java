@@ -388,14 +388,6 @@ public class UOMServiceImpl implements UOMService {
         }
         uomUpdateHelper(uomEntity, optionallyPatchedUOMDto);
         LocalDateTime approvalTime = LocalDateTime.now();
-        uomEntity.getUomMeasuredValues().stream().forEach(f -> {
-            Audit uomMeasuredValueAudit = f.getAudit();
-            uomMeasuredValueAudit.setApprovalTime(approvalTime);
-            f.setAudit(uomMeasuredValueAudit);
-        });
-        Audit uomAudit = uomEntity.getAudit();
-        uomAudit.setApprovalTime(approvalTime);
-        uomEntity.setAudit(uomAudit);
         uomEntity.setStatus(UnitClassStatus.ACTIVE);
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
         uomJpaRepository.save(uomEntity);
