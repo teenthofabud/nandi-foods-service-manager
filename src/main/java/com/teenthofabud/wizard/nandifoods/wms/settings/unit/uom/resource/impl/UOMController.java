@@ -177,7 +177,7 @@ public class UOMController implements UOMAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(Optional.of(longName), uomPageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(Optional.ofNullable(longName), uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

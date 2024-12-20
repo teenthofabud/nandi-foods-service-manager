@@ -271,7 +271,7 @@ public class UOMServiceImpl implements UOMService {
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
-        List<UOMSelfLinkageVo> uomSelfLinkageVos = uomEntity.getToUOMs().stream()
+        List<UOMSelfLinkageVo> uomSelfLinkageVos = uomEntity.getFromUOMs().stream()
                 .map(e -> uomSelfLinkageEntityToVoConverter.convert(e))
                 .collect(Collectors.toList());
         uomVo.setSelfLinksTo(uomSelfLinkageVos);
