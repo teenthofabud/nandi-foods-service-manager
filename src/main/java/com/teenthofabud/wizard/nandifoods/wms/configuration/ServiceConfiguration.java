@@ -40,6 +40,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
@@ -57,6 +58,9 @@ public class ServiceConfiguration implements WebMvcConfigurer {
 
     @Value("#{'${wms.cors.allowedOrigins}'.split(',')}")
     private List<String> allowedOrigins;
+
+    @Value("${wms.settings.unit.approvalTimeFormat}}")
+    private String unitApprovalTimeFormat;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -79,6 +83,7 @@ public class ServiceConfiguration implements WebMvcConfigurer {
                                         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                                         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                                         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                                        .defaultDateFormat(new SimpleDateFormat(unitApprovalTimeFormat))
                                         .build();
         return mapper;
     }
