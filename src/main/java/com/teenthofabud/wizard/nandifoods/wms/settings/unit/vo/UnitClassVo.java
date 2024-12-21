@@ -23,7 +23,8 @@ public abstract class UnitClassVo {
 
     protected String level;
 
-    protected String name;
+    @JsonProperty("name")
+    protected String type;
 
     protected String description;
 

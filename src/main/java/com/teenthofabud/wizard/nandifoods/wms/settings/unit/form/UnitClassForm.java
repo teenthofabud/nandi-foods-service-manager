@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UntilDays;
 import com.teenthofabud.wizard.nandifoods.wms.validator.order.FirstOrder;
@@ -28,6 +29,7 @@ public abstract class UnitClassForm {
 
     protected String level;
 
+    @JsonProperty("name")
     protected String type;
 
     @NotBlank(message = "description is required")
