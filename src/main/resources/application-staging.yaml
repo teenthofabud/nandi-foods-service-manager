@@ -10,7 +10,7 @@ server:
 
 wms:
   cors:
-    allowedOrigins: https://nandi-foods-web-app-staging-ayutk.ondigitalocean.app
+    allowedOrigins: https://nandi-foods-web-app-staging-ayutk.ondigitalocean.app,http://localhost
 
 logging:
   level:
