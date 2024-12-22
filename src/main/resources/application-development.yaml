@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    ## PostgreSQL
+    url: jdbc:postgresql://host.docker.internal:5432/nandi_foods?currentSchema=settings
+
+wms:
+  cors:
+    allowedOrigins: http://host.docker.internal
+
+logging:
+  level:
+    com.teenthofabud.wizard.nandifoods.wms: INFO
+    com.teenthofabud.wizard.nandifoods.wms.settings: INFO

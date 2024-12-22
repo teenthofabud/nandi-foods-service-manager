@@ -26,3 +26,15 @@ mvn clean package -e
 ```
 sh ci/run.sh
 ```
+
+## Docker
+
+### Locally
+
+```
+docker build -t teenthofabud/nandi-foods-service-manager:0.0.3-SNAPSHOT -f Dockerfile .
+```
+
+```
+docker run -p 8081:8081 -d --name nandi-foods-service-manager teenthofabud/nandi-foods-service-manager:0.0.3-SNAPSHOT
+```

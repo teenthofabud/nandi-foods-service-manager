@@ -28,12 +28,16 @@ public class UOMForm extends UnitClassForm {
     @NotBlank(message = "bulk code value is required")
     private String bulkCode;
 
+    @NotNull(message = "inventory UOM is required")
     private Boolean isInventory;
 
+    @NotNull(message = "purchase UOM is required")
     private Boolean isPurchase;
 
+    @NotNull(message = "sales UOM is required")
     private Boolean isSales;
 
+    @NotNull(message = "production UOM is required")
     private Boolean isProduction;
 
     @Builder.Default
