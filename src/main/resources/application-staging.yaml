@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    ## PostgreSQL
+    url: jdbc:postgresql://db-postgresql-tor1-14687-do-user-17871541-0.g.db.ondigitalocean.com:25060/defaultdb?currentSchema=settings
+    username: doadmin
+    password: AVNS_5geh77gDVQEbdfN-IJV
+
+wms:
+  cors:
+    allowedOrigins: https://nandi-foods-web-app-staging-ayutk.ondigitalocean.app
+
+logging:
+  level:
+    com.teenthofabud.wizard.nandifoods.wms: INFO
+    com.teenthofabud.wizard.nandifoods.wms.settings: INFO

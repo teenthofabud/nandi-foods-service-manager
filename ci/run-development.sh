@@ -1,6 +1,8 @@
-docker rm -vf $(docker ps -aq)
+#docker rm -vf $(docker ps -aq)
+docker rm -vf nandi-foods-service-manager
 
-docker rmi -f $(docker images -aq)
+#docker rmi -f $(docker images -aq)
+docker rmi -f teenthofabud/nandi-foods-service-manager:0.0.3-SNAPSHOT
 
 mvn clean package -e
 
