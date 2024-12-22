@@ -5,6 +5,9 @@ spring:
     username: doadmin
     password: AVNS_5geh77gDVQEbdfN-IJV
 
+server:
+  port: 8080
+
 wms:
   cors:
     allowedOrigins: https://nandi-foods-web-app-staging-ayutk.ondigitalocean.app
