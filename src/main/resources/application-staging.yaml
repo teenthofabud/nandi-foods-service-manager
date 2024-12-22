@@ -1,9 +1,7 @@
 spring:
   datasource:
     ## PostgreSQL
-    url: jdbc:postgresql://db-postgresql-tor1-14687-do-user-17871541-0.g.db.ondigitalocean.com:25060/defaultdb?currentSchema=settings
-    username: doadmin
-    password: AVNS_5geh77gDVQEbdfN-IJV
+    url: jdbc:postgresql://db-postgresql-tor1-14687-do-user-17871541-0.g.db.ondigitalocean.com:25060/nandi_foods?currentSchema=settings
 
 server:
   port: 8080
