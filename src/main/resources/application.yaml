@@ -68,7 +68,11 @@ wms:
       approvalTimeFormat: yyy-MM-dd
       creationTimeFormat: yyy-MM-dd
       modificationTimeFormat: yyy-MM-dd
+      fileNameDateTimeFormat: yyyyMMdd-HH.mm
     uom:
+      fileNameFormat:
+        csv: "%s-UOM_List.csv"
+        #csv: %s-%s-UOM_List.csv
       search:
         fields: id,longName,shortName,description,type
         defaultSort: code

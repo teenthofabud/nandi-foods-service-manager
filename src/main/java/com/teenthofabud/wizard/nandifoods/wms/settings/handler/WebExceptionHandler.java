@@ -35,7 +35,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<ErrorVo> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Field is not valid", e);
         ErrorVo errorVo = ErrorVo.builder()
                 .message(e.getMessage())
                 .build();
@@ -44,7 +44,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = IllegalStateException.class)
     public ResponseEntity<ErrorVo> handleIllegalStateException(IllegalStateException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Conflicted resource", e);
         ErrorVo errorVo = ErrorVo.builder()
                 .message(e.getMessage())
                 .build();
@@ -53,7 +53,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = IllegalAccessException.class)
     public ResponseEntity<ErrorVo> handleIllegalAccessException(IllegalAccessException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Cannot access", e);
         ErrorVo errorVo = ErrorVo.builder()
                 .message(e.getMessage())
                 .build();
@@ -71,7 +71,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorVo> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Error validating resource", e);
         List<ObjectError> errors = e.getBindingResult().getAllErrors().stream().collect(Collectors.toList());
         ErrorVo errorVo = ErrorVo.builder()
                 .message(errors.get(0).getDefaultMessage())
@@ -81,7 +81,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = ConstraintViolationException.class)
     public ResponseEntity<ErrorVo> handleConstraintViolationException(ConstraintViolationException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Error validating field", e);
         List<ConstraintViolation<?>> errors = e.getConstraintViolations().stream().collect(Collectors.toList());
         ErrorVo errorVo = ErrorVo.builder()
                 .message(errors.get(0).getMessage())
@@ -100,7 +100,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(value = JsonProcessingException.class)
     public ResponseEntity<ErrorVo> handleJsonProcessingException(JsonProcessingException e) {
-        log.error("Unable to apply patch to entity via dto", e);
+        log.error("Unable to process JSON", e);
         ErrorVo errorVo = ErrorVo.builder()
                 .message(e.getMessage())
                 .build();

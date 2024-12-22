@@ -6,7 +6,6 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMSearchDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
@@ -27,6 +26,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import java.io.IOException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -88,7 +89,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     }
             )
     })
-    public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response);
+    public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response) throws IOException;
 
     @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")
     @ApiResponses(value = {

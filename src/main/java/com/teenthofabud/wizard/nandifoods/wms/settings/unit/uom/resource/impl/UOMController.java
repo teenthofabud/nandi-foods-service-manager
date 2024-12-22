@@ -7,6 +7,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.CSVDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
@@ -31,9 +32,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.springframework.util.StreamUtils.BUFFER_SIZE;
 
 @Slf4j
 @RestController
@@ -129,28 +134,29 @@ public class UOMController implements UOMAPI {
     @GetMapping(path = "/download",
             produces = { MediaType.APPLICATION_PDF_VALUE, HttpMediaType.TEXT_CSV })
     @Override
-    public StreamingResponseBody downloadAllUOM(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) {
+    public StreamingResponseBody downloadAllUOM(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException {
         IllegalArgumentException e = new IllegalArgumentException("Accept type header should be either " + MediaType.APPLICATION_PDF_VALUE + " or " + HttpMediaType.TEXT_CSV);
         if(!StringUtils.hasText(accept)) {
             throw e;
         }
         switch (accept) {
-            case MediaType.APPLICATION_PDF_VALUE : return null;
-            case HttpMediaType.TEXT_CSV : return null;
+            case MediaType.APPLICATION_PDF_VALUE : throw new UnsupportedOperationException("PDF downloads not yet supported");
+            case HttpMediaType.TEXT_CSV :
+                CSVDto csvDto = uomService.downloadAllUOMInCSV();
+                response.setContentType(accept);
+                response.setHeader(
+                        HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + csvDto.getFileName() + "\"");
+
+                return outputStream -> {
+                    int bytesRead;
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    InputStream inputStream = csvDto.getRawContent();
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                };
             default: throw e;
         }
-        /*response.setContentType(fileInfo.getContentType());
-        response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileInfo.getFilename() + "\"");
-
-        return outputStream -> {
-            int bytesRead;
-            byte[] buffer = new byte[BUFFER_SIZE];
-            InputStream inputStream = fileInfo.getInputStream();
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        };*/
     }
 
     @DeleteMapping(path = "/{id}")

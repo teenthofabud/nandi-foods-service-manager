@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo;
 
+import com.opencsv.bean.CsvBindByName;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassVo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 public class UOMVo extends UnitClassVo {
 
+    @CsvBindByName(column = "Bulk Code")
     private String bulkCode;
 
     private Boolean isInventory;

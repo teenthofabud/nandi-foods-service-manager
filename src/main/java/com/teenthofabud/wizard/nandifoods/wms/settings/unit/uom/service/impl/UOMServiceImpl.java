@@ -2,13 +2,11 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
@@ -25,7 +23,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.repository.UOMPUL
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMHULinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMPULinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMPageDtoToPageableConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.MetricSystemContext;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
@@ -50,7 +47,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkag
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Javers;
@@ -64,12 +60,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -101,6 +95,8 @@ public class UOMServiceImpl implements UOMService {
     private Javers javers;
 
     private List<String> searchFields;
+    private String fileNameDateFormat;
+    private String csvFileNameFormat;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -123,7 +119,9 @@ public class UOMServiceImpl implements UOMService {
                           UOMPULinkageJpaRepository uomPULinkageJpaRepository,
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
-                          @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields) {
+                          @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
+                          @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
+                          @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
@@ -145,6 +143,8 @@ public class UOMServiceImpl implements UOMService {
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
         this.searchFields = searchFields;
+        this.fileNameDateFormat = fileNameDateFormat;
+        this.csvFileNameFormat = csvFileNameFormat;
     }
 
     /*private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
@@ -407,12 +407,14 @@ public class UOMServiceImpl implements UOMService {
                 .withQuotechar('\'')
                 .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
                 .build();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
+        String csvFileName = String.format(csvFileNameFormat, dtf.format(LocalDateTime.now()));
         try {
             sbc.write(uomVoList);
             streamWriter.flush();
             CSVDto csvDto = CSVDto.builder()
-                    .fileName("UOMList.csv")
-                    .rawContent(stream.toByteArray())
+                    .fileName(csvFileName)
+                    .rawContent(new ByteArrayInputStream(stream.toByteArray()))
                     .build();
             return csvDto;
         } catch (CsvDataTypeMismatchException e) {
