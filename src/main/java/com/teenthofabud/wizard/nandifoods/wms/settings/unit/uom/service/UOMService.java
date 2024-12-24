@@ -26,6 +26,6 @@ public interface UOMService {
 
     public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto);
 
-    public CSVDto downloadAllUOMInCSV() throws IOException;
+    public CSVDto downloadUOMAsCSV() throws IOException;
 
 }

@@ -76,7 +76,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "fromUOM",
-            cascade = CascadeType.ALL,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
@@ -86,7 +86,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "toUOM",
-            cascade = CascadeType.ALL,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
@@ -96,7 +96,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "uom",
-            cascade = CascadeType.ALL,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
             orphanRemoval = true
     )
     @Getter
@@ -105,7 +105,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "uom",
-            cascade = CascadeType.ALL,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
             orphanRemoval = true
     )
     @Getter

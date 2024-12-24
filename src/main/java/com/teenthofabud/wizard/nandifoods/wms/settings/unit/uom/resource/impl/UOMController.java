@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -139,24 +140,28 @@ public class UOMController implements UOMAPI {
         if(!StringUtils.hasText(accept)) {
             throw e;
         }
+        InputStream is = new ByteArrayInputStream(new byte[BUFFER_SIZE]);
+        String fileName = "";
         switch (accept) {
             case MediaType.APPLICATION_PDF_VALUE : throw new UnsupportedOperationException("PDF downloads not yet supported");
             case HttpMediaType.TEXT_CSV :
-                CSVDto csvDto = uomService.downloadAllUOMInCSV();
-                response.setContentType(accept);
-                response.setHeader(
-                        HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + csvDto.getFileName() + "\"");
-
-                return outputStream -> {
-                    int bytesRead;
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    InputStream inputStream = csvDto.getRawContent();
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-                };
+                CSVDto csvDto = uomService.downloadUOMAsCSV();
+                is = csvDto.getRawContent();
+                fileName = csvDto.getFileName();
+                break;
             default: throw e;
         }
+        response.setContentType(accept);
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
+        InputStream finalIs = is;
+        return outputStream -> {
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = finalIs.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        };
     }
 
     @DeleteMapping(path = "/{id}")

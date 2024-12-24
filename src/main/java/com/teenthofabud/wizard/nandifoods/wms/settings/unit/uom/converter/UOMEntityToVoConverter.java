@@ -45,7 +45,6 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
                 .effectiveDate(source.getEffectiveDate())
                 .modifiedDate(Optional.ofNullable(Optional.ofNullable(source.getAudit().getModificationTime()).map(f -> f.toLocalDate()).orElse(null)))
                 .updatedBy(source.getAudit().getModifiedBy())
-                .updatedBy(source.getAudit().getModifiedBy())
                 .isInventory(source.getIsInventory())
                 .isProduction(source.getIsProduction())
                 .isSales(source.getIsSales())

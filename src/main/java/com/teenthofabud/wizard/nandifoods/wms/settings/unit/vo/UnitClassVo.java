@@ -59,8 +59,6 @@ public abstract class UnitClassVo {
     @JsonFormat(pattern = "yyyy-MM-dd")
     protected Optional<LocalDate> modifiedDate;
 
-    protected LocalDate lastUpdated;
-
     protected String updatedBy;
 
 }
