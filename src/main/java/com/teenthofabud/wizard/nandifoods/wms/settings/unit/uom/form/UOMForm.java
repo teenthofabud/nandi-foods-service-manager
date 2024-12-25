@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassForm;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -41,9 +42,9 @@ public class UOMForm extends UnitClassForm {
     private Boolean isProduction;
 
     @Builder.Default
-    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<UnitClassSelfLinkageForm>> linkedUOMs = Optional.empty();
+    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<@Valid UnitClassSelfLinkageForm>> linkedUOMs = Optional.empty();
 
     @Builder.Default
-    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<UnitClassCrossLinkageForm>> linkedPUHUs = Optional.empty();
+    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<@Valid UnitClassCrossLinkageForm>> linkedPUHUs = Optional.empty();
 
 }
