@@ -290,15 +290,17 @@ public class UOMServiceImpl implements UOMService {
             f.setToUOM(null);
         });
         fromUOMs.stream().forEach(f -> from.removeConversionFromUOM(f));
-        fromUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
+        log.debug("Removed all UOM links that UOM with code: {} is related to", from.getCode());
+        //fromUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
         List<UOMSelfLinkageEntity> toUOMs = new CopyOnWriteArrayList<>(from.getToUOMs());
         toUOMs.stream().forEach(f -> {
             f.setFromUOM(null);
             f.setToUOM(null);
         });
         toUOMs.stream().forEach(f -> from.removeConversionToUOM(f));
-        toUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
-        uomJpaRepository.save(from);
+        log.debug("Removed all UOM links that UOM with code: {} is related with", from.getCode());
+        //toUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
+        //uomJpaRepository.save(from);
         log.info("Removed all UOM self links from UOM with code: {}", from.getCode());
     }
 

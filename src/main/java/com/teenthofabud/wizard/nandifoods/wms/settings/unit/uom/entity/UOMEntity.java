@@ -77,8 +77,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "fromUOM",
-            cascade = { CascadeType.ALL },
-            //cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
+            cascade = { CascadeType.DETACH },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
@@ -88,8 +87,7 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "toUOM",
-            //cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
-            cascade = { CascadeType.ALL },
+            cascade = { CascadeType.DETACH },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
