@@ -7,6 +7,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity.UnitClassLink
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.ObjectUtils;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 @ToString(onlyExplicitlyIncluded = true)
 @Entity(name = "UOMSelfLinkageEntity")
 @Table(name = "uom_self_link")
+@DynamicUpdate
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditListener.class)
@@ -93,5 +95,15 @@ public class UOMSelfLinkageEntity implements Auditable {
         }
         this.id.setToId(toId);
         return this;
+    }
+
+    public void setToUOM() {
+        this.toUOM.removeConversionToUOM(this); //SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
+        this.toUOM = null;
+    }
+
+    public void setFromUOM() {
+        this.toUOM.removeConversionFromUOM(this); //SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
+        this.toUOM = null;
     }
 }

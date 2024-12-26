@@ -1,9 +1,8 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import lombok.*;
 
 import java.io.InputStream;
-import java.util.Optional;
 
 @EqualsAndHashCode
 @ToString
@@ -12,7 +11,7 @@ import java.util.Optional;
 @Builder
 @Getter
 @Setter
-public class CSVDto {
+public class FileDto {
 
     private String fileName;
 

@@ -1,6 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.CSVDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
@@ -26,6 +26,6 @@ public interface UOMService {
 
     public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto);
 
-    public CSVDto downloadUOMAsCSV() throws IOException;
+    public FileDto downloadUOMAsCSV() throws IOException;
 
 }

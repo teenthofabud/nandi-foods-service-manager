@@ -7,7 +7,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.CSVDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
@@ -33,6 +33,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -140,21 +141,19 @@ public class UOMController implements UOMAPI {
         if(!StringUtils.hasText(accept)) {
             throw e;
         }
-        InputStream is = new ByteArrayInputStream(new byte[BUFFER_SIZE]);
-        String fileName = "";
+        Optional<FileDto> optionalFileDto = Optional.empty();
         switch (accept) {
             case MediaType.APPLICATION_PDF_VALUE : throw new UnsupportedOperationException("PDF downloads not yet supported");
             case HttpMediaType.TEXT_CSV :
-                CSVDto csvDto = uomService.downloadUOMAsCSV();
-                is = csvDto.getRawContent();
-                fileName = csvDto.getFileName();
+                optionalFileDto = Optional.ofNullable(uomService.downloadUOMAsCSV());
                 break;
             default: throw e;
         }
+        FileDto fileDto = optionalFileDto.get();
         response.setContentType(accept);
         response.setHeader(
-                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
-        InputStream finalIs = is;
+                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileDto.getFileName() + "\"");
+        InputStream finalIs = fileDto.getRawContent();
         return outputStream -> {
             int bytesRead;
             byte[] buffer = new byte[BUFFER_SIZE];

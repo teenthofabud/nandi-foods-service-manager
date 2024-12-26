@@ -87,7 +87,10 @@ public interface UOMAPI extends BaseUnitClassAPI {
                             @Content(mediaType = HttpMediaType.TEXT_CSV),
                             @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)
                     }
-            )
+            ),
+            @ApiResponse(
+                    responseCode = "406", description = "Media type not accepted",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response) throws IOException;
 

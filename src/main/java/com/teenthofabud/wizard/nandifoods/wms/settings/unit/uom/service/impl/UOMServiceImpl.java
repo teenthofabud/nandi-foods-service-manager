@@ -10,6 +10,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.entity.HUEntity;
@@ -25,19 +26,19 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCro
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.CSVDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.projections.UOMSummaryProjection;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.*;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMCrossLinkageJpaRepository;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJpaRepository;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSummaryVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import jakarta.validation.Valid;
@@ -53,6 +54,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
@@ -61,6 +63,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -163,9 +166,7 @@ public class UOMServiceImpl implements UOMService {
     private void createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form) {
         UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
         uomMeasuredValuesEntity.setUom(uomEntity);// because of bidirectional one to many strategy by vlad mihalcea the entire JPA relationship needs to be managed by hand
-        uomMeasuredValuesEntity = uomMeasuredValuesJpaRepository.save(uomMeasuredValuesEntity);
         uomEntity.addUOMeasuredValue(uomMeasuredValuesEntity);
-        uomEntity = uomJpaRepository.save(uomEntity);
         log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), form.getMetricSystem(), uomMeasuredValuesEntity.getId());
     }
 
@@ -181,13 +182,8 @@ public class UOMServiceImpl implements UOMService {
             }
             UOMEntity to = optionalTo.get();
             UOMSelfLinkageEntity uomSelfLinkageEntity = unitClassSelfLinkageToUOMSelfLinkageEntityReducer.reduce(e, from, to);
-            uomSelfLinkageEntity = uomSelfLinkageJpaRepository.save(uomSelfLinkageEntity);
             from.addConversionFromUOM(uomSelfLinkageEntity);
             from.addConversionToUOM(uomSelfLinkageEntity);
-            from = uomJpaRepository.save(from);
-            /*to.addConversionFromUOM(uomSelfLinkageEntity);
-            to.addConversionToUOM(uomSelfLinkageEntity);
-            to = uomJpaRepository.save(to);*/
             log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUOM().getCode());
         }
     }
@@ -199,9 +195,7 @@ public class UOMServiceImpl implements UOMService {
         }
         PUEntity to = optionalTo.get();
         UOMPULinkageEntity uomPULinkageEntity = unitClassCrossLinkageToUOMPULinkageEntityReducer.reduce(e, from, to);
-        uomPULinkageEntity = uomPULinkageJpaRepository.save(uomPULinkageEntity);
         from.addUOMPULinkage(uomPULinkageEntity);
-        from = uomJpaRepository.save(from);
         log.debug("UOM with code: {} linked to PU with code: {}", from.getCode(), to.getCode());
     }
 
@@ -212,9 +206,9 @@ public class UOMServiceImpl implements UOMService {
         }
         HUEntity to = optionalTo.get();
         UOMHULinkageEntity uomHULinkageEntity = unitClassCrossLinkageToUOMHULinkageEntityReducer.reduce(e, from, to);
-        uomHULinkageEntity = uomHULinkageJpaRepository.save(uomHULinkageEntity);
+        //uomHULinkageEntity = uomHULinkageJpaRepository.save(uomHULinkageEntity);
         from.addUOMHULinkage(uomHULinkageEntity);
-        from = uomJpaRepository.save(from);
+        //from = uomJpaRepository.save(from);
         log.debug("UOM with code: {} linked to HU with code: {}", from.getCode(), to.getCode());
     }
 
@@ -238,7 +232,7 @@ public class UOMServiceImpl implements UOMService {
         return unitClassMeasuredValuesVo;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public UOMVo createNewUOM(UOMForm form) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(form.getCode());
@@ -248,8 +242,6 @@ public class UOMServiceImpl implements UOMService {
 
         // Save UOM
         final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
-        uomJpaRepository.save(uomEntity);
-        log.debug("UOM saved with id: {}", uomEntity.getId());
 
         // Save measured values for all metric systems
         form.getMeasuredValues().stream().forEach(f -> createNewUOMMeasuredValues(uomEntity, f));
@@ -260,9 +252,11 @@ public class UOMServiceImpl implements UOMService {
         // Save linked PU/HU
         crossLink(uomEntity, form.getLinkedPUHUs());
 
+        uomJpaRepository.save(uomEntity);
+        log.info("UOM saved with id: {}", uomEntity.getId());
+
         // Prepare UOM for display
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
-        log.info("Saved UOMEntity with id: {}", uomEntity.getId());
         return uomVo;
     }
 
@@ -289,7 +283,41 @@ public class UOMServiceImpl implements UOMService {
         return uomVo;
     }
 
-    @Transactional
+    private void unlinkSelf(UOMEntity from) {
+        List<UOMSelfLinkageEntity> fromUOMs = new CopyOnWriteArrayList<>(from.getFromUOMs());
+        fromUOMs.stream().forEach(f -> {
+            f.setFromUOM(null);
+            f.setToUOM(null);
+        });
+        fromUOMs.stream().forEach(f -> from.removeConversionFromUOM(f));
+        fromUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
+        List<UOMSelfLinkageEntity> toUOMs = new CopyOnWriteArrayList<>(from.getToUOMs());
+        toUOMs.stream().forEach(f -> {
+            f.setFromUOM(null);
+            f.setToUOM(null);
+        });
+        toUOMs.stream().forEach(f -> from.removeConversionToUOM(f));
+        toUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
+        uomJpaRepository.save(from);
+        log.info("Removed all UOM self links from UOM with code: {}", from.getCode());
+    }
+
+    private void unlinkCross(UOMEntity from) {
+        for(UOMPULinkageEntity e : from.getPuLinks()) {
+            from.removeUOMPULinkage(e);
+            log.debug("UOM with code: {} unlinked from PU with code: {}", from.getCode(), e.getPu().getCode());
+            uomPULinkageJpaRepository.delete(e);
+        }
+        for(UOMHULinkageEntity e : from.getHuLinks()) {
+            from.removeUOMHULinkage(e);
+            log.debug("UOM with code: {} unlinked from HU with code: {}", from.getCode(), e.getHu().getCode());
+            uomHULinkageJpaRepository.delete(e);
+        }
+        uomJpaRepository.save(from);
+        log.info("Removed all PU and HU links from UOM with code: {}", from.getCode());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void deleteExistingUOMByCode(String code) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
@@ -298,6 +326,9 @@ public class UOMServiceImpl implements UOMService {
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
+        // unlink measured values, self, pu hu
+        unlinkSelf(uomEntity);
+        unlinkCross(uomEntity);
         uomJpaRepository.delete(uomEntity);
         log.debug("UOM deleted with code: {}", uomEntity.getCode());
     }
@@ -407,7 +438,7 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public CSVDto downloadUOMAsCSV() throws IOException {
+    public FileDto downloadUOMAsCSV() throws IOException {
         //Writer writer = new StringWriter();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Writer streamWriter = new OutputStreamWriter(stream);
@@ -427,11 +458,11 @@ public class UOMServiceImpl implements UOMService {
             sbc.write(uomVoList);
             //sbc.write(uomSummaryVoList);
             streamWriter.flush();
-            CSVDto csvDto = CSVDto.builder()
+            FileDto fileDto = FileDto.builder()
                     .fileName(csvFileName)
                     .rawContent(new ByteArrayInputStream(stream.toByteArray()))
                     .build();
-            return csvDto;
+            return fileDto;
         } catch (CsvDataTypeMismatchException e) {
             throw new IllegalArgumentException("CSV bean field not configured properly", e);
         } catch (CsvRequiredFieldEmptyException e) {

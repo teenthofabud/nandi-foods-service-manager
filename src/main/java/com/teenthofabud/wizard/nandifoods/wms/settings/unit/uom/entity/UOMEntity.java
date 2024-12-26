@@ -12,6 +12,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
@@ -76,7 +77,8 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "fromUOM",
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
+            cascade = { CascadeType.ALL },
+            //cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
@@ -86,7 +88,8 @@ public class UOMEntity extends UnitClassEntity {
 
     @OneToMany(
             mappedBy = "toUOM",
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
+            //cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH },
+            cascade = { CascadeType.ALL },
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
@@ -124,7 +127,7 @@ public class UOMEntity extends UnitClassEntity {
 
     public UOMMeasuredValuesEntity addUOMeasuredValue(UOMMeasuredValuesEntity uomMeasuredValue) {
         if(ObjectUtils.isEmpty(this.uomMeasuredValues)) {
-            this.uomMeasuredValues = new ArrayList<>();
+            this.uomMeasuredValues = new CopyOnWriteArrayList<>();
         }
         this.uomMeasuredValues.add(uomMeasuredValue);
         return uomMeasuredValue;
@@ -138,7 +141,7 @@ public class UOMEntity extends UnitClassEntity {
 
     public UOMSelfLinkageEntity addConversionToUOM(UOMSelfLinkageEntity to) {
         if(ObjectUtils.isEmpty(this.toUOMs)) {
-            this.toUOMs = new ArrayList<>();
+            this.toUOMs = new CopyOnWriteArrayList<>();
         }
         this.toUOMs.add(to);
         return to;
@@ -150,9 +153,16 @@ public class UOMEntity extends UnitClassEntity {
         }
     }
 
+    public void removeConversionToUOM() {
+        if(!ObjectUtils.isEmpty(this.toUOMs)) {
+            this.toUOMs.forEach(f -> f.setToUOM()); // SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
+            this.toUOMs.clear();
+        }
+    }
+
     public UOMSelfLinkageEntity addConversionFromUOM(UOMSelfLinkageEntity from) {
         if(ObjectUtils.isEmpty(this.fromUOMs)) {
-            this.fromUOMs = new ArrayList<>();
+            this.fromUOMs = new CopyOnWriteArrayList<>();
         }
         this.fromUOMs.add(from);
         return from;
@@ -164,9 +174,16 @@ public class UOMEntity extends UnitClassEntity {
         }
     }
 
+    public void removeConversionFromUOM() {
+        if(!ObjectUtils.isEmpty(this.fromUOMs)) {
+            this.fromUOMs.forEach(f -> f.setFromUOM()); // SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
+            this.fromUOMs.clear();
+        }
+    }
+
     public UOMHULinkageEntity addUOMHULinkage(UOMHULinkageEntity uomHULinkage) {
         if(ObjectUtils.isEmpty(this.huLinks)) {
-            this.huLinks = new ArrayList<>();
+            this.huLinks = new CopyOnWriteArrayList<>();
         }
         this.huLinks.add(uomHULinkage);
         return uomHULinkage;
@@ -178,9 +195,15 @@ public class UOMEntity extends UnitClassEntity {
         }
     }
 
+    public void removeUOMHULinkage() {
+        if(!ObjectUtils.isEmpty(this.huLinks)) {
+            this.huLinks.clear();
+        }
+    }
+
     public UOMPULinkageEntity addUOMPULinkage(UOMPULinkageEntity uomPULinkage) {
         if(ObjectUtils.isEmpty(this.puLinks)) {
-            this.puLinks = new ArrayList<>();
+            this.puLinks = new CopyOnWriteArrayList<>();
         }
         this.puLinks.add(uomPULinkage);
         return uomPULinkage;
@@ -189,6 +212,12 @@ public class UOMEntity extends UnitClassEntity {
     public void removeUOMPULinkage(UOMPULinkageEntity uomPULinkage) {
         if(!ObjectUtils.isEmpty(this.puLinks)) {
             this.puLinks.remove(uomPULinkage);
+        }
+    }
+
+    public void removeUOMPULinkage() {
+        if(!ObjectUtils.isEmpty(this.puLinks)) {
+            this.puLinks.clear();
         }
     }
 
