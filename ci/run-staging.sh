@@ -1,4 +1,6 @@
-export VERSION=0.1.4-RELEASE
+export ALL_VERSIONS=$(echo $(awk -F '[<>]' '/version/{print $3}' pom.xml))
+
+export VERSION=$(echo $ALL_VERSIONS | cut -d' ' -f2)
 
 docker rm -vf nandi-foods-service-manager
 
