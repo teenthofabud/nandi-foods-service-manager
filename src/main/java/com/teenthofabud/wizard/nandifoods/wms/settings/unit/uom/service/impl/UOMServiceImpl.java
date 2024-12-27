@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -151,18 +150,6 @@ public class UOMServiceImpl implements UOMService {
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
-    /*private UOMEntity createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form, MetricSystem metricSystem) {
-        MetricSystemContext.set(metricSystem);
-        UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
-        MetricSystemContext.clear();
-        uomMeasuredValuesEntity.setUom(uomEntity);// because of bidirectional one to many strategy by vlad mihalcea the entire JPA relationship needs to be managed by hand
-        uomMeasuredValuesEntity = uomMeasuredValuesJpaRepository.save(uomMeasuredValuesEntity);
-        uomEntity.addUOMeasuredValue(uomMeasuredValuesEntity);
-        uomEntity = uomJpaRepository.save(uomEntity);
-        log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), metricSystem, uomMeasuredValuesEntity.getId());
-        return uomEntity;
-    }*/
-
     private void createNewUOMMeasuredValues(UOMEntity uomEntity, UnitClassMeasuredValuesForm form) {
         UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
         uomMeasuredValuesEntity.setUom(uomEntity);// because of bidirectional one to many strategy by vlad mihalcea the entire JPA relationship needs to be managed by hand
@@ -183,8 +170,7 @@ public class UOMServiceImpl implements UOMService {
             UOMEntity to = optionalTo.get();
             UOMSelfLinkageEntity uomSelfLinkageEntity = unitClassSelfLinkageToUOMSelfLinkageEntityReducer.reduce(e, from, to);
             from.addConversionFromUOM(uomSelfLinkageEntity);
-            from.addConversionToUOM(uomSelfLinkageEntity);
-            log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUOM().getCode());
+            log.debug("UOM with code: {} linked to UOM with code: {}", from.getCode(), uomSelfLinkageEntity.getToUom().getCode());
         }
     }
 
@@ -246,6 +232,8 @@ public class UOMServiceImpl implements UOMService {
         // Save measured values for all metric systems
         form.getMeasuredValues().stream().forEach(f -> createNewUOMMeasuredValues(uomEntity, f));
 
+        uomJpaRepository.save(uomEntity);
+
         // Save linked UOMs
         selfLink(uomEntity, form.getLinkedUOMs());
 
@@ -273,34 +261,33 @@ public class UOMServiceImpl implements UOMService {
         List<UOMSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream()
                 .map(e -> uomSelfLinkageEntityToVoConverter.convert(e))
                 .collect(Collectors.toList());
-        UOMSelfLinkageContext.setCascadeLevelContext(true);
-        List<UOMSelfLinkageVo> toVos = uomEntity.getToUOMs().stream()
-                .map(e -> uomSelfLinkageEntityToVoConverter.convert(e))
-                .collect(Collectors.toList());
-        UOMSelfLinkageContext.clearCascadeLevelContext();
-        List<UOMSelfLinkageVo> uomSelfLinkageVos = Stream.concat(fromVos.stream(), toVos.stream()).collect(Collectors.toList());
-        uomVo.setSelfLinksTo(uomSelfLinkageVos);
+        log.debug("Retrieved all linked UOMs to this UOM with code: {}", uomEntity.getCode());
+        uomVo.setSelfLinksTo(fromVos);
+        log.info("Details available for UOM with code: {}", uomEntity.getCode());
         return uomVo;
+    }
+
+    private void removeMeasuredValues(UOMEntity from) {
+        List<UOMMeasuredValuesEntity> measuredValuesEntityList = new CopyOnWriteArrayList<>(from.getUomMeasuredValues());
+        measuredValuesEntityList.stream().forEach(f -> {
+            f.setUom(null);
+            from.removeUOMMeasuredValue(f);
+        });
+        uomMeasuredValuesJpaRepository.deleteByUomId(from.getId());
+        log.debug("Removed all measured values for UOM with code: {}", from.getCode());
     }
 
     private void unlinkSelf(UOMEntity from) {
         List<UOMSelfLinkageEntity> fromUOMs = new CopyOnWriteArrayList<>(from.getFromUOMs());
         fromUOMs.stream().forEach(f -> {
-            f.setFromUOM(null);
-            f.setToUOM(null);
+            f.setFromUom(null);
+            f.setToUom(null);
+            from.removeConversionFromUOM(f);
         });
-        fromUOMs.stream().forEach(f -> from.removeConversionFromUOM(f));
+        uomSelfLinkageJpaRepository.deleteByFromUomId(from.getId());
         log.debug("Removed all UOM links that UOM with code: {} is related to", from.getCode());
-        //fromUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
-        List<UOMSelfLinkageEntity> toUOMs = new CopyOnWriteArrayList<>(from.getToUOMs());
-        toUOMs.stream().forEach(f -> {
-            f.setFromUOM(null);
-            f.setToUOM(null);
-        });
-        toUOMs.stream().forEach(f -> from.removeConversionToUOM(f));
+        uomSelfLinkageJpaRepository.deleteByToUomId(from.getId());
         log.debug("Removed all UOM links that UOM with code: {} is related with", from.getCode());
-        //toUOMs.stream().forEach(f -> uomSelfLinkageJpaRepository.delete(f));
-        //uomJpaRepository.save(from);
         log.info("Removed all UOM self links from UOM with code: {}", from.getCode());
     }
 
@@ -328,10 +315,12 @@ public class UOMServiceImpl implements UOMService {
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
+        // remove measured values
+        removeMeasuredValues(uomEntity);
         // unlink measured values, self, pu hu
         unlinkSelf(uomEntity);
         unlinkCross(uomEntity);
-        uomJpaRepository.delete(uomEntity);
+        uomJpaRepository.deleteAllInBatch(List.of(uomEntity));
         log.debug("UOM deleted with code: {}", uomEntity.getCode());
     }
 

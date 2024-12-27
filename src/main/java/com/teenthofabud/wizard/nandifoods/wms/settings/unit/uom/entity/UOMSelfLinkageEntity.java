@@ -3,23 +3,21 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
 import com.teenthofabud.wizard.nandifoods.wms.audit.AuditListener;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity.UnitClassLinkageId;
 import jakarta.persistence.*;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
+import org.hibernate.annotations.*;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Entity(name = "UOMSelfLinkageEntity")
 @Table(name = "uom_self_link")
 @DynamicUpdate
+@DynamicInsert
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EntityListeners(AuditListener.class)
 @org.hibernate.annotations.Cache(
         usage = CacheConcurrencyStrategy.READ_WRITE
@@ -31,10 +29,10 @@ public class UOMSelfLinkageEntity implements Auditable {
     @Embedded
     protected Audit audit;
 
-    @EmbeddedId
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @ToString.Include
-    protected UnitClassLinkageId id;
+    protected Long id;
 
     @Column(nullable = false)
     @EqualsAndHashCode.Include
@@ -48,62 +46,13 @@ public class UOMSelfLinkageEntity implements Auditable {
     protected Short version;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("fromId")
-    @JoinColumn(name = "from_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "conversion_from_uom_fk"))
-    protected UOMEntity fromUOM;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "from_id", foreignKey = @ForeignKey(name = "conversion_from_uom_fk"))
+    protected UOMEntity fromUom;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("toId")
-    @JoinColumn(name = "to_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "conversion_to_uom_fk"))
-    protected UOMEntity toUOM;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "to_id",  foreignKey = @ForeignKey(name = "conversion_to_uom_fk"))
+    protected UOMEntity toUom;
 
-    @Builder
-    public UOMSelfLinkageEntity(Integer quantity, UOMEntity fromUOM, UOMEntity toUOM) {
-        this.quantity = quantity;
-        this.fromUOM = fromUOM;
-        this.toUOM = toUOM;
-        this.id = UnitClassLinkageId.builder()
-                .fromId(fromUOM.getId())
-                .toId(toUOM.getId())
-                .build();
-        this.audit = Audit.builder().build();
-    }
-
-    public UOMSelfLinkageEntity setFromUOM(UOMEntity fromUOM) {
-        this.fromUOM = fromUOM;
-        return this;
-    }
-
-
-    public UOMSelfLinkageEntity setToUOM(UOMEntity toUOM) {
-        this.toUOM = toUOM;
-        return this;
-    }
-
-    public UOMSelfLinkageEntity setFromUOMId(Long fromId) {
-        if(ObjectUtils.isEmpty(this.id)) {
-            this.id = UnitClassLinkageId.builder().build();
-        }
-        this.id.setFromId(fromId);
-        return this;
-    }
-
-
-    public UOMSelfLinkageEntity setToUOMId(Long toId) {
-        if(ObjectUtils.isEmpty(this.id)) {
-            this.id = UnitClassLinkageId.builder().build();
-        }
-        this.id.setToId(toId);
-        return this;
-    }
-
-    public void setToUOM() {
-        this.toUOM.removeConversionToUOM(this); //SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
-        this.toUOM = null;
-    }
-
-    public void setFromUOM() {
-        this.toUOM.removeConversionFromUOM(this); //SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
-        this.toUOM = null;
-    }
 }

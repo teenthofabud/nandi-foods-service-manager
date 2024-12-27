@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UOMSelfLinkageJpaRepository extends JpaRepository<UOMSelfLinkageEntity, Long> {
 
+    public void deleteByFromUomId(Long id);
+    public void deleteByToUomId(Long id);
+
 }

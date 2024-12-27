@@ -4,11 +4,15 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity.UnitClassMeas
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(callSuper = true)
 @Entity(name = "UOMMeasuredValuesEntity")
 @Table(name = "uom_measured_values")
+@DynamicUpdate
+@DynamicInsert
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -17,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 public class UOMMeasuredValuesEntity extends UnitClassMeasuredValuesEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uom_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "uom_measured_values_fk"))
+    @JoinColumn(name = "uom_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "uom_measured_values_fk"))
     private UOMEntity uom;
 
 }

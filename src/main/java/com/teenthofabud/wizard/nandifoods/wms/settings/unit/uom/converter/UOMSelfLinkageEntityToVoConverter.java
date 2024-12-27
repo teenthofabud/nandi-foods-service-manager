@@ -21,7 +21,7 @@ public class UOMSelfLinkageEntityToVoConverter implements Converter<UOMSelfLinka
     public UOMSelfLinkageVo convert(UOMSelfLinkageEntity source) {
         UOMSelfLinkageVo target = UOMSelfLinkageVo.builder()
                 .to(uomEntityToVoConverter.convert(
-                        UOMSelfLinkageContext.getCascadeLevelContext() ? source.getFromUOM() : source.getToUOM()))
+                        UOMSelfLinkageContext.getCascadeLevelContext() ? source.getFromUom() : source.getToUom()))
                 .quantity(source.getQuantity())
                 .build();
         return target;

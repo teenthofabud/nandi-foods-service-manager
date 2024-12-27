@@ -7,10 +7,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -18,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Entity(name = "UOMEntity")
 @DynamicUpdate
+@DynamicInsert
 @Table(name = "uom",
         indexes = {
                 @Index(columnList = "short_name", name = "idx_uom_short_name"),
@@ -76,24 +77,13 @@ public class UOMEntity extends UnitClassEntity {
     private Boolean isProduction;
 
     @OneToMany(
-            mappedBy = "fromUOM",
-            cascade = { CascadeType.DETACH },
-            orphanRemoval = true,
-            fetch = FetchType.EAGER
+            mappedBy = "fromUom",
+            cascade = { CascadeType.ALL },
+            orphanRemoval = true
     )
     @Getter
     @ToString.Include
     private List<UOMSelfLinkageEntity> fromUOMs;
-
-    @OneToMany(
-            mappedBy = "toUOM",
-            cascade = { CascadeType.DETACH },
-            orphanRemoval = true,
-            fetch = FetchType.EAGER
-    )
-    @Getter
-    @ToString.Include
-    private List<UOMSelfLinkageEntity> toUOMs;
 
     @OneToMany(
             mappedBy = "uom",
@@ -137,45 +127,18 @@ public class UOMEntity extends UnitClassEntity {
         }
     }
 
-    public UOMSelfLinkageEntity addConversionToUOM(UOMSelfLinkageEntity to) {
-        if(ObjectUtils.isEmpty(this.toUOMs)) {
-            this.toUOMs = new CopyOnWriteArrayList<>();
-        }
-        this.toUOMs.add(to);
-        return to;
-    }
-
-    public void removeConversionToUOM(UOMSelfLinkageEntity to) {
-        if(!ObjectUtils.isEmpty(this.toUOMs)) {
-            this.toUOMs.remove(to);
-        }
-    }
-
-    public void removeConversionToUOM() {
-        if(!ObjectUtils.isEmpty(this.toUOMs)) {
-            this.toUOMs.forEach(f -> f.setToUOM()); // SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
-            this.toUOMs.clear();
-        }
-    }
-
     public UOMSelfLinkageEntity addConversionFromUOM(UOMSelfLinkageEntity from) {
         if(ObjectUtils.isEmpty(this.fromUOMs)) {
             this.fromUOMs = new CopyOnWriteArrayList<>();
         }
         this.fromUOMs.add(from);
+        from.setFromUom(this);
         return from;
     }
 
     public void removeConversionFromUOM(UOMSelfLinkageEntity from) {
         if(!ObjectUtils.isEmpty(this.fromUOMs)) {
             this.fromUOMs.remove(from);
-        }
-    }
-
-    public void removeConversionFromUOM() {
-        if(!ObjectUtils.isEmpty(this.fromUOMs)) {
-            this.fromUOMs.forEach(f -> f.setFromUOM()); // SYNCHRONIZING THE OTHER SIDE OF RELATIONSHIP
-            this.fromUOMs.clear();
         }
     }
 

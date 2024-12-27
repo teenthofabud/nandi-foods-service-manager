@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class UnitClassSelfLinkageToUOMSelfLinkageEntityReducer {
     public UOMSelfLinkageEntity reduce(UnitClassSelfLinkageForm source, UOMEntity from, UOMEntity to) {
         UOMSelfLinkageEntity target = UOMSelfLinkageEntity.builder()
-                .fromUOM(from)
-                .toUOM(to)
+                .fromUom(from)
+                .toUom(to)
                 .quantity(source.getQuantity())
                 .build();
         return target;
