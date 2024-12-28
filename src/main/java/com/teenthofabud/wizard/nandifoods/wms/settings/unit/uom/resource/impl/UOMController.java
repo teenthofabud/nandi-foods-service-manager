@@ -143,7 +143,9 @@ public class UOMController implements UOMAPI {
         }
         Optional<FileDto> optionalFileDto = Optional.empty();
         switch (accept) {
-            case MediaType.APPLICATION_PDF_VALUE : throw new UnsupportedOperationException("PDF downloads not yet supported");
+            case MediaType.APPLICATION_PDF_VALUE :
+                optionalFileDto = Optional.ofNullable(uomService.downloadUOMAsPDF());
+                break;
             case HttpMediaType.TEXT_CSV :
                 optionalFileDto = Optional.ofNullable(uomService.downloadUOMAsCSV());
                 break;

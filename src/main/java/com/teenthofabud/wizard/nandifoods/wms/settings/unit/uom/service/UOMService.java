@@ -28,4 +28,6 @@ public interface UOMService {
 
     public FileDto downloadUOMAsCSV() throws IOException;
 
+    public FileDto downloadUOMAsPDF() throws IOException;
+
 }

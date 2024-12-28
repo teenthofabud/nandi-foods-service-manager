@@ -72,6 +72,7 @@ wms:
     uom:
       fileNameFormat:
         csv: "%s-UOM_List.csv"
+        pdf: "%s-UOM_List.pdf"
         #csv: %s-%s-UOM_List.csv
       search:
         fields: id,longName,shortName,description,type

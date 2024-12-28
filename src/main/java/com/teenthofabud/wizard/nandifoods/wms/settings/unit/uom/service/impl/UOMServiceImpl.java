@@ -2,7 +2,16 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.kernel.colors.DeviceGray;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
 import com.opencsv.CSVWriter;
+import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
@@ -43,10 +52,12 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
+import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -58,13 +69,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -91,11 +103,13 @@ public class UOMServiceImpl implements UOMService {
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
     private Javers javers;
     private UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter;
+    private Reflections reflections;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
     private List<String> searchFields;
     private String fileNameDateFormat;
     private String csvFileNameFormat;
+    private String pdfFileNameFormat;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -119,10 +133,12 @@ public class UOMServiceImpl implements UOMService {
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
                           UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter,
+                          Reflections reflections,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
-                          @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat) {
+                          @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat,
+                          @Value("${wms.settings.uom.fileNameFormat.pdf}") String pdfFileNameFormat) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomFormToEntityConverter = uomFormToEntityConverter;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
@@ -144,9 +160,11 @@ public class UOMServiceImpl implements UOMService {
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
         this.uomSummaryProjectionToVoConverter = uomSummaryProjectionToVoConverter;
+        this.reflections = reflections;
         this.searchFields = searchFields;
         this.fileNameDateFormat = fileNameDateFormat;
         this.csvFileNameFormat = csvFileNameFormat;
+        this.pdfFileNameFormat = pdfFileNameFormat;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -430,7 +448,6 @@ public class UOMServiceImpl implements UOMService {
     @Transactional
     @Override
     public FileDto downloadUOMAsCSV() throws IOException {
-        //Writer writer = new StringWriter();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Writer streamWriter = new OutputStreamWriter(stream);
         CSVWriter writer = new CSVWriter(streamWriter);
@@ -459,5 +476,48 @@ public class UOMServiceImpl implements UOMService {
         } catch (CsvRequiredFieldEmptyException e) {
             throw new IllegalArgumentException("CSV bean field is empty", e);
         }
+    }
+
+    @Override
+    public FileDto downloadUOMAsPDF() throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        PdfDocument pdfDocument = new PdfDocument(new PdfWriter(stream));
+        Document doc = new Document(pdfDocument);
+
+        List<Field> fields = Stream.concat(
+                Arrays.stream(UOMVo.class.getDeclaredFields()), Arrays.stream(UOMVo.class.getSuperclass().getDeclaredFields()))
+                .filter(f -> f.isAnnotationPresent(CsvBindByName.class))
+                //.map(f -> f.getDeclaredAnnotation(CsvBindByName.class).column())
+                .collect(Collectors.toList());
+        fields.sort(Comparator.comparing(o -> o.getDeclaredAnnotation(CsvBindByName.class).column()));
+        Table table = new Table(fields.size()).useAllAvailableWidth();
+        fields.stream().forEach(f -> table.addHeaderCell(
+                new Cell().add(
+                        new Paragraph(
+                                f.getDeclaredAnnotation(CsvBindByName.class).column()))
+                        .setBackgroundColor(DeviceGray.GRAY))
+                .setTextAlignment(TextAlignment.LEFT));
+
+        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
+        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
+        uomVoList.stream().forEach(f ->
+                fields.stream().forEach(d -> {
+                try {
+                    table.addCell(new Cell().add(new Paragraph(BeanUtils.getProperty(f, d.getName()))));
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+
+        doc.add(table);
+        doc.close();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
+        String pdfFileName = String.format(pdfFileNameFormat, dtf.format(LocalDateTime.now()));
+
+        FileDto fileDto = FileDto.builder()
+                .fileName(pdfFileName)
+                .rawContent(new ByteArrayInputStream(stream.toByteArray()))
+                .build();
+        return fileDto;
     }
 }

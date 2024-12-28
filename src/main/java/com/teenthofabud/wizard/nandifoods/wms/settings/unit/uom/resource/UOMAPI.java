@@ -92,6 +92,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     responseCode = "406", description = "Media type not accepted",
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
+    @Parameter(description = "List type", name = "Accept", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
     public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response) throws IOException;
 
     @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")

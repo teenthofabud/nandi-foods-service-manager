@@ -17,7 +17,7 @@ import com.teenthofabud.wizard.nandifoods.wms.converter.OptionalStringToIntegerT
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -27,6 +27,7 @@ import org.hibernate.validator.HibernateValidator;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
 import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -89,9 +90,20 @@ public class ServiceConfiguration implements WebMvcConfigurer {
         return mapper;
     }
 
+    @Bean
+    public Reflections reflections() {
+        return new Reflections(
+                "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto",
+                "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo",
+                ClasspathHelper.forClass(UOMVo.class),
+                "com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.dto",
+                "com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.dto");
+    }
+
     public void cacheDTOTypes(ObjectMapper mapper) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         Reflections reflections = new Reflections(
                 "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto",
+                "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo",
                 "com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.dto",
                 "com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.dto");
 
