@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,11 +30,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -66,11 +66,6 @@ public class UOMController implements UOMAPI {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Override
     public ResponseEntity<Void> postUOM(@RequestBody @Valid UOMForm form) {
-        // only applicable to approve process
-        /*Set<ConstraintViolation<UnitClassSelfLinkageForm>> violations = form.getLinkedUOMs().stream().map(e -> validator.validate(e)).flatMap(e -> e.stream()).collect(Collectors.toSet());
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }*/
         UOMVo uomVo = uomService.createNewUOM(form);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -136,7 +131,7 @@ public class UOMController implements UOMAPI {
     @GetMapping(path = "/download",
             produces = { MediaType.APPLICATION_PDF_VALUE, HttpMediaType.TEXT_CSV })
     @Override
-    public StreamingResponseBody downloadAllUOM(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException {
+    public StreamingResponseBody downloadUOM(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException {
         IllegalArgumentException e = new IllegalArgumentException("Accept type header should be either " + MediaType.APPLICATION_PDF_VALUE + " or " + HttpMediaType.TEXT_CSV);
         if(!StringUtils.hasText(accept)) {
             throw e;
@@ -165,6 +160,26 @@ public class UOMController implements UOMAPI {
         };
     }
 
+    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Override
+    public StreamingResponseBody uploadUOM(@RequestHeader(name = HttpHeaders.CONTENT_TYPE) String contentType,
+                                           @RequestPart(value = "uomFile", required = false) MultipartFile uomFile) throws IOException {
+        if(ObjectUtils.isEmpty(uomFile) || uomFile.isEmpty()) {
+            throw new IllegalArgumentException("UOM file is required");
+        }
+        if(contentType.compareTo(MediaType.MULTIPART_FORM_DATA_VALUE) != 0 ) {
+            throw new IllegalArgumentException("Content-Type header should be " + MediaType.MULTIPART_FORM_DATA_VALUE);
+        }
+        if(HttpMediaType.TEXT_CSV.compareTo(uomFile.getContentType()) != 0) {
+            throw new IllegalArgumentException("Document type is not " + HttpMediaType.TEXT_CSV);
+        }
+        FileDto fileDto = FileDto.builder()
+                .fileName(uomFile.getName())
+                .rawContent(uomFile.getInputStream())
+                .build();
+        return null;
+    }
+
     @DeleteMapping(path = "/{id}")
     @Override
     public ResponseEntity<Void> deleteUOMById(@PathVariable(name = "id") String code) {
@@ -172,9 +187,8 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByLongNameWithinRange(@RequestParam(required = false) String longName,
+    public ResponseEntity<UOMPageImplVo> searchUOMByLongNameWithinRange(@RequestParam(required = false) String longName,
                                                                         @RequestParam(required = false) String sort,
                                                                         @RequestParam(required = false) Boolean ascending,
                                                                         @RequestParam(required = false) Integer offset,
@@ -189,13 +203,36 @@ public class UOMController implements UOMAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMByLongName(Optional.ofNullable(longName), uomPageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
+        return ResponseEntity.ok(uomPageImplVo);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<UOMPageImplVo> searchUOMByLongNameWithinRange(@RequestParam(required = false) String longName,
+                                                                        @RequestParam(required = false) String sort,
+                                                                        @RequestParam(required = false) String status,
+                                                                        @RequestParam(required = false) Boolean ascending,
+                                                                        @RequestParam(required = false) Integer offset,
+                                                                        @RequestParam(required = false) Long limit) {
+        UOMPageDto uomPageDto = UOMPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .status(Optional.ofNullable(status))
+                .ascending(Optional.ofNullable(ascending))
+                .build();
+        Set<ConstraintViolation<UOMPageDto>> violations = validator.validate(uomPageDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        UOMPageImplVo uomPageImplVo = uomService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 
     @PostMapping(path = "/search", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(required = false) String query,
+    public ResponseEntity<UOMPageImplVo> searchUOMByQueryParameterWithinRange(@RequestBody(required = false) String query,
                                                                                  @RequestParam(required = false) String sort,
                                                                                  @RequestParam(required = false) Boolean ascending,
                                                                                  @RequestParam(required = false) Integer offset,
@@ -215,7 +252,7 @@ public class UOMController implements UOMAPI {
         if (!optionalQueryViolations.isEmpty()) {
             throw new ConstraintViolationException(optionalQueryViolations);
         }
-        UOMPageImplVo uomPageImplVo = uomService.retrieveAllUOMWithinRange(optionalQuery, uomPageDto);
+        UOMPageImplVo uomPageImplVo = uomService.retrieveUOMWithinRange(optionalQuery, uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 

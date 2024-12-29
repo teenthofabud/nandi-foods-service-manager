@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvIgnore;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,15 +27,19 @@ public abstract class UnitClassVo {
 
     @JsonProperty("name")
     @CsvBindByName(column = "UOM Name")
+    @CsvBindByPosition(position = 2)
     protected String type;
 
     @CsvBindByName(column = "Description")
+    @CsvBindByPosition(position = 3)
     protected String description;
 
     @CsvBindByName(column = "UOM Long Name")
+    @CsvBindByPosition(position = 4)
     protected String longName;
 
     @CsvBindByName(column = "UOM Short Name")
+    @CsvBindByPosition(position = 5)
     protected String shortName;
 
     @CsvIgnore
@@ -46,6 +51,7 @@ public abstract class UnitClassVo {
 
     @JsonProperty("id")
     @CsvBindByName(column = "UOM ID")
+    @CsvBindByPosition(position = 1)
     protected String code;
 
     protected String status;

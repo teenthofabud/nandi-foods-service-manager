@@ -8,14 +8,14 @@ import jakarta.validation.constraints.NotNull;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = OptionalEnumValidatorImpl.class)
+@Constraint(validatedBy = OptionalTypeAttributeValidatorImpl.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE_USE})
 @NotNull(message = "Value cannot be null")
 @ReportAsSingleViolation
-public @interface OptionalEnumValidator {
+public @interface OptionalTypeAttributeValidator {
 
-    Class<? extends Enum<?>> enumClazz();
+    Class<?> clazz();
 
     String message() default "Value is invalid";
 

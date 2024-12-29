@@ -11,11 +11,10 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.opencsv.CSVWriter;
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.bean.*;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import com.teenthofabud.wizard.nandifoods.wms.handler.ColumnPositionNameMappingStrategy;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
@@ -32,9 +31,15 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.repository.PURepo
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.repository.UOMPULinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMHULinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMPULinkageEntityReducer;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMPageDtoToPageableConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSummaryProjectionToVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
@@ -68,7 +73,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
@@ -244,6 +253,15 @@ public class UOMServiceImpl implements UOMService {
             throw new IllegalStateException("UOM already exists with id: " + form.getCode());
         }
 
+        if(form.getLinkedUOMs().isPresent()) {
+            List<UnitClassSelfLinkageForm> selfLinksList = form.getLinkedUOMs().get();
+            Set<UnitClassSelfLinkageForm> selfLinksSet = selfLinksList.stream().collect(Collectors.toSet());
+            if(selfLinksList.size() != selfLinksSet.size()) {
+                log.debug("Same UOM is being tried to linked multiple times");
+                throw new IllegalStateException("Duplicate UOM self links");
+            }
+        }
+
         // Save UOM
         final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
 
@@ -344,18 +362,18 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public UOMPageImplVo retrieveAllUOMByLongName(Optional<String> optionalLongName, UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveUOMByLongName(Optional<String> optionalLongName, UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
         Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
-        if(optionalLongName.isPresent()) {
-            String longName = optionalLongName.get();
-            Specification<UOMEntity> uomSearchQuerySpecification = uomJpaRepository.likeProperty("longName", longName);
-            log.debug("Created specification for UOMEntity using long name: {}", longName);
-            uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
-        } else {
-            log.debug("Searching UOMEntity with page: {}", pageable);
-            uomEntityPage = uomJpaRepository.findAll(pageable);
-        }
+        Specification<UOMEntity> uomSearchQueryLikeLongNameSpecification = optionalLongName.map(o -> uomJpaRepository.likeProperty("longName", optionalLongName.get()))
+                .orElse(uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
+        Specification<UOMEntity> uomSearchQueryEqualStatusSpecification = uomPageDto.getStatus().map(o ->
+                uomJpaRepository.equalsProperty("status", UnitClassStatus.valueOf(uomPageDto.getStatus().get()).getOrdinal()))
+                .orElse(uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
+        Specification<UOMEntity> uomSearchQuerySpecification = Specification
+                .where(uomSearchQueryLikeLongNameSpecification).and(uomSearchQueryEqualStatusSpecification);
+        log.debug("Created specification for UOMEntity using long name: {} and status: {} and page", optionalLongName, uomPageDto.getStatus(), pageable);
+        uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
             List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
@@ -369,7 +387,7 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
-    public UOMPageImplVo retrieveAllUOMWithinRange(Optional<String> optionalQuery, @Valid UOMPageDto uomPageDto) {
+    public UOMPageImplVo retrieveUOMWithinRange(Optional<String> optionalQuery, @Valid UOMPageDto uomPageDto) {
         Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
         Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
         if(optionalQuery.isPresent()) {
@@ -451,6 +469,8 @@ public class UOMServiceImpl implements UOMService {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Writer streamWriter = new OutputStreamWriter(stream);
         CSVWriter writer = new CSVWriter(streamWriter);
+        ColumnPositionNameMappingStrategy<UOMVo> mappingStrategy = new ColumnPositionNameMappingStrategy<UOMVo>(UOMVo.class);
+        mappingStrategy.setType(UOMVo.class);
         List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
         List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
         //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MetricSystem.SI);
@@ -459,6 +479,7 @@ public class UOMServiceImpl implements UOMService {
         //StatefulBeanToCsv<UOMSummaryVo> sbc = new StatefulBeanToCsvBuilder<UOMSummaryVo>(writer)
                 .withQuotechar('\'')
                 .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                .withMappingStrategy(mappingStrategy)
                 .build();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
         String csvFileName = String.format(csvFileNameFormat, dtf.format(LocalDateTime.now()));
@@ -466,16 +487,16 @@ public class UOMServiceImpl implements UOMService {
             sbc.write(uomVoList);
             //sbc.write(uomSummaryVoList);
             streamWriter.flush();
-            FileDto fileDto = FileDto.builder()
-                    .fileName(csvFileName)
-                    .rawContent(new ByteArrayInputStream(stream.toByteArray()))
-                    .build();
-            return fileDto;
         } catch (CsvDataTypeMismatchException e) {
             throw new IllegalArgumentException("CSV bean field not configured properly", e);
         } catch (CsvRequiredFieldEmptyException e) {
             throw new IllegalArgumentException("CSV bean field is empty", e);
         }
+        FileDto fileDto = FileDto.builder()
+                .fileName(csvFileName)
+                .rawContent(new ByteArrayInputStream(stream.toByteArray()))
+                .build();
+        return fileDto;
     }
 
     @Override
@@ -486,10 +507,9 @@ public class UOMServiceImpl implements UOMService {
 
         List<Field> fields = Stream.concat(
                 Arrays.stream(UOMVo.class.getDeclaredFields()), Arrays.stream(UOMVo.class.getSuperclass().getDeclaredFields()))
-                .filter(f -> f.isAnnotationPresent(CsvBindByName.class))
-                //.map(f -> f.getDeclaredAnnotation(CsvBindByName.class).column())
+                .filter(f -> f.isAnnotationPresent(CsvBindByName.class) && f.isAnnotationPresent(CsvBindByPosition.class))
                 .collect(Collectors.toList());
-        fields.sort(Comparator.comparing(o -> o.getDeclaredAnnotation(CsvBindByName.class).column()));
+        fields.sort(Comparator.comparing(o -> o.getDeclaredAnnotation(CsvBindByPosition.class).position()));
         Table table = new Table(fields.size()).useAllAvailableWidth();
         fields.stream().forEach(f -> table.addHeaderCell(
                 new Cell().add(

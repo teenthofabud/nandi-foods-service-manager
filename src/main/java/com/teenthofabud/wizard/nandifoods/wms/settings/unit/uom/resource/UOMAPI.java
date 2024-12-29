@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
@@ -80,7 +81,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<UOMVo> getUOMByCode(String code);
 
-    @Operation(method = "GET", summary = "Download UOM List", description = "downloadAllUOM")
+    @Operation(method = "GET", summary = "Download UOM List", description = "downloadUOM")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Downloaded UOM List",
                     content = {
@@ -92,8 +93,17 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     responseCode = "406", description = "Media type not accepted",
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
-    @Parameter(description = "List type", name = "Accept", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
-    public StreamingResponseBody downloadAllUOM(String accept, HttpServletResponse response) throws IOException;
+    @Parameter(description = "Document type for UOM list", name = "Accept", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
+    public StreamingResponseBody downloadUOM(String accept, HttpServletResponse response) throws IOException;
+
+    @Operation(method = "POST", summary = "Upload UOM file", description = "uploadUOM")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Uploaded UOM file"),
+            @ApiResponse(
+                    responseCode = "406", description = "Media type not accepted",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
+    })
+    public StreamingResponseBody uploadUOM(String contentType, MultipartFile uomFile) throws IOException;
 
     @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")
     @ApiResponses(value = {
@@ -102,7 +112,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<Void> deleteUOMById(String code);
 
-    @Operation(method = "GET", summary = "Search UOM by long name within range", description = "searchAllUOMByLongNameWithinRange")
+    @Operation(method = "GET", summary = "Search UOM by long name within range", description = "searchUOMByLongNameWithinRange", deprecated = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching long name within range",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPageImplVo.class))
@@ -115,11 +125,27 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
             @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
     })
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByLongNameWithinRange(String longName, String sort, Boolean ascending, Integer offset, Long limit);
+    public ResponseEntity<UOMPageImplVo> searchUOMByLongNameWithinRange(String longName, String sort, Boolean ascending, Integer offset, Long limit);
+
+    @Operation(method = "GET", summary = "Search UOM by long name within range", description = "searchUOMByLongNameWithinRange")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching long name within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPageImplVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Long Name", name = "longName", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Sort by", name = "sort", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "UOM Status", name = "status", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Is ascending", name = "ascending", schema = @Schema(implementation = Boolean.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
+    })
+    public ResponseEntity<UOMPageImplVo> searchUOMByLongNameWithinRange(String longName, String sort, String status, Boolean ascending, Integer offset, Long limit);
 
 
     @Hidden
-    @Operation(method = "POST", summary = "Search UOM by query parameter within range", description = "searchAllUOMByQueryParameterWithinRange")
+    @Operation(method = "POST", summary = "Search UOM by query parameter within range", description = "searchUOMByQueryParameterWithinRange")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved all UOM matching query parameter within range",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UOMPageImplVo.class))
@@ -131,7 +157,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
             @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
     })
-    public ResponseEntity<UOMPageImplVo> searchAllUOMByQueryParameterWithinRange(@RequestBody(description = "UOM search query",
+    public ResponseEntity<UOMPageImplVo> searchUOMByQueryParameterWithinRange(@RequestBody(description = "UOM search query",
             content = @Content(schema = @Schema(implementation = String.class))) String query, String sort, Boolean ascending, Integer offset, Long limit);
 
 }

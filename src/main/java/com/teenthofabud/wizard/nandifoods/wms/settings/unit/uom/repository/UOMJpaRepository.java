@@ -43,5 +43,12 @@ public interface UOMJpaRepository extends JpaRepository<UOMEntity, Long>, Paging
         return (root, query, builder) -> builder.like(root.get(key).as(String.class), String.format("%%%s%%", value));
     }
 
+    default Specification<UOMEntity> equalsProperty(String key, Object value) {
+        return (root, query, builder) -> builder.equal(root.get(key).as(String.class), value);
+    }
+
+    default Specification<UOMEntity> skipThisSpecificationWithEmptyCriteriaConjunction() {
+        return (root, query, builder) -> builder.conjunction();
+    }
 
 }

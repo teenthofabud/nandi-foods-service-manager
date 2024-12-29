@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvBindByPosition;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -27,6 +28,8 @@ public class UnitClassMeasuredValuesVo {
     private Double volumeValue;
     private String volumeUnit;
 
+    @CsvBindByName(column = "Weight")
+    @CsvBindByPosition(position = 6)
     private Double weightValue;
     private String weightUnit;
 
