@@ -484,6 +484,7 @@ public class UOMServiceImpl implements UOMService {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
         String csvFileName = String.format(csvFileNameFormat, dtf.format(LocalDateTime.now()));
         try {
+            log.debug("Creating UOM list in CSV with {} UOMs", uomVoList.size());
             sbc.write(uomVoList);
             //sbc.write(uomSummaryVoList);
             streamWriter.flush();
@@ -496,6 +497,7 @@ public class UOMServiceImpl implements UOMService {
                 .fileName(csvFileName)
                 .rawContent(new ByteArrayInputStream(stream.toByteArray()))
                 .build();
+        log.info("UOM is available for download in CSV as {}", fileDto.getFileName());
         return fileDto;
     }
 
@@ -520,6 +522,7 @@ public class UOMServiceImpl implements UOMService {
 
         List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
         List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
+        log.debug("Creating UOM list in PDF with {} UOMs", uomVoList.size());
         uomVoList.stream().forEach(f ->
                 fields.stream().forEach(d -> {
                 try {
@@ -538,6 +541,7 @@ public class UOMServiceImpl implements UOMService {
                 .fileName(pdfFileName)
                 .rawContent(new ByteArrayInputStream(stream.toByteArray()))
                 .build();
+        log.info("UOM is available for download in PDF as {}", fileDto.getFileName());
         return fileDto;
     }
 }

@@ -156,6 +156,7 @@ public class UOMController implements UOMAPI {
             while ((bytesRead = finalIs.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
+            log.info("UOM document: {} written to response", fileDto.getFileName());
         };
     }
 
@@ -176,6 +177,7 @@ public class UOMController implements UOMAPI {
                 .fileName(uomFile.getName())
                 .rawContent(uomFile.getInputStream())
                 .build();
+        log.info("UOM uploaded successfully");
         return null;
     }
 
