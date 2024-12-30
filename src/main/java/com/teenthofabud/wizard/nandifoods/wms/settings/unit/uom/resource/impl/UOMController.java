@@ -167,7 +167,7 @@ public class UOMController implements UOMAPI {
         if(ObjectUtils.isEmpty(uomFile) || uomFile.isEmpty()) {
             throw new IllegalArgumentException("UOM file is required");
         }
-        if(contentType.compareTo(MediaType.MULTIPART_FORM_DATA_VALUE) != 0 ) {
+        if(!contentType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE)) {
             throw new IllegalArgumentException("Content-Type header should be " + MediaType.MULTIPART_FORM_DATA_VALUE);
         }
         if(HttpMediaType.TEXT_CSV.compareTo(uomFile.getContentType()) != 0) {
@@ -177,7 +177,7 @@ public class UOMController implements UOMAPI {
                 .fileName(uomFile.getName())
                 .rawContent(uomFile.getInputStream())
                 .build();
-        log.info("UOM uploaded successfully");
+        log.info("UOM CSV list uploaded successfully");
         return null;
     }
 
