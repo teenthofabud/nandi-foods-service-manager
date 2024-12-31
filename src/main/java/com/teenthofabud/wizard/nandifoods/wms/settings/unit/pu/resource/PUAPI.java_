@@ -1,0 +1,164 @@
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.resource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.JsonPatchOperation;
+import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.form.PUForm;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.vo.PUPageImplVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.vo.PUVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import java.io.IOException;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+@Tag(name = "PUAPI", description = "PU Management")
+public interface PUAPI extends BaseUnitClassAPI {
+
+    public static final String BASE_URI = BaseUnitClassAPI.BASE_URI + "/pu";
+
+    @Operation(method = "POST", summary = "PU creation", description = "postPU")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "PU created"),
+            @ApiResponse(
+                    responseCode = "409", description = "PU already created",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
+    })
+    public ResponseEntity<Void> postPU(@RequestBody(description = "PU form", required = true,
+            content = @Content(schema = @Schema(implementation = PUForm.class))) PUForm form);
+
+    @Operation(method = "PATCH", summary = "PU edit", description = "patchPUById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "PU edited")
+    })
+    @Parameter(description = "PU Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> patchPUByCode(String code, @RequestBody(description = "JsonPatch", required = false,
+            content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = JsonPatchOperation.class)
+                    ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
+
+    @Operation(method = "PATCH", summary = "PU approval", description = "approveSavedPUById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "PU approved"),
+            @ApiResponse(
+                    responseCode = "409", description = "PU already approved",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
+    })
+    @Parameter(description = "PU Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> approveSavedPUById(String code, @RequestBody(description = "JsonPatch", required = false,
+            content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = JsonPatchOperation.class)
+                    ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
+
+    @Operation(method = "GET", summary = "Get PU by Id", description = "getPUById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved PU by Id",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PUVo.class))
+                    )
+    })
+    @Parameter(description = "PU Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<PUVo> getPUByCode(String code);
+
+    @Operation(method = "GET", summary = "Download PU List", description = "downloadPU")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Downloaded PU List",
+                    content = {
+                            @Content(mediaType = HttpMediaType.TEXT_CSV),
+                            @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "406", description = "Media type not accepted",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
+    })
+    @Parameter(description = "Document type for PU list", name = "Accept", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
+    public StreamingResponseBody downloadPU(String accept, HttpServletResponse response) throws IOException;
+
+    @Operation(method = "POST", summary = "Upload PU file", description = "uploadPU")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Uploaded PU file"),
+            @ApiResponse(
+                    responseCode = "406", description = "Media type not accepted",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
+    })
+    @Parameter(hidden = true, description = "Document type for PU file", name = "Content-Type", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
+    public StreamingResponseBody uploadPU(String contentType, MultipartFile puFile) throws IOException;
+
+    @Operation(method = "DELETE", summary = "Delete PU by Id", description = "deletePUById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "PU edited")
+    })
+    @Parameter(description = "PU Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> deletePUById(String code);
+
+    @Operation(method = "GET", summary = "Search PU by long name within range", description = "searchPUByLongNameWithinRange", deprecated = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all PU matching long name within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PUPageImplVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Long Name", name = "longName", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Sort by", name = "sort", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Is ascending", name = "ascending", schema = @Schema(implementation = Boolean.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
+    })
+    public ResponseEntity<PUPageImplVo> searchPUByLongNameWithinRange(String longName, String sort, Boolean ascending, Integer offset, Long limit);
+
+    @Operation(method = "GET", summary = "Search PU by long name within range", description = "searchPUByLongNameWithinRange")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all PU matching long name within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PUPageImplVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Long Name", name = "longName", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Sort by", name = "sort", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "PU Status", name = "status", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Is ascending", name = "ascending", schema = @Schema(implementation = Boolean.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
+    })
+    public ResponseEntity<PUPageImplVo> searchPUByLongNameWithinRange(String longName, String sort, String status, Boolean ascending, Integer offset, Long limit);
+
+
+    @Hidden
+    @Operation(method = "POST", summary = "Search PU by query parameter within range", description = "searchPUByQueryParameterWithinRange")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved all PU matching query parameter within range",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PUPageImplVo.class))
+            )
+    })
+    @Parameters(value = {
+            @Parameter(description = "Sort by", name = "sort", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Is ascending", name = "ascending", schema = @Schema(implementation = Boolean.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page offset", name = "offset", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true),
+            @Parameter(description = "Page limit", name = "limit", schema = @Schema(implementation = Integer.class), in = ParameterIn.QUERY, allowEmptyValue = true)
+    })
+    public ResponseEntity<PUPageImplVo> searchPUByQueryParameterWithinRange(@RequestBody(description = "PU search query",
+            content = @Content(schema = @Schema(implementation = String.class))) String query, String sort, Boolean ascending, Integer offset, Long limit);
+
+}

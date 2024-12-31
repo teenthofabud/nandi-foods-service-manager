@@ -1,0 +1,260 @@
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.resource.impl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.form.PUForm;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.resource.PUAPI;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.vo.PUVo;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotBlank;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.springframework.util.StreamUtils.BUFFER_SIZE;
+
+@Slf4j
+@RestController
+@RequestMapping(path = PUAPI.BASE_URI)
+public class PUController implements PUAPI {
+
+    private PUService puService;
+    private ObjectMapper mapper;
+    private JsonFlattener jsonFlattener;
+    private Validator validator;
+
+    @Autowired
+    public PUController(PUService puService,
+                        ObjectMapper mapper,
+                        JsonFlattener jsonFlattener,
+                        Validator validator) {
+        this.puService = puService;
+        this.mapper = mapper;
+        this.jsonFlattener = jsonFlattener;
+        this.validator = validator;
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<Void> postPU(@RequestBody @Valid PUForm form) {
+        PUVo puVo = puService.createNewPU(form);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(puVo.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    public static Object parseJsonNode(JsonNode v) {
+        Object o = null;
+        switch (v.getNodeType()) {
+            case STRING -> o = v.textValue();
+            case NUMBER -> o = v.doubleValue();
+            case BOOLEAN -> o = v.booleanValue();
+        }
+        return o;
+    }
+
+    private PUDto patchPU(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
+        PUDto blankPUDto = new PUDto();
+        JsonNode blankPUDtoNode = mapper.convertValue(blankPUDto, JsonNode.class);
+        JsonNode patchedPUDtoNode = jsonPatch.apply(blankPUDtoNode);
+        PUDto patchePUDto = mapper.treeToValue(patchedPUDtoNode, PUDto.class);
+        log.debug("patchedPUDtoNode: {}", mapper.writeValueAsString(patchePUDto));
+        return patchePUDto;
+    }
+
+    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @Override
+    public ResponseEntity<Void> patchPUByCode(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        if(ObjectUtils.isEmpty(jsonPatch)) {
+            throw new IllegalArgumentException("Json patch with changes is required");
+        }
+        PUDto patchePUDto = patchPU(jsonPatch);
+        Set<ConstraintViolation<PUDto>> violations = validator.validate(patchePUDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        puService.updateExistingPUByCode(code, patchePUDto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(path = "/{id}/approve", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @Override
+    public ResponseEntity<Void> approveSavedPUById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        Optional<PUDto> optionallyPatchedPUDto = ObjectUtils.isEmpty(jsonPatch) ? Optional.empty() : Optional.of(patchPU(jsonPatch));
+        Set<ConstraintViolation<Optional<PUDto>>> violations = validator.validate(optionallyPatchedPUDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        puService.approveSavedPUByCode(code, optionallyPatchedPUDto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<PUVo> getPUByCode(@PathVariable(name = "id") String code) {
+        PUVo puVo = puService.retrieveExistingPUByCode(code);
+        return ResponseEntity.ok(puVo);
+    }
+
+    @GetMapping(path = "/download",
+            produces = { MediaType.APPLICATION_PDF_VALUE, HttpMediaType.TEXT_CSV })
+    @Override
+    public StreamingResponseBody downloadPU(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException {
+        IllegalArgumentException e = new IllegalArgumentException("Accept type header should be either " + MediaType.APPLICATION_PDF_VALUE + " or " + HttpMediaType.TEXT_CSV);
+        if(!StringUtils.hasText(accept)) {
+            throw e;
+        }
+        Optional<FileDto> optionalFileDto = Optional.empty();
+        switch (accept) {
+            case MediaType.APPLICATION_PDF_VALUE :
+                optionalFileDto = Optional.ofNullable(puService.downloadPUAsPDF());
+                break;
+            case HttpMediaType.TEXT_CSV :
+                optionalFileDto = Optional.ofNullable(puService.downloadPUAsCSV());
+                break;
+            default: throw e;
+        }
+        FileDto fileDto = optionalFileDto.get();
+        response.setContentType(accept);
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileDto.getFileName() + "\"");
+        InputStream finalIs = fileDto.getRawContent();
+        return outputStream -> {
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = finalIs.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            log.info("PU document: {} written to response", fileDto.getFileName());
+        };
+    }
+
+    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Override
+    public StreamingResponseBody uploadPU(@RequestHeader(name = HttpHeaders.CONTENT_TYPE) String contentType,
+                                           @RequestPart(value = "puFile", required = false) MultipartFile puFile) throws IOException {
+        if(ObjectUtils.isEmpty(puFile) || puFile.isEmpty()) {
+            throw new IllegalArgumentException("PU file is required");
+        }
+        if(!contentType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE)) {
+            throw new IllegalArgumentException("Content-Type header should be " + MediaType.MULTIPART_FORM_DATA_VALUE);
+        }
+        if(HttpMediaType.TEXT_CSV.compareTo(puFile.getContentType()) != 0) {
+            throw new IllegalArgumentException("Document type is not " + HttpMediaType.TEXT_CSV);
+        }
+        FileDto fileDto = FileDto.builder()
+                .fileName(puFile.getName())
+                .rawContent(puFile.getInputStream())
+                .build();
+        log.info("PU CSV list uploaded successfully");
+        return null;
+    }
+
+    @DeleteMapping(path = "/{id}")
+    @Override
+    public ResponseEntity<Void> deletePUById(@PathVariable(name = "id") String code) {
+        puService.deleteExistingPUByCode(code);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<PUPageImplVo> searchPUByLongNameWithinRange(@RequestParam(required = false) String longName,
+                                                                        @RequestParam(required = false) String sort,
+                                                                        @RequestParam(required = false) Boolean ascending,
+                                                                        @RequestParam(required = false) Integer offset,
+                                                                        @RequestParam(required = false) Long limit) {
+        PUPageDto puPageDto = PUPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .ascending(Optional.ofNullable(ascending))
+                .build();
+        Set<ConstraintViolation<PUPageDto>> violations = validator.validate(puPageDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        PUPageImplVo puPageImplVo = puService.retrievePUByLongName(Optional.ofNullable(longName), puPageDto);
+        return ResponseEntity.ok(puPageImplVo);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<PUPageImplVo> searchPUByLongNameWithinRange(@RequestParam(required = false) String longName,
+                                                                        @RequestParam(required = false) String sort,
+                                                                        @RequestParam(required = false) String status,
+                                                                        @RequestParam(required = false) Boolean ascending,
+                                                                        @RequestParam(required = false) Integer offset,
+                                                                        @RequestParam(required = false) Long limit) {
+        PUPageDto puPageDto = PUPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .status(Optional.ofNullable(status))
+                .ascending(Optional.ofNullable(ascending))
+                .build();
+        Set<ConstraintViolation<PUPageDto>> violations = validator.validate(puPageDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        PUPageImplVo puPageImplVo = puService.retrievePUByLongName(Optional.ofNullable(longName), puPageDto);
+        return ResponseEntity.ok(puPageImplVo);
+    }
+
+    @PostMapping(path = "/search", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<PUPageImplVo> searchPUByQueryParameterWithinRange(@RequestBody(required = false) String query,
+                                                                                 @RequestParam(required = false) String sort,
+                                                                                 @RequestParam(required = false) Boolean ascending,
+                                                                                 @RequestParam(required = false) Integer offset,
+                                                                                 @RequestParam(required = false) Long limit) {
+        PUPageDto puPageDto = PUPageDto.builder()
+                .offset(Optional.ofNullable(offset))
+                .limit(Optional.ofNullable(limit))
+                .sort(Optional.ofNullable(sort))
+                .ascending(Optional.ofNullable(ascending))
+                .build();
+        Set<ConstraintViolation<PUPageDto>> puPageDtoViolations = validator.validate(puPageDto);
+        if (!puPageDtoViolations.isEmpty()) {
+            throw new ConstraintViolationException(puPageDtoViolations);
+        }
+        Optional<@NotBlank(message = "PU search query is required") String> optionalQuery = Optional.ofNullable(query);
+        Set<ConstraintViolation<Optional<String>>> optionalQueryViolations = validator.validate(optionalQuery);
+        if (!optionalQueryViolations.isEmpty()) {
+            throw new ConstraintViolationException(optionalQueryViolations);
+        }
+        PUPageImplVo puPageImplVo = puService.retrievePUWithinRange(optionalQuery, puPageDto);
+        return ResponseEntity.ok(puPageImplVo);
+    }
+
+    @Override
+    public String getContext() {
+        return "PUController";
+    }
+}

@@ -38,8 +38,10 @@ public abstract class UnitClassForm {
     @Length(min = 1, message = "description should be at least 1 character long")
     protected String description;
 
+    @Length(min = 8, max = 30, message = "long name should be between 8 and 30 characters")
     protected String longName;
 
+    @Length(min = 8, max = 15, message = "short name should be between 8 and 15 characters")
     protected String shortName;
 
     @FutureOrPresent(groups = FirstOrder.class)
