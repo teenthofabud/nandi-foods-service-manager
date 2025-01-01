@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpMethod;
 import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
@@ -39,6 +40,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerResponse;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -50,6 +53,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.reflections.scanners.Scanners.ConstructorsSignature;
+import static org.springframework.web.servlet.function.RequestPredicates.path;
+import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 @EnableWebMvc
 @Configuration
@@ -88,6 +93,12 @@ public class ServiceConfiguration implements WebMvcConfigurer {
                                         .defaultDateFormat(new SimpleDateFormat(unitApprovalTimeFormat))
                                         .build();
         return mapper;
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> homeRouter() {
+        ClassPathResource index = new ClassPathResource("static/index.html");
+        return route().resource(path("/"), index).build();
     }
 
     @Bean
