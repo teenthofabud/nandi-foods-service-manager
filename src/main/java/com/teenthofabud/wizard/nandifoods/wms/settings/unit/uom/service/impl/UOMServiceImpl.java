@@ -112,7 +112,7 @@ public class UOMServiceImpl implements UOMService {
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
     private Javers javers;
     private UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter;
-    private Reflections reflections;
+    //private Reflections reflections;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
     private List<String> searchFields;
@@ -142,7 +142,7 @@ public class UOMServiceImpl implements UOMService {
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
                           UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter,
-                          Reflections reflections,
+                          //Reflections reflections,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -169,7 +169,7 @@ public class UOMServiceImpl implements UOMService {
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
         this.uomSummaryProjectionToVoConverter = uomSummaryProjectionToVoConverter;
-        this.reflections = reflections;
+        //this.reflections = reflections;
         this.searchFields = searchFields;
         this.fileNameDateFormat = fileNameDateFormat;
         this.csvFileNameFormat = csvFileNameFormat;

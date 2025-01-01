@@ -7,16 +7,15 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassL
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassAttributeConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassLevelTypeAttributeConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassLevelAttributeConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassTypeAttributeConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassStatusAttributeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditListener.class)
@@ -49,15 +48,20 @@ public abstract class UnitClassEntity implements Auditable {
     @EqualsAndHashCode.Include
     protected LocalDate effectiveDate;
 
-    @Column(name = "class_type", nullable = false)
+    @Column(name = "class", nullable = false)
     @Convert(converter = UnitClassAttributeConverter.class)
     @EqualsAndHashCode.Include
-    protected UnitClassType type;
+    protected UnitClassType _class;
 
-    @Column(name = "level_type", nullable = false)
-    @Convert(converter = UnitClassLevelTypeAttributeConverter.class)
+    @Column(name = "level", nullable = false)
+    @Convert(converter = UnitClassLevelAttributeConverter.class)
     @EqualsAndHashCode.Include
-    protected UnitClassLevelType levelType;
+    protected UnitClassLevelType level;
+
+    @Column(name = "type", nullable = false)
+    @Convert(converter = UnitClassTypeAttributeConverter.class)
+    @EqualsAndHashCode.Include
+    protected UnitClassLevelType type;
 
     @Column(nullable = false)
     @Convert(converter = UnitClassStatusAttributeConverter.class)

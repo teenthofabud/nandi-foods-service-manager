@@ -4,15 +4,15 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassL
 import jakarta.persistence.AttributeConverter;
 
 
-public class UnitClassLevelTypeAttributeConverter implements AttributeConverter<UnitClassLevelType, String> {
+public class UnitClassLevelAttributeConverter implements AttributeConverter<UnitClassLevelType, String> {
 
     @Override
     public String convertToDatabaseColumn(UnitClassLevelType attribute) {
-        return attribute.getType();
+        return attribute.getLevel();
     }
 
     @Override
     public UnitClassLevelType convertToEntityAttribute(String dbData) {
-        return UnitClassLevelType.getByType(dbData);
+        return UnitClassLevelType.getByLevel(dbData);
     }
 }

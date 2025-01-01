@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Target(ElementType.FIELD)
+@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RUNTIME)
 @Constraint(validatedBy = UntilDaysValidatorImpl.class)
 @Documented

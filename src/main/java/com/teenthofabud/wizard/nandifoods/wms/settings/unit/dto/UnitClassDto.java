@@ -1,16 +1,25 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UntilDays;
 import com.teenthofabud.wizard.nandifoods.wms.validator.OptionalEnumValidator;
+import com.teenthofabud.wizard.nandifoods.wms.validator.order.FirstOrder;
+import com.teenthofabud.wizard.nandifoods.wms.validator.order.SecondOrder;
+import jakarta.validation.GroupSequence;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,15 +27,16 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@UnitClassLevelTypeValidator
+@SuperBuilder
 @Getter
 @Setter
-@SuperBuilder
-public abstract class UnitClassDto {
+@GroupSequence({ UnitClassDto.class, FirstOrder.class, SecondOrder.class })
+public abstract class UnitClassDto implements UnitClassLevelContract {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    @OptionalEnumValidator(enumClazz = UnitClassLevelType.class, message = "Level type is invalid")
-    protected Optional<String> levelType = Optional.empty();
+    protected Optional<String> level = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
@@ -34,8 +44,9 @@ public abstract class UnitClassDto {
     protected Optional<String> status = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
+    @JsonProperty("name")
     @Builder.Default
-    protected Optional<String> name = Optional.ofNullable(null);
+    protected Optional<String> type = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
@@ -43,15 +54,16 @@ public abstract class UnitClassDto {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> longName = Optional.ofNullable(null);
-
-    @JsonSetter(nulls = Nulls.SKIP)
-    @Builder.Default
     protected Optional<String> shortName = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> metric = Optional.of(new ArrayList<>());
+    protected Optional<@FutureOrPresent(groups = FirstOrder.class) @UntilDays(count = 91, groups = SecondOrder.class) LocalDate> effectiveDate = Optional.ofNullable(null);
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @Builder.Default
+    //protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(new ArrayList<>());
+    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(Collections.nCopies(2, new UnitClassMeasuredValuesDto()));
 
     /*@JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
@@ -71,4 +83,14 @@ public abstract class UnitClassDto {
         this.metric = Optional.of(new UnitClassMeasuredValuesDto());
         this.imperial = Optional.of(new UnitClassMeasuredValuesDto());
     }*/
+
+    @Override
+    public String getLevelValue() {
+        return this.level.isPresent() ? this.level.get() : "";
+    }
+
+    @Override
+    public String getTypeValue() {
+        return this.type.isPresent() ? this.type.get() : "";
+    }
 }

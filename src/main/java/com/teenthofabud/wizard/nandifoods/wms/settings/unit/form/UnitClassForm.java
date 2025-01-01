@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UntilDays;
 import com.teenthofabud.wizard.nandifoods.wms.validator.order.FirstOrder;
@@ -27,7 +28,7 @@ import java.util.List;
 @SuperBuilder
 @UnitClassLevelTypeValidator
 @GroupSequence({ UnitClassForm.class, FirstOrder.class, SecondOrder.class })
-public abstract class UnitClassForm {
+public abstract class UnitClassForm implements UnitClassLevelContract {
 
     protected String level;
 
@@ -38,6 +39,7 @@ public abstract class UnitClassForm {
     @Length(min = 1, message = "description should be at least 1 character long")
     protected String description;
 
+    // not editable
     @Length(min = 8, max = 30, message = "long name should be between 8 and 30 characters")
     protected String longName;
 
@@ -52,4 +54,13 @@ public abstract class UnitClassForm {
     @Size(min = 2, max = 2, message = "Both of imperial and metric measured values must be specified")
     protected List<@Valid UnitClassMeasuredValuesForm> measuredValues;
 
+    @Override
+    public String getLevelValue() {
+        return this.level;
+    }
+
+    @Override
+    public String getTypeValue() {
+        return this.type;
+    }
 }

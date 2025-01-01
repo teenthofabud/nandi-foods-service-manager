@@ -35,10 +35,11 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
     public UOMVo convert(UOMEntity source) {
         List<UnitClassMeasuredValuesVo> measuredValues = source.getUomMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(f)).collect(Collectors.toList());
         UOMVo target = UOMVo.builder()
-                .type(source.getLevelType().getType())
+                ._class(source.get_class().name())
+                .type(source.getType().getType())
                 .longName(source.getLongName())
                 .shortName(source.getShortName())
-                .level(source.getLevelType().getLevel())
+                .level(source.getLevel().getLevel())
                 .description(source.getDescription())
                 .bulkCode(source.getBulkCode())
                 .dateCreated(source.getAudit().getCreationTime().toLocalDate())

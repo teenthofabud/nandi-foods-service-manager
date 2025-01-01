@@ -21,11 +21,13 @@ import java.util.Optional;
 @Setter
 public class UOMForm extends UnitClassForm {
 
+    // not editable
     @JsonProperty("id")
     @NotNull(message = "id value is required")
     @Pattern(regexp = "U(100[1-9]|10[1-9][0-9]|1[1-9][0-9]{2}|[2-4][0-9]{3})", message = "id value is invalid")
     protected String code;
 
+    // Not editable
     @NotBlank(message = "bulk code value is required")
     private String bulkCode;
 

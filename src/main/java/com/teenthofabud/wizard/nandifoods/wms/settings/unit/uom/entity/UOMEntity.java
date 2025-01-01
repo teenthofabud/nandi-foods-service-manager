@@ -23,9 +23,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
         indexes = {
                 @Index(columnList = "short_name", name = "idx_uom_short_name"),
                 @Index(columnList = "long_name", name = "idx_uom_long_name"),
-                @Index(columnList = "level_type", name = "idx_uom_level_type"),
+                @Index(columnList = "level", name = "idx_uom_level"),
+                @Index(columnList = "type", name = "idx_uom_type"),
                 @Index(columnList = "code", name = "idx_uom_code"),
-                @Index(columnList = "class_type", name = "idx_uom_class_type")
+                @Index(columnList = "class", name = "idx_uom_class")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uix_uom_code", columnNames = { "code" })

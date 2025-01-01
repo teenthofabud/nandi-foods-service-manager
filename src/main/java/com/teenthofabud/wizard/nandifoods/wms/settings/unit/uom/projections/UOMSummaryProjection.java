@@ -1,10 +1,8 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.projections;
 
-import com.blazebit.persistence.view.EntityView;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.projections.UnitClassMeasuredValuesSummaryProjection;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.projections.UnitClassSummaryProjection;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.PersistenceCreator;

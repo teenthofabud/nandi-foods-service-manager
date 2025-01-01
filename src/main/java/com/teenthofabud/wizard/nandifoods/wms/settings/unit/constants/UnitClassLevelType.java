@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants;
 
+import com.teenthofabud.wizard.nandifoods.wms.constants.EnumKeyValue;
 import lombok.Getter;
 import lombok.experimental.FieldNameConstants;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 
 @FieldNameConstants(onlyExplicitlyIncluded = true)
 @Getter
-public enum UnitClassLevelType {
+public enum UnitClassLevelType implements EnumKeyValue<UnitClassLevelType> {
 
     @FieldNameConstants.Include LEVEL_1("Level 1", "EACH"),
     @FieldNameConstants.Include LEVEL_2("Level 2", "BOX"),
@@ -60,7 +61,7 @@ public enum UnitClassLevelType {
     public static UnitClassLevelType getByType(String type) throws NoSuchElementException {
         UnitClassLevelType x = null;
         for(UnitClassLevelType t : UnitClassLevelType.values()) {
-            if(t.getType().compareTo(type) == 0) {
+            if(t.getType().compareTo(type.toUpperCase()) == 0) {
                 x = t;
                 break;
             }
@@ -72,4 +73,33 @@ public enum UnitClassLevelType {
         }
     }
 
+    @Override
+    public String getKey() {
+        return this.level;
+    }
+
+    @Override
+    public String getValue() {
+        return this.type;
+    }
+
+    @Override
+    public List<EnumKeyValue<UnitClassLevelType>> getEnumConstants() {
+        return List.of(UnitClassLevelType.values());
+    }
+
+    @Override
+    public String getKeyName() {
+        return "level";
+    }
+
+    @Override
+    public String getValueName() {
+        return "type";
+    }
+
+    @Override
+    public String getTypeName() {
+        return UnitClassLevelType.class.getSimpleName();
+    }
 }

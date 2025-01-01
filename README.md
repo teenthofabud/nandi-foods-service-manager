@@ -10,7 +10,7 @@ JDK 21
 [
     {"op":"replace","path":"/level","value":"Level 2"}, 
     {"op":"replace","path":"/longName","value": "this is a long name"},
-    {"op":"replace","path":"/metric/lengthValue","value": 2.9},
+    {"op":"replace","path":"/metric/0/lengthValue","value": 2.9},
     {"op":"replace","path":"/isInventory","value": true}
 ]
 ```

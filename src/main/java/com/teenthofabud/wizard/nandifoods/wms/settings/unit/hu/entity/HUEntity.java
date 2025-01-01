@@ -17,9 +17,10 @@ import java.util.List;
         indexes = {
                 @Index(columnList = "short_name", name = "idx_hu_short_name"),
                 @Index(columnList = "long_name", name = "idx_hu_long_name"),
-                @Index(columnList = "level_type", name = "idx_hu_level_type"),
+                @Index(columnList = "level", name = "idx_hu_level"),
+                @Index(columnList = "type", name = "idx_hu_type"),
                 @Index(columnList = "code", name = "idx_hu_code"),
-                @Index(columnList = "class_type", name = "idx_hu_class_type")
+                @Index(columnList = "class", name = "idx_hu_class")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uix_hu_code", columnNames = { "code" })

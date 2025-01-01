@@ -23,6 +23,9 @@ import java.util.Optional;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public abstract class UnitClassVo {
 
+    @JsonProperty("class")
+    protected String _class;
+
     protected String level;
 
     @JsonProperty("name")

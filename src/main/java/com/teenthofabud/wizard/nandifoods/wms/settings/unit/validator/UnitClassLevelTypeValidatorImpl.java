@@ -1,30 +1,29 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassForm;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 
-public class UnitClassLevelTypeValidatorImpl implements ConstraintValidator<UnitClassLevelTypeValidator, UnitClassForm> {
+public class UnitClassLevelTypeValidatorImpl implements ConstraintValidator<UnitClassLevelTypeValidator, UnitClassLevelContract> {
 
     @Override
-    public boolean isValid(UnitClassForm value, ConstraintValidatorContext context) {
-        if(ObjectUtils.isEmpty(value) || !StringUtils.hasText(value.getLevel()) || !StringUtils.hasText(value.getType())) {
+    public boolean isValid(UnitClassLevelContract value, ConstraintValidatorContext context) {
+        String level = value.getLevelValue();
+        String type = value.getTypeValue();
+        if(ObjectUtils.isEmpty(value) || !StringUtils.hasText(level) || !StringUtils.hasText(type)) {
             return false;
         }
         boolean flag = false;
         try {
-            UnitClassLevelType level = UnitClassLevelType.getByLevel(value.getLevel());
-            UnitClassLevelType type = UnitClassLevelType.getByType(value.getType());
-            flag = level.compareTo(type) == 0;
+            UnitClassLevelType levelConstant = UnitClassLevelType.getByLevel(level);
+            UnitClassLevelType typeConstant = UnitClassLevelType.getByType(type);
+            flag = levelConstant.compareTo(typeConstant) == 0;
         } catch (NoSuchElementException e) {
         }
         return flag;
@@ -32,6 +31,7 @@ public class UnitClassLevelTypeValidatorImpl implements ConstraintValidator<Unit
 
     @Override
     public void initialize(UnitClassLevelTypeValidator constraintAnnotation) {
+
     }
 
 }

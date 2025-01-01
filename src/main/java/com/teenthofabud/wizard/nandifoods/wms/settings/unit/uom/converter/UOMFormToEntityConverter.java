@@ -1,19 +1,13 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
-import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Component
 public class UOMFormToEntityConverter implements Converter<UOMForm, UOMEntity> {
@@ -26,22 +20,18 @@ public class UOMFormToEntityConverter implements Converter<UOMForm, UOMEntity> {
                 : String.format("%s (%s)", source.getType(), source.getCode());
         UOMEntity target = UOMEntity.builder()
                 .code(source.getCode())
-                .type(UnitClassType.UOM)
+                ._class(UnitClassType.UOM)
                 .description(source.getDescription())
                 .longName(longName)
                 .shortName(shortName)
-                .levelType(UnitClassLevelType.getByLevel(source.getLevel()))
+                .level(UnitClassLevelType.getByLevel(source.getLevel()))
+                .type(UnitClassLevelType.getByType(source.getType()))
                 .bulkCode(source.getBulkCode())
                 .status(UnitClassStatus.PENDING)
                 .isInventory(source.getIsInventory())
                 .isProduction(source.getIsProduction())
                 .isSales(source.getIsSales())
                 .isPurchase(source.getIsPurchase())
-                /*.fromUOMs(new ArrayList<>())
-                .toUOMs(new ArrayList<>())
-                .puLinks(new ArrayList<>())
-                .huLinks(new ArrayList<>())
-                .uomMeasuredValues(new ArrayList<>())*/
                 .effectiveDate(source.getEffectiveDate())
                 .build();
         // audit is set automatically for creation related attributes
