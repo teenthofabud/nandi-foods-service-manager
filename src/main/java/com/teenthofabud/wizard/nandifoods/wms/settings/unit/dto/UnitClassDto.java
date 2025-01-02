@@ -3,6 +3,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
@@ -13,7 +14,6 @@ import com.teenthofabud.wizard.nandifoods.wms.validator.order.SecondOrder;
 import jakarta.validation.GroupSequence;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -63,7 +64,13 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     //protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(new ArrayList<>());
-    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(Collections.nCopies(2, new UnitClassMeasuredValuesDto()));
+    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
+            = Optional.of(
+                    Set.of(
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                    )
+    );
 
     /*@JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @SuperBuilder
 @AllArgsConstructor
@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 public class UnitClassMeasuredValuesForm {
 
     @EnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
+    @EqualsAndHashCode.Include
     protected String metricSystem;
 
     @NotNull(message = "length is required")

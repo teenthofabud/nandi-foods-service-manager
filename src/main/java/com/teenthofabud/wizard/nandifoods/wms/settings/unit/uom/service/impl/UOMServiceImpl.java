@@ -62,7 +62,6 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
-import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -245,14 +244,7 @@ public class UOMServiceImpl implements UOMService {
         return unitClassMeasuredValuesVo;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Override
-    public UOMVo createNewUOM(UOMForm form) {
-        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(form.getCode());
-        if(optionalUOMEntity.isPresent()) {
-            throw new IllegalStateException("UOM already exists with id: " + form.getCode());
-        }
-
+    private void validateDuplicateItems(UOMForm form) {
         if(form.getLinkedUOMs().isPresent()) {
             List<UnitClassSelfLinkageForm> selfLinksList = form.getLinkedUOMs().get();
             Set<UnitClassSelfLinkageForm> selfLinksSet = selfLinksList.stream().collect(Collectors.toSet());
@@ -261,6 +253,27 @@ public class UOMServiceImpl implements UOMService {
                 throw new IllegalStateException("Duplicate UOM self links");
             }
         }
+        Optional<UnitClassMeasuredValuesForm> optionalSIMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.SI.name()) == 0).findFirst();
+        Optional<UnitClassMeasuredValuesForm> optionalImperialMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.IMPERIAL.name()) == 0).findFirst();
+        if(optionalSIMeasuredValues.isEmpty()) {
+            log.debug("Duplicate measured values for SI metric system");
+            throw new IllegalStateException("Duplicate SI measured values");
+        }
+        if(optionalImperialMeasuredValues.isEmpty()) {
+            log.debug("Duplicate measured values for Imperial metric system");
+            throw new IllegalStateException("Duplicate Imperial measured values");
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public UOMVo createNewUOM(UOMForm form) {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(form.getCode());
+        if(optionalUOMEntity.isPresent()) {
+            throw new IllegalStateException("UOM already exists with id: " + form.getCode());
+        }
+
+        validateDuplicateItems(form);
 
         // Save UOM
         final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);
@@ -420,9 +433,9 @@ public class UOMServiceImpl implements UOMService {
             Diff rawDtoUpdates = javers.compare(blankUOMDto, patchedUOMDto);
             log.debug("UOM found with code: {}", uomEntity.getCode());
             log.debug("Mapping updates from patched UOMDto to UOMEntity");
-            rawDtoUpdates.getChanges().forEach(Errors.rethrow().wrap(p -> {
+            /*rawDtoUpdates.getChanges().forEach(Errors.rethrow().wrap(p -> {
                 log.debug("{}", p);
-            }));
+            }));*/
             rawDtoUpdates.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
                 log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
                 beanUtilsBean.copyProperty(uomEntity, p.getPropertyNameWithPath(), p.getRight());

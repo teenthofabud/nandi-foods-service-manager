@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode
 @ToString
@@ -52,7 +52,7 @@ public abstract class UnitClassForm implements UnitClassLevelContract {
     protected LocalDate effectiveDate;
 
     @Size(min = 2, max = 2, message = "Both of imperial and metric measured values must be specified")
-    protected List<@Valid UnitClassMeasuredValuesForm> measuredValues;
+    protected Set<@Valid UnitClassMeasuredValuesForm> measuredValues;
 
     @Override
     public String getLevelValue() {

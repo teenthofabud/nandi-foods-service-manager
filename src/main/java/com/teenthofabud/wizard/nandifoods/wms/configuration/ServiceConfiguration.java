@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.teenthofabud.wizard.nandifoods.wms.converter.*;
+import com.teenthofabud.wizard.nandifoods.wms.handler.OptionalCollectionComparator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
@@ -67,7 +68,10 @@ public class ServiceConfiguration {
 
     @Bean
     public Javers javers() {
-        return JaversBuilder.javers().build();
+        return JaversBuilder
+                .javers()
+                //.registerValue(optionalCollectionType, new OptionalCollectionComparator())
+                .build();
     }
 
     @Bean

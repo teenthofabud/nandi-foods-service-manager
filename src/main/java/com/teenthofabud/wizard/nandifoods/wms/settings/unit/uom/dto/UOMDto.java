@@ -22,22 +22,18 @@ public class UOMDto extends UnitClassDto {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    //private Optional<Boolean> isInventory = Optional.empty();
     private Optional<Boolean> isInventory = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    //private Optional<Boolean> isPurchase = Optional.empty();
     private Optional<Boolean> isPurchase = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    //private Optional<Boolean> isSales = Optional.empty();
     private Optional<Boolean> isSales = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    //private Optional<Boolean> isProduction = Optional.empty();
     private Optional<Boolean> isProduction = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
