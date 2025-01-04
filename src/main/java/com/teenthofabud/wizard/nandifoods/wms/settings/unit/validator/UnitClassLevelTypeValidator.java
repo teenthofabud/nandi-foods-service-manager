@@ -15,6 +15,8 @@ import java.lang.annotation.*;
 @ReportAsSingleViolation
 public @interface UnitClassLevelTypeValidator {
 
+    boolean mandatory() default true;
+
     String message() default "Level and type does not belong to each other";
 
     Class<?>[] groups() default {};

@@ -54,14 +54,13 @@ public class ServiceConfiguration {
     @Bean
     public BeanUtilsBean beanUtilsBean() {
         OptionalStringToEnumTypeUtilsConverter optionalStringToEnumTypeUtilsConverter = OptionalStringToEnumTypeUtilsConverter.builder().build();
-        OptionalStringToEnumKeyValueTypeUtilsConverter optionalStringToEnumKeyValueTypeUtilsConverter = OptionalStringToEnumKeyValueTypeUtilsConverter.builder().build();
         BeanUtilsBean beanUtilsBean = BeanUtilsBean2.getInstance();
         beanUtilsBean.getConvertUtils().register(OptionalLocalDateTypeUtilsConverter.builder().build(), LocalDate.class);
         beanUtilsBean.getConvertUtils().register(OptionalBooleanTypeUtilsConverter.builder().build(), Boolean.class);
         beanUtilsBean.getConvertUtils().register(OptionalStringTypeUtilsConverter.builder().build(), String.class);
         beanUtilsBean.getConvertUtils().register(OptionalStringToDoubleTypeUtilsConverter.builder().build(), Double.class);
         beanUtilsBean.getConvertUtils().register(OptionalStringToIntegerTypeUtilsConverter.builder().build(), Integer.class);
-        beanUtilsBean.getConvertUtils().register(optionalStringToEnumKeyValueTypeUtilsConverter, UnitClassLevelType.class);
+        beanUtilsBean.getConvertUtils().register(OptionalStringToEnumKeyValueTypeUtilsConverter.builder().build(), UnitClassLevelType.class);
         beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, UnitClassStatus.class);
         beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, MetricSystem.class);
         return beanUtilsBean;
