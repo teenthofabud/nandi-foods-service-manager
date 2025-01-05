@@ -19,10 +19,10 @@ public class UOMPageDto extends PageDto {
 
     @OptionalTypeAttributeValidator(clazz = UOMVo.class)
     @Builder.Default
-    private Optional<String> sort = Optional.of("");
+    private Optional<String> sort = Optional.empty();
 
     @OptionalEnumValidator(enumClazz = UnitClassStatus.class)
     @Builder.Default
-    private Optional<String> status = Optional.of("");
+    private Optional<String> status = Optional.empty();
 
 }

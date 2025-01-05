@@ -144,8 +144,7 @@ public class UnitServiceImpl implements UnitService {
         CSVWriter writer = new CSVWriter(streamWriter);
         ColumnPositionNameMappingStrategy<UOMVo> mappingStrategy = new ColumnPositionNameMappingStrategy<UOMVo>(UOMVo.class);
         mappingStrategy.setType(UOMVo.class);
-        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
-        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
+        List<UOMVo> uomVoList = getUOMList();
         //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MetricSystem.SI);
         //List<UOMSummaryVo> uomSummaryVoList = uomSummaryList.stream().map(f -> uomSummaryProjectionToVoConverter.convert(f)).collect(Collectors.toList());
         StatefulBeanToCsv<UOMVo> sbc = new StatefulBeanToCsvBuilder<UOMVo>(writer)
@@ -174,6 +173,14 @@ public class UnitServiceImpl implements UnitService {
         return fileDto;
     }
 
+    private List<UOMVo> getUOMList() {
+        UOMPageDto uomPageDto = UOMPageDto.builder().build();
+        Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
+        List<UOMEntity> uomEntityList = uomJpaRepository.findAll(pageable.getSort());
+        List<UOMVo> uomVoList = uomEntityList.stream().map(i -> uomEntityToVoConverter.convert(i)).collect(Collectors.toList());
+        return uomVoList;
+    }
+
     @Override
     public FileDto downloadUOMAsPDF() throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -193,8 +200,7 @@ public class UnitServiceImpl implements UnitService {
                         .setBackgroundColor(DeviceGray.GRAY))
                 .setTextAlignment(TextAlignment.LEFT));
 
-        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
-        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
+        List<UOMVo> uomVoList = getUOMList();
         log.debug("Creating UOM list in PDF with {} UOMs", uomVoList.size());
         uomVoList.stream().forEach(f ->
                 fields.stream().forEach(d -> {

@@ -11,7 +11,6 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = UnitClassLevelTypeValidatorImpl.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE})
-@NotNull(message = "Value cannot be null")
 @ReportAsSingleViolation
 public @interface UnitClassLevelTypeValidator {
 
