@@ -1,0 +1,25 @@
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter;
+
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.OptionalUnitClassMeasuredValuesDtoCollection;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassMeasuredValuesDto;
+import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.Converter;
+
+import java.util.Set;
+
+public class OptionalUnitClassMeasuredValuesDtoToUnitClassMeasuredValuesEntityConverter implements Converter {
+    @Override
+    public <T> T convert(Class<T> type, Object value) {
+        OptionalUnitClassMeasuredValuesDtoCollection optionalUnitClassMeasuredValuesDtoCollection = (OptionalUnitClassMeasuredValuesDtoCollection) type.cast(value);
+        if(optionalUnitClassMeasuredValuesDtoCollection.getMeasuredValues().isEmpty()) {
+            throw new ConversionException("No value provided for conversion");
+        }
+        Set<UnitClassMeasuredValuesDto> measuredValues = optionalUnitClassMeasuredValuesDtoCollection.getMeasuredValues().get();
+        if(measuredValues.isEmpty()) {
+            throw new ConversionException("No value provided for conversion");
+        } else {
+            measuredValues.stream().map(f -> )
+        }
+        return (T) b;
+    }
+}

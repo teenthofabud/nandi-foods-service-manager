@@ -2,8 +2,8 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.impl;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.UnitAPI;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.UnitClassAPI;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitClassService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,16 +31,16 @@ import static org.springframework.util.StreamUtils.BUFFER_SIZE;
 
 @Slf4j
 @RestController
-@RequestMapping(path = UnitAPI.BASE_URI)
-public class UnitController implements UnitAPI {
+@RequestMapping(path = UnitClassAPI.BASE_URI)
+public class UnitClassController implements UnitClassAPI {
 
-    private UnitService unitService;
+    private UnitClassService unitClassService;
     private Validator validator;
 
     @Autowired
-    public UnitController(UnitService unitService,
-                          Validator validator) {
-        this.unitService = unitService;
+    public UnitClassController(UnitClassService unitClassService,
+                               Validator validator) {
+        this.unitClassService = unitClassService;
         this.validator = validator;
     }
 
@@ -55,10 +55,10 @@ public class UnitController implements UnitAPI {
         Optional<FileDto> optionalFileDto = Optional.empty();
         switch (accept) {
             case MediaType.APPLICATION_PDF_VALUE :
-                optionalFileDto = Optional.ofNullable(unitService.downloadUOMAsPDF());
+                optionalFileDto = Optional.ofNullable(unitClassService.downloadUOMAsPDF());
                 break;
             case HttpMediaType.TEXT_CSV :
-                optionalFileDto = Optional.ofNullable(unitService.downloadUOMAsCSV());
+                optionalFileDto = Optional.ofNullable(unitClassService.downloadUOMAsCSV());
                 break;
             default: throw e;
         }
@@ -114,7 +114,7 @@ public class UnitController implements UnitAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        UOMPageImplVo uomPageImplVo = unitService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
+        UOMPageImplVo uomPageImplVo = unitClassService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 
@@ -137,7 +137,7 @@ public class UnitController implements UnitAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        UOMPageImplVo uomPageImplVo = unitService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
+        UOMPageImplVo uomPageImplVo = unitClassService.retrieveUOMByLongName(Optional.ofNullable(longName), uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 
@@ -163,12 +163,12 @@ public class UnitController implements UnitAPI {
         if (!optionalQueryViolations.isEmpty()) {
             throw new ConstraintViolationException(optionalQueryViolations);
         }
-        UOMPageImplVo uomPageImplVo = unitService.retrieveUOMWithinRange(optionalQuery, uomPageDto);
+        UOMPageImplVo uomPageImplVo = unitClassService.retrieveUOMWithinRange(optionalQuery, uomPageDto);
         return ResponseEntity.ok(uomPageImplVo);
     }
 
     @Override
     public String getContext() {
-        return "UnitController";
+        return "UnitClassController";
     }
 }

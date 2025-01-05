@@ -244,7 +244,7 @@ public class UOMServiceImpl implements UOMService {
         return unitClassMeasuredValuesVo;
     }
 
-    private void validateDuplicateItems(UOMForm form) {
+    private void validateMutualRelationsBetweenCollectionItems(UOMForm form) {
         if(form.getLinkedUOMs().isPresent()) {
             List<UnitClassSelfLinkageForm> selfLinksList = form.getLinkedUOMs().get();
             Set<UnitClassSelfLinkageForm> selfLinksSet = selfLinksList.stream().collect(Collectors.toSet());
@@ -253,15 +253,21 @@ public class UOMServiceImpl implements UOMService {
                 throw new IllegalStateException("Duplicate UOM self links");
             }
         }
-        Optional<UnitClassMeasuredValuesForm> optionalSIMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.SI.name()) == 0).findFirst();
-        Optional<UnitClassMeasuredValuesForm> optionalImperialMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(MetricSystem.IMPERIAL.name()) == 0).findFirst();
-        if(optionalSIMeasuredValues.isEmpty()) {
-            log.debug("Duplicate measured values for SI metric system");
-            throw new IllegalStateException("Duplicate SI measured values");
+        validateMutualRelationsBetweenMeasuredValues(form, MetricSystem.IMPERIAL);
+        validateMutualRelationsBetweenMeasuredValues(form, MetricSystem.SI);
+    }
+
+    private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MetricSystem metricSystem) {
+        Optional<UnitClassMeasuredValuesForm> optionalMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(metricSystem.name()) == 0).findFirst();
+        if(optionalMeasuredValues.isEmpty()) {
+            log.debug("Duplicate measured values for {} metric system", metricSystem);
+            throw new IllegalStateException("Duplicate " + metricSystem + " measured values");
         }
-        if(optionalImperialMeasuredValues.isEmpty()) {
-            log.debug("Duplicate measured values for Imperial metric system");
-            throw new IllegalStateException("Duplicate Imperial measured values");
+        int expectedMetricSystemIndex = metricSystem.getOrdinal(); // because set puts unit measured values according to lexicographic arrangement
+        int actualMetricSystemIndex = new ArrayList<UnitClassMeasuredValuesForm>(form.getMeasuredValues()).get(expectedMetricSystemIndex).getMetricSystem().compareTo(metricSystem.name());
+        if(expectedMetricSystemIndex != actualMetricSystemIndex) {
+            log.debug("Measured values at index {} should be for {} metric system", metricSystem.getOrdinal(), metricSystem);
+            throw new IllegalArgumentException("Measured values at index " + metricSystem.getOrdinal() + " should be for " + metricSystem + " metric system");
         }
     }
 
@@ -273,7 +279,7 @@ public class UOMServiceImpl implements UOMService {
             throw new IllegalStateException("UOM already exists with id: " + form.getCode());
         }
 
-        validateDuplicateItems(form);
+        validateMutualRelationsBetweenCollectionItems(form);
 
         // Save UOM
         final UOMEntity uomEntity = uomFormToEntityConverter.convert(form);

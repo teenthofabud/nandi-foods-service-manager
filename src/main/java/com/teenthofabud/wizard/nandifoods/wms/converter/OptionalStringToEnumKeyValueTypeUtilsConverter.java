@@ -16,10 +16,8 @@ public class OptionalStringToEnumKeyValueTypeUtilsConverter implements Converter
         if(optionalEnumValName.isEmpty()) {
             throw new ConversionException("No value provided for conversion");
         }
-
         EnumKeyValue[] enumConstants = (EnumKeyValue[]) type.getEnumConstants();
         String enumValName = optionalEnumValName.get().toUpperCase();
-
         for (EnumKeyValue enumConstant : enumConstants) {
             boolean isKey = enumConstant.getKey().toUpperCase().compareTo(enumValName.toUpperCase()) == 0;
             boolean isValue = enumConstant.getValue().toUpperCase().compareTo(enumValName.toUpperCase()) == 0;
@@ -27,7 +25,6 @@ public class OptionalStringToEnumKeyValueTypeUtilsConverter implements Converter
                 return (T) enumConstant;
             }
         }
-
         throw new ConversionException(String.format("Failed to convert %s value to %s class", enumValName, type.toString()));
     }
 }

@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UnitClassMeasuredValuesForm {
+public class UnitClassMeasuredValuesForm implements Comparable<UnitClassMeasuredValuesForm> {
 
     @EnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
     @EqualsAndHashCode.Include
@@ -40,4 +40,8 @@ public class UnitClassMeasuredValuesForm {
     @DecimalMin(value = "0.1", message = "weight cannot be zero or less")
     private Double weightValue;
 
+    @Override
+    public int compareTo(UnitClassMeasuredValuesForm o) {
+        return this.getMetricSystem().compareTo(o.getMetricSystem());
+    }
 }

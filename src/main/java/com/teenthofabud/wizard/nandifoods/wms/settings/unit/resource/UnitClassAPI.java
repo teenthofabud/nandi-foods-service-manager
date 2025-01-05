@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Tag(name = "UnitAPI", description = "Unit Class Reports")
-public interface UnitAPI extends BaseUnitClassAPI {
+@Tag(name = "UnitClassAPI", description = "Unit Class Reports")
+public interface UnitClassAPI extends BaseUnitClassAPI {
 
     public static final String BASE_URI = BaseUnitClassAPI.BASE_URI;
 

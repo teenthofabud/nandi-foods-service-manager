@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
@@ -13,7 +14,6 @@ import com.teenthofabud.wizard.nandifoods.wms.validator.order.SecondOrder;
 import jakarta.validation.GroupSequence;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -55,10 +55,14 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<@FutureOrPresent(groups = FirstOrder.class) @UntilDays(count = 91, groups = SecondOrder.class) LocalDate> effectiveDate = Optional.ofNullable(null);
+    protected Optional<@FutureOrPresent(groups = FirstOrder.class) @UntilDays(mandatory = false, count = 91, groups = SecondOrder.class) LocalDate> effectiveDate = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
+    @JsonUnwrapped
+    protected Optional<@Valid UnitClassMeasuredValuesDtoCollection> measuredValuesDtoCollection = Optional.empty();
+    //protected Optional<@Valid UnitClassMeasuredValuesDtoCollection> measuredValuesDtoCollection = Optional.of(UnitClassMeasuredValuesDtoCollection.builder().build());
+    //protected OptionalUnitClassMeasuredValuesDtoCollection measuredValuesDtoCollection = OptionalUnitClassMeasuredValuesDtoCollection.builder().build();
     //protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(new ArrayList<>());
     /*protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
             = Optional.of(
@@ -67,8 +71,8 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
                             UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
                     )
     );*/
-    protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
-            = Optional.of(new HashSet<>(Collections.nCopies(2, UnitClassMeasuredValuesDto.builder().build())));
+    /*protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
+            = Optional.of(new HashSet<>(Collections.nCopies(2, UnitClassMeasuredValuesDto.builder().build())));*/
 
     /*@JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default

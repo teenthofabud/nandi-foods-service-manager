@@ -8,10 +8,13 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.teenthofabud.wizard.nandifoods.wms.converter.*;
-import com.teenthofabud.wizard.nandifoods.wms.handler.OptionalCollectionComparator;
+import com.teenthofabud.wizard.nandifoods.wms.handler.OptionalUnitClassMeasuredValuesDtoCollectionComparator;
+import com.teenthofabud.wizard.nandifoods.wms.handler.UnitClassMeasuredValuesDtoCollectionComparator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.OptionalUnitClassMeasuredValuesDtoCollection;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassMeasuredValuesDtoCollection;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -70,7 +73,8 @@ public class ServiceConfiguration {
     public Javers javers() {
         return JaversBuilder
                 .javers()
-                //.registerValue(optionalCollectionType, new OptionalCollectionComparator())
+                .registerValue(OptionalUnitClassMeasuredValuesDtoCollection.class, new OptionalUnitClassMeasuredValuesDtoCollectionComparator())
+                .registerValue(UnitClassMeasuredValuesDtoCollection.class, new UnitClassMeasuredValuesDtoCollectionComparator())
                 .build();
     }
 

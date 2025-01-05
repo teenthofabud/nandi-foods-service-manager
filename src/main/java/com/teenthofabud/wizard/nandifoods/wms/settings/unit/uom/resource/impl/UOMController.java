@@ -85,8 +85,7 @@ public class UOMController implements UOMAPI {
     }
 
     private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
-        UOMDto blankUOMDto = new UOMDto();
-        JsonNode blankUOMDtoNode = mapper.convertValue(blankUOMDto, JsonNode.class);
+        JsonNode blankUOMDtoNode = mapper.convertValue(UOMDto.builder().build(), JsonNode.class);
         JsonNode patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
         UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, UOMDto.class);
         log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));

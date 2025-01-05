@@ -10,16 +10,21 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class UntilDaysValidatorImpl implements ConstraintValidator<UntilDays, LocalDate> {
 
     int count = 0;
+    boolean mandatory;
 
     @Override
     public void initialize(UntilDays constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
         this.count = constraintAnnotation.count();
+        this.mandatory = constraintAnnotation.mandatory();
     }
 
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        long differenceInDays = DAYS.between(LocalDate.now(), value);
-        return differenceInDays >= 0 && differenceInDays <= count;
+        if(mandatory) {
+            long differenceInDays = DAYS.between(LocalDate.now(), value);
+            return differenceInDays >= 0 && differenceInDays <= count;
+        }
+        return true;
     }
 }

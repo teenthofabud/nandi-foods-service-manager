@@ -11,11 +11,9 @@ public class OptionalStringToDoubleTypeUtilsConverter implements Converter {
     @Override
     public <T> T convert(Class<T> type, Object value) {
         Optional<String> doubleValName = (Optional<String>) value;
-
         if(doubleValName.isEmpty()) {
             throw new ConversionException("No value provided for conversion");
         }
-
         return (T) Double.valueOf(doubleValName.get());
     }
 }

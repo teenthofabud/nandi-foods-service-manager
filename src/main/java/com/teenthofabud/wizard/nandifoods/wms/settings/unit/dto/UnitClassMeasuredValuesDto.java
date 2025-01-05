@@ -10,14 +10,13 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class UnitClassMeasuredValuesDto {
 
-    @EqualsAndHashCode.Include
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     @OptionalEnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")

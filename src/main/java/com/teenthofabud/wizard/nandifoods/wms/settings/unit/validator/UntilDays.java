@@ -15,6 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = UntilDaysValidatorImpl.class)
 @Documented
 public @interface UntilDays {
+    boolean mandatory() default true;
     String message() default "Date can't be greater than {count} days from now";
     Class<?>[] groups() default {};
     int count();

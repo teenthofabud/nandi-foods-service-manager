@@ -7,7 +7,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo
 import java.io.IOException;
 import java.util.Optional;
 
-public interface UnitService {
+public interface UnitClassService {
 
    public UOMPageImplVo retrieveUOMByLongName(Optional<String> optionalLongName, UOMPageDto uomPageDto);
 

@@ -18,7 +18,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ColumnPositionNameMappingStrategy;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitService;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitClassService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class UnitServiceImpl implements UnitService {
+public class UnitClassServiceImpl implements UnitClassService {
 
     private UOMJpaRepository uomJpaRepository;
     private UOMEntityToVoConverter uomEntityToVoConverter;
@@ -63,15 +63,15 @@ public class UnitServiceImpl implements UnitService {
     private String pdfFileNameFormat;
 
     @Autowired
-    public UnitServiceImpl(UOMJpaRepository uomJpaRepository,
-                           UOMEntityToVoConverter uomEntityToVoConverter,
-                           UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
-                           UOMPageDtoToPageableConverter uomPageDtoToPageableConverter,
-                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
-                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
-                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
-                           @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat,
-                           @Value("${wms.settings.uom.fileNameFormat.pdf}") String pdfFileNameFormat) {
+    public UnitClassServiceImpl(UOMJpaRepository uomJpaRepository,
+                                UOMEntityToVoConverter uomEntityToVoConverter,
+                                UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
+                                UOMPageDtoToPageableConverter uomPageDtoToPageableConverter,
+                                //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
+                                @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
+                                @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
+                                @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat,
+                                @Value("${wms.settings.uom.fileNameFormat.pdf}") String pdfFileNameFormat) {
         this.uomJpaRepository = uomJpaRepository;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
         this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
