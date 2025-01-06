@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 public class OptionalEnumValidatorImpl implements ConstraintValidator<OptionalEnumValidator, Optional<String>> {
 
     List<String> valueList = null;

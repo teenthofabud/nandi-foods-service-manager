@@ -6,13 +6,13 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSyst
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -25,9 +25,11 @@ public class UnitClassMeasuredValuesDtoCollection {
     @Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified")
     protected Set<@Valid UnitClassMeasuredValuesDto> measuredValues
             //= Optional.of(new HashSet<>(Collections.nCopies(2, UnitClassMeasuredValuesDto.builder().build())));
-            = Set.of(
-            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
-            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+            = new TreeSet<UnitClassMeasuredValuesDto>(
+                    Set.of(
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                    )
     );
 
     /*public UnitClassMeasuredValuesDto() {

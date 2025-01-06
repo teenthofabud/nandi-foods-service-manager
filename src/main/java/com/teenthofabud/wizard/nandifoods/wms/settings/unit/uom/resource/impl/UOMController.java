@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -87,7 +88,7 @@ public class UOMController implements UOMAPI {
     private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
         JsonNode blankUOMDtoNode = mapper.convertValue(UOMDto.builder().build(), JsonNode.class);
         JsonNode patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
-        UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, UOMDto.class);
+        UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDto>() {});
         log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
         return patcheUOMDto;
     }

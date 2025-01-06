@@ -258,17 +258,17 @@ public class UOMServiceImpl implements UOMService {
     }
 
     private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MetricSystem metricSystem) {
-        Optional<UnitClassMeasuredValuesForm> optionalMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(metricSystem.name()) == 0).findFirst();
-        if(optionalMeasuredValues.isEmpty()) {
-            log.debug("Duplicate measured values for {} metric system", metricSystem);
-            throw new IllegalStateException("Duplicate " + metricSystem + " measured values");
+       Long countMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(metricSystem.name()) == 0).count();
+        if(countMeasuredValues != 1l) {
+            log.debug("Invalid number : {} of measured values for {} metric system", countMeasuredValues, metricSystem);
+            throw new IllegalArgumentException("Invalid count of " + metricSystem.name() + " measured values");
         }
-        int expectedMetricSystemIndex = metricSystem.getOrdinal(); // because set puts unit measured values according to lexicographic arrangement
+        /*int expectedMetricSystemIndex = metricSystem.getOrdinal(); // because set puts unit measured values according to lexicographic arrangement
         int actualMetricSystemIndex = new ArrayList<UnitClassMeasuredValuesForm>(form.getMeasuredValues()).get(expectedMetricSystemIndex).getMetricSystem().compareTo(metricSystem.name());
         if(expectedMetricSystemIndex != actualMetricSystemIndex) {
             log.debug("Measured values at index {} should be for {} metric system", metricSystem.getOrdinal(), metricSystem);
-            throw new IllegalArgumentException("Measured values at index " + metricSystem.getOrdinal() + " should be for " + metricSystem + " metric system");
-        }
+            throw new IllegalArgumentException("Measured values at index " + metricSystem.getOrdinal() + " should be for " + metricSystem.name() + " metric system");
+        }*/
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
@@ -60,8 +61,17 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     @JsonUnwrapped
-    protected Optional<@Valid UnitClassMeasuredValuesDtoCollection> measuredValuesDtoCollection = Optional.empty();
-    //protected Optional<@Valid UnitClassMeasuredValuesDtoCollection> measuredValuesDtoCollection = Optional.of(UnitClassMeasuredValuesDtoCollection.builder().build());
+    protected Optional<@Valid UnitClassMeasuredValuesDtoCollection> measuredValuesDtoCollection = Optional.of(
+            UnitClassMeasuredValuesDtoCollection
+                    .builder()
+                    .measuredValues(new TreeSet<UnitClassMeasuredValuesDto>(
+                            Set.of(
+                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
+                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                            )
+                    ))
+                    .build()
+    );
     //protected OptionalUnitClassMeasuredValuesDtoCollection measuredValuesDtoCollection = OptionalUnitClassMeasuredValuesDtoCollection.builder().build();
     //protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") List<@Valid UnitClassMeasuredValuesDto>> measuredValues = Optional.of(new ArrayList<>());
     /*protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues

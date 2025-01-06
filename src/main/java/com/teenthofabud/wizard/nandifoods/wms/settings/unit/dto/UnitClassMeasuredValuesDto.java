@@ -3,7 +3,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
-import com.teenthofabud.wizard.nandifoods.wms.validator.OptionalEnumValidator;
+import com.teenthofabud.wizard.nandifoods.wms.validator.OptionalEnumKeyValueValidator;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,21 +15,20 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class UnitClassMeasuredValuesDto {
+@Getter
+@Setter
+public class UnitClassMeasuredValuesDto implements Comparable<UnitClassMeasuredValuesDto> {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    @OptionalEnumValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
+    @OptionalEnumKeyValueValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
     protected Optional<String> metricSystem = Optional.empty();
 
-    @Getter
-    @Setter
+
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     private Optional<@DecimalMin(value = "0.1", message = "length cannot be zero or less") Double> lengthValue = Optional.empty();
 
-    @Getter
-    @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     private Optional<@DecimalMin(value = "0.1", message = "width cannot be zero or less") Double>  widthValue = Optional.empty();
@@ -38,17 +37,18 @@ public class UnitClassMeasuredValuesDto {
     @Builder.Default
     private Optional<@DecimalMin(value = "0.1", message = "height cannot be zero or less") Double>  heightValue = Optional.empty();
 
-    @Getter
-    @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     private Optional<@DecimalMin(value = "0.1", message = "volume cannot be zero or less") Double>  volumeValue = Optional.empty();
 
-    @Getter
-    @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
     private Optional<@DecimalMin(value = "0.1", message = "weight cannot be zero or less") Double>  weightValue = Optional.empty();
+
+    @Override
+    public int compareTo(UnitClassMeasuredValuesDto o) {
+        return MetricSystem.valueOf(this.metricSystem.get()).compareTo(MetricSystem.valueOf(o.getMetricSystem().get()));
+    }
 
     /*public UnitClassMeasuredValuesDto() {
         this.lengthValue = Optional.empty();
