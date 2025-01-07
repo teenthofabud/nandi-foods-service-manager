@@ -10,6 +10,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.handler.JsonFlattener;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.resource.UOMAPI;
@@ -93,9 +94,9 @@ public class UOMController implements UOMAPI {
         return patcheUOMDto;
     }
 
-    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    //@PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @PathVariable(name = "id") JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         if(ObjectUtils.isEmpty(jsonPatch)) {
             throw new IllegalArgumentException("Json patch with changes is required");
         }
@@ -105,6 +106,13 @@ public class UOMController implements UOMAPI {
             throw new ConstraintViolationException(violations);
         }
         uomService.updateExistingUOMByCode(code, patcheUOMDto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @Override
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException {
+        uomService.updateExistingUOMByCode(code, sourceUOMDto);
         return ResponseEntity.noContent().build();
     }
 

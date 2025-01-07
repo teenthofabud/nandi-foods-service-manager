@@ -1,9 +1,9 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MeasurementSystemVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelTypeVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassConstantVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,32 +21,41 @@ public interface UnitMetadataAPI extends BaseUnitClassAPI {
 
     public static final String BASE_URI = BaseUnitClassAPI.BASE_URI + "/metadata";
 
-    @Operation(method = "GET", summary = "Get all metric systems and their units", description = "getMetricSystems")
+    @Operation(hidden = true, method = "GET", summary = "Get all metric systems and their units", description = "getMetricSystems")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved Metric Systems and their units",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                            schema = @Schema(implementation = MetricSystemVo.class)
+                            schema = @Schema(implementation = MeasurementSystemVo.class)
                     )))
     })
-    public ResponseEntity<List<MetricSystemVo>> getMetricSystems();
+    public ResponseEntity<List<MeasurementSystemVo>> getMetricSystems();
+
+    @Operation(method = "GET", summary = "Get all measurement systems and their units", description = "getMeasurementSystems")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieved Measurement systems and their units",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                            schema = @Schema(implementation = MeasurementSystemVo.class)
+                    )))
+    })
+    public ResponseEntity<List<MeasurementSystemVo>> getMeasurementSystems();
 
     @Operation(method = "GET", summary = "Get all Unit Class types", description = "getUnitClassTypes")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved Unit Class types",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                            schema = @Schema(implementation = UnitClassTypeVo.class)
+                            schema = @Schema(implementation = UnitClassConstantVo.class)
                     )))
     })
-    public ResponseEntity<List<UnitClassTypeVo>> getUnitClassTypes();
+    public ResponseEntity<List<UnitClassConstantVo>> getUnitClassTypes();
 
     @Operation(method = "GET", summary = "Get all Unit Class levels", description = "getUnitClassLevels")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieved Unit Class levels",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                            schema = @Schema(implementation = UnitClassLevelVo.class)
+                            schema = @Schema(implementation = UnitClassLevelTypeVo.class)
                     )))
     })
-    public ResponseEntity<List<UnitClassLevelVo>> getUnitClassLevels();
+    public ResponseEntity<List<UnitClassLevelTypeVo>> getUnitClassLevels();
 
     @Operation(method = "GET", summary = "Get all Unit Class statuses", description = "getUnitClassStatuses")
     @ApiResponses(value = {

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.teenthofabud.wizard.nandifoods.wms.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.handler.OptionalUnitClassMeasuredValuesDtoCollectionComparator;
 import com.teenthofabud.wizard.nandifoods.wms.handler.UnitClassMeasuredValuesDtoCollectionComparator;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.OptionalUnitClassMeasuredValuesDtoCollection;
@@ -65,7 +65,7 @@ public class ServiceConfiguration {
         beanUtilsBean.getConvertUtils().register(OptionalStringToIntegerTypeUtilsConverter.builder().build(), Integer.class);
         beanUtilsBean.getConvertUtils().register(OptionalStringToEnumKeyValueTypeUtilsConverter.builder().build(), UnitClassLevelType.class);
         beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, UnitClassStatus.class);
-        beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, MetricSystem.class);
+        beanUtilsBean.getConvertUtils().register(optionalStringToEnumTypeUtilsConverter, MeasurementSystem.class);
         return beanUtilsBean;
     }
 

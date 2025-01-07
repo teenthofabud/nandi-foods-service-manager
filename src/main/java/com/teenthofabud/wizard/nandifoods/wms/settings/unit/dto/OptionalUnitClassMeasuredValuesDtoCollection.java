@@ -2,7 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -26,8 +26,8 @@ public class OptionalUnitClassMeasuredValuesDtoCollection {
             //= Optional.of(new HashSet<>(Collections.nCopies(2, UnitClassMeasuredValuesDto.builder().build())));
             = Optional.of(
                     Set.of(
-                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
-                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MeasurementSystem.SI.name())).build(),
+                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MeasurementSystem.IMPERIAL.name())).build()
                     )
     );
 

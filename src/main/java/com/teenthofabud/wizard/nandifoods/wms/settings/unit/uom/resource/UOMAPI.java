@@ -6,6 +6,8 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
@@ -47,6 +49,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
     public ResponseEntity<Void> postUOM(@RequestBody(description = "UOM form", required = true,
             content = @Content(schema = @Schema(implementation = UOMForm.class))) UOMForm form);
 
+    @Hidden
     @Operation(method = "PATCH", summary = "UOM edit", description = "patchUOMById")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "UOM edited")
@@ -57,6 +60,14 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     array = @ArraySchema(
                             schema = @Schema(implementation = JsonPatchOperation.class)
                     ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
+
+    @Operation(method = "PATCH", summary = "UOM edit", description = "patchUOMById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "UOM edited")
+    })
+    @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "UOM dto", required = true,
+            content = @Content(schema = @Schema(implementation = UOMDtoV2.class))) UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException;
 
     @Operation(method = "PATCH", summary = "UOM approval", description = "approveSavedUOMById")
     @ApiResponses(value = {

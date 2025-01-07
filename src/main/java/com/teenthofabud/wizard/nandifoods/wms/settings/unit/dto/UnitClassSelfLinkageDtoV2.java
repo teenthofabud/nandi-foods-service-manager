@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -13,9 +13,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class UnitClassSelfLinkageForm extends UnitClassLinkageForm {
+public class UnitClassSelfLinkageDtoV2 extends UnitClassLinkageDtoV2 {
 
-    //@NotNull(message = "quantity value is required")
     @Min(value = 1, message = "minimum quantity value is 1")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "number of UOMs linked to")
     protected Integer quantity;

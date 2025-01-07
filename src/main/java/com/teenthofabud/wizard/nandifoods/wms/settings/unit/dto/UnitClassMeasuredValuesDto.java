@@ -2,7 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.validator.OptionalEnumKeyValueValidator;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
@@ -21,7 +21,7 @@ public class UnitClassMeasuredValuesDto implements Comparable<UnitClassMeasuredV
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    @OptionalEnumKeyValueValidator(enumClazz = MetricSystem.class, message = "Metric system is invalid")
+    @OptionalEnumKeyValueValidator(enumClazz = MeasurementSystem.class, message = "Metric system is invalid")
     protected Optional<String> metricSystem = Optional.empty();
 
 
@@ -47,7 +47,7 @@ public class UnitClassMeasuredValuesDto implements Comparable<UnitClassMeasuredV
 
     @Override
     public int compareTo(UnitClassMeasuredValuesDto o) {
-        return MetricSystem.valueOf(this.metricSystem.get()).compareTo(MetricSystem.valueOf(o.getMetricSystem().get()));
+        return MeasurementSystem.valueOf(this.metricSystem.get()).compareTo(MeasurementSystem.valueOf(o.getMetricSystem().get()));
     }
 
     /*public UnitClassMeasuredValuesDto() {

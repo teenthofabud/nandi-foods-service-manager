@@ -3,9 +3,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
 import com.teenthofabud.wizard.nandifoods.wms.audit.AuditListener;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassAttributeConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassLevelAttributeConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassTypeAttributeConverter;
@@ -51,17 +49,17 @@ public abstract class UnitClassEntity implements Auditable {
     @Column(name = "class", nullable = false)
     @Convert(converter = UnitClassAttributeConverter.class)
     @EqualsAndHashCode.Include
-    protected UnitClassType _class;
+    protected UnitClass _class;
 
     @Column(name = "level", nullable = false)
     @Convert(converter = UnitClassLevelAttributeConverter.class)
     @EqualsAndHashCode.Include
-    protected UnitClassLevelType level;
+    protected UnitClassLevel level;
 
     @Column(name = "type", nullable = false)
     @Convert(converter = UnitClassTypeAttributeConverter.class)
     @EqualsAndHashCode.Include
-    protected UnitClassLevelType type;
+    protected UnitClassType type;
 
     @Column(nullable = false)
     @Convert(converter = UnitClassStatusAttributeConverter.class)

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.Nulls;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevel;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UntilDays;
@@ -34,7 +36,7 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
-    protected Optional<String> level = Optional.empty();
+    protected Optional<UnitClassLevel> level = Optional.empty();
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
@@ -44,7 +46,7 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
     @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("name")
     @Builder.Default
-    protected Optional<String> type = Optional.ofNullable(null);
+    protected Optional<UnitClassType> type = Optional.ofNullable(null);
 
     @JsonSetter(nulls = Nulls.SKIP)
     @Builder.Default
@@ -66,8 +68,8 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
                     .builder()
                     .measuredValues(new TreeSet<UnitClassMeasuredValuesDto>(
                             Set.of(
-                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
-                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MeasurementSystem.SI.name())).build(),
+                                    UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MeasurementSystem.IMPERIAL.name())).build()
                             )
                     ))
                     .build()
@@ -77,8 +79,8 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
     /*protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
             = Optional.of(
                     Set.of(
-                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.SI.name())).build(),
-                            UnitClassMeasuredValuesDto.builder().metricSystem(Optional.of(MetricSystem.IMPERIAL.name())).build()
+                            UnitClassMeasuredValuesDto.builder().measurementSystem(Optional.of(MeasurementSystem.SI.name())).build(),
+                            UnitClassMeasuredValuesDto.builder().measurementSystem(Optional.of(MeasurementSystem.IMPERIAL.name())).build()
                     )
     );*/
     /*protected Optional<@Size(min = 1, max = 2, message = "Either or both of imperial and metric measured values must be specified") Set<@Valid UnitClassMeasuredValuesDto>> measuredValues
@@ -104,12 +106,12 @@ public abstract class UnitClassDto implements UnitClassLevelContract {
     }*/
 
     @Override
-    public String getLevelValue() {
-        return this.level.isPresent() ? this.level.get() : "";
+    public UnitClassLevel getLevel() {
+        return this.level.isPresent() ? this.level.get() : null;
     }
 
     @Override
-    public String getTypeValue() {
-        return this.type.isPresent() ? this.type.get() : "";
+    public UnitClassType getType() {
+        return this.type.isPresent() ? this.type.get() : null;
     }
 }

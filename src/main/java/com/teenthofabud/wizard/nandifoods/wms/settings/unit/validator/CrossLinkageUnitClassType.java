@@ -1,6 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Constraint(validatedBy = CrossLinkageUnitClassTypeValidator.class)
 public @interface CrossLinkageUnitClassType {
-    UnitClassType[] anyOf();
+    UnitClass[] anyOf();
     String message() default "must be any of {anyOf}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

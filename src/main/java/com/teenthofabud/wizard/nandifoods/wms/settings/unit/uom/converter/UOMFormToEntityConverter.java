@@ -1,8 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import org.springframework.core.convert.converter.Converter;
@@ -15,17 +13,17 @@ public class UOMFormToEntityConverter implements Converter<UOMForm, UOMEntity> {
     @Override
     public UOMEntity convert(UOMForm source) {
         String longName = StringUtils.hasText(source.getLongName()) ? source.getLongName()
-                : String.format("%s %s (%s)", source.getCode(), source.getType(), source.getDescription());
+                : String.format("%s %s (%s)", source.getDescription(), source.getType(), source.getDescription());
         String shortName = StringUtils.hasText(source.getShortName()) ? source.getShortName()
                 : String.format("%s (%s)", source.getType(), source.getCode());
         UOMEntity target = UOMEntity.builder()
                 .code(source.getCode())
-                ._class(UnitClassType.UOM)
+                ._class(UnitClass.UOM)
                 .description(source.getDescription())
                 .longName(longName)
                 .shortName(shortName)
-                .level(UnitClassLevelType.getByLevel(source.getLevel()))
-                .type(UnitClassLevelType.getByType(source.getType()))
+                .level(source.getLevel())
+                .type(source.getType())
                 .bulkCode(source.getBulkCode())
                 .status(UnitClassStatus.PENDING)
                 .isInventory(source.getIsInventory())

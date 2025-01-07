@@ -14,4 +14,5 @@ public abstract class UnitClassLinkVo {
 
     protected Integer quantity;
 
+
 }

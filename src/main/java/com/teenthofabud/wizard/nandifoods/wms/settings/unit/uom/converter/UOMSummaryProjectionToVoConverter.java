@@ -11,7 +11,7 @@ public class UOMSummaryProjectionToVoConverter implements Converter<UOMSummaryPr
     @Override
     public UOMSummaryVo convert(UOMSummaryProjection source) {
         UOMSummaryVo target = UOMSummaryVo.builder()
-                .type(source.getLevelType().getType())
+                .type(source.getLevelType().getValue())
                 .description(source.getDescription())
                 .code(source.getCode())
                 .bulkCode(source.getBulkCode())

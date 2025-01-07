@@ -15,9 +15,9 @@ import com.opencsv.bean.*;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ColumnPositionNameMappingStrategy;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
@@ -33,14 +33,10 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCro
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMPULinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMPageDtoToPageableConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSummaryProjectionToVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
@@ -52,9 +48,9 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMe
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassSelfLinkageVo;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
@@ -111,6 +107,8 @@ public class UOMServiceImpl implements UOMService {
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
     private Javers javers;
     private UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter;
+    private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+    private UOMEntityToDtoV2Converter uomEntityToDtoV2Converter;
     //private Reflections reflections;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
@@ -141,6 +139,8 @@ public class UOMServiceImpl implements UOMService {
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
                           UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter,
+                          UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
+                          UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
                           //Reflections reflections,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
@@ -168,6 +168,8 @@ public class UOMServiceImpl implements UOMService {
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
         this.uomSummaryProjectionToVoConverter = uomSummaryProjectionToVoConverter;
+        this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+        this.uomEntityToDtoV2Converter = uomEntityToDtoV2Converter;
         //this.reflections = reflections;
         this.searchFields = searchFields;
         this.fileNameDateFormat = fileNameDateFormat;
@@ -180,7 +182,7 @@ public class UOMServiceImpl implements UOMService {
         UOMMeasuredValuesEntity uomMeasuredValuesEntity = unitClassToUOMMeasuredValuesConverter.convert(form);
         uomMeasuredValuesEntity.setUom(uomEntity);// because of bidirectional one to many strategy by vlad mihalcea the entire JPA relationship needs to be managed by hand
         uomEntity.addUOMeasuredValue(uomMeasuredValuesEntity);
-        log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), form.getMetricSystem(), uomMeasuredValuesEntity.getId());
+        log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), form.getMeasurementSystem(), uomMeasuredValuesEntity.getId());
     }
 
     private void selfLink(UOMEntity from, Optional<List<UnitClassSelfLinkageForm>> optionalUnitClassSelfLinkageForms) {
@@ -230,14 +232,14 @@ public class UOMServiceImpl implements UOMService {
             return;
         }
         List<UnitClassCrossLinkageForm> linkedPUHUs = optionalUnitClassCrossLinkageForms.get();
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClassType.PU) == 0).forEach(e -> puLink(from, e));
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClassType.HU) == 0).forEach(e -> huLink(from, e));
+        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.PU) == 0).forEach(e -> puLink(from, e));
+        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.HU) == 0).forEach(e -> huLink(from, e));
     }
 
-    private UnitClassMeasuredValuesVo getUnitClassMeasuredValuesFor(UOMEntity uomEntity, MetricSystem metricSystem) {
+    private UnitClassMeasuredValuesVo getUnitClassMeasuredValuesFor(UOMEntity uomEntity, MeasurementSystem measurementSystem) {
         UnitClassMeasuredValuesVo unitClassMeasuredValuesVo = uomEntity.getUomMeasuredValues()
                 .stream()
-                .filter(umv -> umv.getMetricSystem().compareTo(metricSystem) == 0)
+                .filter(umv -> umv.getMeasurementSystem().compareTo(measurementSystem) == 0)
                 .map(f -> uomToUnitClassMeasuredValuesConverter.convert(f))
                 .findFirst()
                 .get();
@@ -253,21 +255,21 @@ public class UOMServiceImpl implements UOMService {
                 throw new IllegalStateException("Duplicate UOM self links");
             }
         }
-        validateMutualRelationsBetweenMeasuredValues(form, MetricSystem.IMPERIAL);
-        validateMutualRelationsBetweenMeasuredValues(form, MetricSystem.SI);
+        validateMutualRelationsBetweenMeasuredValues(form, MeasurementSystem.IMPERIAL);
+        validateMutualRelationsBetweenMeasuredValues(form, MeasurementSystem.SI);
     }
 
-    private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MetricSystem metricSystem) {
-       Long countMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMetricSystem().compareTo(metricSystem.name()) == 0).count();
+    private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MeasurementSystem measurementSystem) {
+       Long countMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMeasurementSystem().compareTo(measurementSystem) == 0).count();
         if(countMeasuredValues != 1l) {
-            log.debug("Invalid number : {} of measured values for {} metric system", countMeasuredValues, metricSystem);
-            throw new IllegalArgumentException("Invalid count of " + metricSystem.name() + " measured values");
+            log.debug("Invalid number : {} of measured values for {} metric system", countMeasuredValues, measurementSystem);
+            throw new IllegalArgumentException("Invalid count of " + measurementSystem.name() + " measured values");
         }
-        /*int expectedMetricSystemIndex = metricSystem.getOrdinal(); // because set puts unit measured values according to lexicographic arrangement
-        int actualMetricSystemIndex = new ArrayList<UnitClassMeasuredValuesForm>(form.getMeasuredValues()).get(expectedMetricSystemIndex).getMetricSystem().compareTo(metricSystem.name());
+        /*int expectedMetricSystemIndex = measurementSystem.getOrdinal(); // because set puts unit measured values according to lexicographic arrangement
+        int actualMetricSystemIndex = new ArrayList<UnitClassMeasuredValuesForm>(form.getMeasuredValues()).get(expectedMetricSystemIndex).getMeasurementSystem().compareTo(measurementSystem.name());
         if(expectedMetricSystemIndex != actualMetricSystemIndex) {
-            log.debug("Measured values at index {} should be for {} metric system", metricSystem.getOrdinal(), metricSystem);
-            throw new IllegalArgumentException("Measured values at index " + metricSystem.getOrdinal() + " should be for " + metricSystem.name() + " metric system");
+            log.debug("Measured values at index {} should be for {} metric system", measurementSystem.getOrdinal(), measurementSystem);
+            throw new IllegalArgumentException("Measured values at index " + measurementSystem.getOrdinal() + " should be for " + measurementSystem.name() + " metric system");
         }*/
     }
 
@@ -313,8 +315,13 @@ public class UOMServiceImpl implements UOMService {
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
-        List<UOMSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream()
+        /*List<UOMSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream()
                 .map(e -> uomSelfLinkageEntityToVoConverter.convert(e))
+                .collect(Collectors.toList());
+        log.debug("Retrieved all linked UOMs to this UOM with code: {}", uomEntity.getCode());
+        uomVo.setSelfLinksTo(fromVos);*/
+        List<UnitClassSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream()
+                .map(e -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(e))
                 .collect(Collectors.toList());
         log.debug("Retrieved all linked UOMs to this UOM with code: {}", uomEntity.getCode());
         uomVo.setSelfLinksTo(fromVos);
@@ -394,9 +401,11 @@ public class UOMServiceImpl implements UOMService {
         log.debug("Created specification for UOMEntity using long name: {} and status: {} and page", optionalLongName, uomPageDto.getStatus(), pageable);
         uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            //List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            //uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
             return uomVo;
         }).collect(Collectors.toList());
         UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
@@ -422,9 +431,11 @@ public class UOMServiceImpl implements UOMService {
             uomEntityPage = uomJpaRepository.findAll(pageable);
         }
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            //List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            //uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
             return uomVo;
         }).collect(Collectors.toList());
         UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
@@ -465,6 +476,24 @@ public class UOMServiceImpl implements UOMService {
 
     @Transactional
     @Override
+    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
+        if(optionalUOMEntity.isEmpty()) {
+            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+        }
+        log.debug("UOM does exists with code: {}", code);
+        UOMEntity uomEntity = optionalUOMEntity.get();
+        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        Diff diff = javers.compare(sourceUOMDto, targetUOMDto);
+        diff.getChanges().forEach(Errors.rethrow().wrap(p -> {
+            log.debug("{}", p);
+        }));
+        uomJpaRepository.save(uomEntity);
+        log.info("Updated UOMEntity with id: {}", uomEntity.getId());
+    }
+
+    @Transactional
+    @Override
     public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
@@ -492,7 +521,7 @@ public class UOMServiceImpl implements UOMService {
         mappingStrategy.setType(UOMVo.class);
         List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
         List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
-        //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MetricSystem.SI);
+        //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MeasurementSystem.SI);
         //List<UOMSummaryVo> uomSummaryVoList = uomSummaryList.stream().map(f -> uomSummaryProjectionToVoConverter.convert(f)).collect(Collectors.toList());
         StatefulBeanToCsv<UOMVo> sbc = new StatefulBeanToCsvBuilder<UOMVo>(writer)
         //StatefulBeanToCsv<UOMSummaryVo> sbc = new StatefulBeanToCsvBuilder<UOMSummaryVo>(writer)

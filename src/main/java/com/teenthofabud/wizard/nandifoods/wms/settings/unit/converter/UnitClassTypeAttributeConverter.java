@@ -1,18 +1,18 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
 import jakarta.persistence.AttributeConverter;
 
 
-public class UnitClassTypeAttributeConverter implements AttributeConverter<UnitClassLevelType, String> {
+public class UnitClassTypeAttributeConverter implements AttributeConverter<UnitClassType, String> {
 
     @Override
-    public String convertToDatabaseColumn(UnitClassLevelType attribute) {
-        return attribute.getType();
+    public String convertToDatabaseColumn(UnitClassType attribute) {
+        return attribute.name();
     }
 
     @Override
-    public UnitClassLevelType convertToEntityAttribute(String dbData) {
-        return UnitClassLevelType.getByType(dbData);
+    public UnitClassType convertToEntityAttribute(String dbData) {
+        return UnitClassType.getByName(dbData);
     }
 }

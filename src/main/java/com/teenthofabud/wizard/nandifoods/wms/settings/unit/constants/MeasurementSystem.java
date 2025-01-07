@@ -18,8 +18,7 @@ import static tech.units.indriya.unit.Units.*;
 
 @FieldNameConstants(onlyExplicitlyIncluded = true)
 @Getter
-@ToString
-public enum MetricSystem implements EnumKeyValue<MetricSystem> {
+public enum MeasurementSystem implements EnumKeyValue<MeasurementSystem> {
 
     @FieldNameConstants.Include SI(MetricPrefix.CENTI(METRE), MetricPrefix.CENTI(METRE), MetricPrefix.CENTI(METRE), CUBIC_METRE, MetricPrefix.KILO(GRAM), 1, "SI", "International System of Units"),
     @FieldNameConstants.Include IMPERIAL(USCustomary.INCH, USCustomary.INCH, USCustomary.INCH, USCustomary.CUBIC_FOOT, USCustomary.POUND, 0, "IMPERIAL", "United States Customary Unit");
@@ -33,7 +32,7 @@ public enum MetricSystem implements EnumKeyValue<MetricSystem> {
     private String name;
     private String description;
 
-    private MetricSystem(Unit<Length> widthUnit, Unit<Length> lengthUnit, Unit<Length> heightUnit, Unit<Volume> volumeUnit, Unit<Mass> weightUnit, int ordinal, String name, String description) {
+    private MeasurementSystem(Unit<Length> widthUnit, Unit<Length> lengthUnit, Unit<Length> heightUnit, Unit<Volume> volumeUnit, Unit<Mass> weightUnit, int ordinal, String name, String description) {
         this.widthUnit = widthUnit;
         this.lengthUnit = lengthUnit;
         this.heightUnit = heightUnit;
@@ -55,8 +54,8 @@ public enum MetricSystem implements EnumKeyValue<MetricSystem> {
     }
 
     @Override
-    public List<EnumKeyValue<MetricSystem>> getEnumConstants() {
-        return List.of(MetricSystem.values());
+    public List<EnumKeyValue<MeasurementSystem>> getEnumConstants() {
+        return List.of(MeasurementSystem.values());
     }
 
     @Override
@@ -71,6 +70,11 @@ public enum MetricSystem implements EnumKeyValue<MetricSystem> {
 
     @Override
     public String getTypeName() {
-        return MetricSystem.class.getSimpleName();
+        return MeasurementSystem.class.getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        return this.name();
     }
 }

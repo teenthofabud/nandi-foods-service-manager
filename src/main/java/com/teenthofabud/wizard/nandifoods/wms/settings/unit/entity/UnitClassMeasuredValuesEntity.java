@@ -3,8 +3,8 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
 import com.teenthofabud.wizard.nandifoods.wms.audit.AuditListener;
 import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.MetricSystemAttributeConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.MeasurementSystemAttributeConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.JSR385LengthType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.JSR385MassType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.JSR385VolumeType;
@@ -87,9 +87,9 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
     private Unit<Mass> weightUnit;
 
     @Column(name = "metric_system", columnDefinition = "varchar(50)", nullable = false)
-    @Convert(converter = MetricSystemAttributeConverter.class)
+    @Convert(converter = MeasurementSystemAttributeConverter.class)
     @EqualsAndHashCode.Include
-    private MetricSystem metricSystem;
+    private MeasurementSystem measurementSystem;
 
     @Version
     @Column(nullable = false)

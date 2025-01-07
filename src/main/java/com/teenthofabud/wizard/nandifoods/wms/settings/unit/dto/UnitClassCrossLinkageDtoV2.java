@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.CrossLinkageUnitClassType;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class UnitClassCrossLinkageForm extends UnitClassLinkageForm {
+public class UnitClassCrossLinkageDtoV2 extends UnitClassLinkageDtoV2 {
 
     @CrossLinkageUnitClassType(anyOf = { UnitClass.PU, UnitClass.HU })
     protected UnitClass type;

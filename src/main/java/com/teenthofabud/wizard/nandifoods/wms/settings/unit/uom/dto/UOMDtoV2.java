@@ -1,19 +1,19 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassCrossLinkageDtoV2;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassDtoV2;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassSelfLinkageDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassForm;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -22,12 +22,7 @@ import java.util.Optional;
 @SuperBuilder
 @Getter
 @Setter
-public class UOMForm extends UnitClassForm {
-
-    // Not editable in edit workflow
-    @JsonIgnore
-    @NotBlank(message = "bulk code value is required")
-    private String bulkCode;
+public class UOMDtoV2 extends UnitClassDtoV2 {
 
     @NotNull(message = "inventory UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
@@ -49,9 +44,10 @@ public class UOMForm extends UnitClassForm {
     @ArraySchema(schema = @Schema(
             implementation = UnitClassSelfLinkageForm.class,
             description = "this UOM is linked to these UOMs"))
-    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") List<@Valid UnitClassSelfLinkageForm>> linkedUOMs = Optional.empty();
+    private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") Set<@Valid UnitClassSelfLinkageDtoV2>> linkedUOMs = Optional.empty();
 
     @Builder.Default
-    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") List<@Valid UnitClassCrossLinkageForm>> linkedPUHUs = Optional.empty();
+    private Optional<@Size(min = 1, message = "At least 1 PU/HU must be linked") Set<@Valid UnitClassCrossLinkageDtoV2>> linkedPUHUs = Optional.empty();
+
 
 }

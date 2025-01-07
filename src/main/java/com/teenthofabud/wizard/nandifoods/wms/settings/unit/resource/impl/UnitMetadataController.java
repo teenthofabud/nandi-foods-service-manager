@@ -2,10 +2,10 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.impl;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.UnitMetadataAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitMetadataService;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MeasurementSystemVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelTypeVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassConstantVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,23 +36,31 @@ public class UnitMetadataController implements UnitMetadataAPI {
 
     @GetMapping(path = "/metricSystem", produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<List<MetricSystemVo>> getMetricSystems() {
-        List<MetricSystemVo> metricSystemVoList = unitMetadataService.retrieveExistingMetricSystems();
-        return ResponseEntity.ok(metricSystemVoList);
+    public ResponseEntity<List<MeasurementSystemVo>> getMetricSystems() {
+        /*List<MeasurementSystemVo> measurementSystemVoList = unitMetadataService.retrieveExistingMetricSystems();
+        return ResponseEntity.ok(measurementSystemVoList);*/
+        return null;
     }
 
-    @GetMapping(path = "/type", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/measurementSystem", produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<List<UnitClassTypeVo>> getUnitClassTypes() {
-        List<UnitClassTypeVo> unitClassTypeVoList = unitMetadataService.retrieveExistingUnitClassTypes();
-        return ResponseEntity.ok(unitClassTypeVoList);
+    public ResponseEntity<List<MeasurementSystemVo>> getMeasurementSystems() {
+        List<MeasurementSystemVo> measurementSystemVoList = unitMetadataService.retrieveExistingMeasurementSystems();
+        return ResponseEntity.ok(measurementSystemVoList);
     }
 
-    @GetMapping(path = "/level", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/class", produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<List<UnitClassLevelVo>> getUnitClassLevels() {
-        List<UnitClassLevelVo> unitClassLevelVoList = unitMetadataService.retrieveExistingUnitClassLevels();
-        return ResponseEntity.ok(unitClassLevelVoList);
+    public ResponseEntity<List<UnitClassConstantVo>> getUnitClassTypes() {
+        List<UnitClassConstantVo> unitClassConstantVoList = unitMetadataService.retrieveExistingUnitClasses();
+        return ResponseEntity.ok(unitClassConstantVoList);
+    }
+
+    @GetMapping(path = "/levelType", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
+    public ResponseEntity<List<UnitClassLevelTypeVo>> getUnitClassLevels() {
+        List<UnitClassLevelTypeVo> unitClassLevelTypeVoList = unitMetadataService.retrieveExistingUnitClassLevelTypes();
+        return ResponseEntity.ok(unitClassLevelTypeVoList);
     }
 
     @GetMapping(path = "/status", produces = MediaType.APPLICATION_JSON_VALUE)

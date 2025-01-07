@@ -13,7 +13,7 @@ public class UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter impleme
     public UnitClassMeasuredValuesVo convert(UOMMeasuredValuesEntity source) {
         UnitClassMeasuredValuesVo target = UnitClassMeasuredValuesVo.builder()
                 //.audit() -> automatically set by JPA for first time creation wrt creation related attributes
-                .metricSystem(source.getMetricSystem().name())
+                .measurementSystem(source.getMeasurementSystem())
                 .heightValue(source.getHeightValue())
                 .lengthValue(source.getLengthValue())
                 .volumeValue(source.getVolumeValue())
@@ -24,7 +24,8 @@ public class UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter impleme
                 .widthUnit(source.getWidthUnit().toString())
                 .volumeUnit(source.getVolumeUnit().toString())
                 .weightUnit(source.getWeightUnit().toString())
-                // id is discarded because metric and imperial have their own dedicated field in the front end vs shared instance on the backend
+                .id(source.getId()) // id is mapped because measured values type are managed in a collection in the front end model and it is difficult to manage them within a shared collection if id si not available
+                // NO LONGER VALID: id is discarded because metric and imperial have their own dedicated field in the front end vs shared instance on the backend
                 .build();
         return target;
     }

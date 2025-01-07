@@ -7,20 +7,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.measure.Unit;
-import javax.measure.quantity.Length;
-import javax.measure.quantity.Mass;
-import javax.measure.quantity.Volume;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MetricSystemVo {
+public class MeasurementSystemVo {
 
-    @Schema(example = "SI", description = "Name of the metric system")
+    @Schema(example = "SI", description = "Name of the measurement system")
     private String name;
+
+    @Schema(example = "Internation System of Measurements", description = "Description of the measurement system")
+    private String description;
 
     @Schema(example = "cm", description = "Name of the unit to measure width")
     private String widthUnit;

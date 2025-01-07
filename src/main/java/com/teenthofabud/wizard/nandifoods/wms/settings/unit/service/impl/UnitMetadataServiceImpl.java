@@ -1,14 +1,14 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.impl;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevelType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitMetadataService;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MetricSystemVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.MeasurementSystemVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassLevelTypeVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassStatusVo;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassTypeVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassConstantVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,31 +20,32 @@ import java.util.List;
 public class UnitMetadataServiceImpl implements UnitMetadataService {
 
     @Override
-    public List<MetricSystemVo> retrieveExistingMetricSystems() {
-        List<MetricSystemVo> metricSystemVoList = Arrays.stream(MetricSystem.values()).map(
-                e -> MetricSystemVo.builder()
+    public List<MeasurementSystemVo> retrieveExistingMeasurementSystems() {
+        List<MeasurementSystemVo> measurementSystemVoList = Arrays.stream(MeasurementSystem.values()).map(
+                e -> MeasurementSystemVo.builder()
                         .name(e.name())
                         .lengthUnit(e.getLengthUnit().toString())
                         .widthUnit(e.getWidthUnit().toString())
                         .weightUnit(e.getWeightUnit().toString())
                         .volumeUnit(e.getVolumeUnit().toString())
                         .heightUnit(e.getHeightUnit().toString())
+                        .description(e.getDescription())
                         .build()).toList();
-        return metricSystemVoList;
+        return measurementSystemVoList;
     }
 
     @Override
-    public List<UnitClassTypeVo> retrieveExistingUnitClassTypes() {
-        List<UnitClassTypeVo> unitClassTypeVoList = Arrays.stream(UnitClassType.values()).map(
-                e -> UnitClassTypeVo.builder().name(e.name()).build()).toList();
-        return unitClassTypeVoList;
+    public List<UnitClassConstantVo> retrieveExistingUnitClasses() {
+        List<UnitClassConstantVo> unitClassConstantVoList = Arrays.stream(UnitClass.values()).map(
+                e -> UnitClassConstantVo.builder()._class(e).build()).toList();
+        return unitClassConstantVoList;
     }
 
     @Override
-    public List<UnitClassLevelVo> retrieveExistingUnitClassLevels() {
-        List<UnitClassLevelVo> unitClassLevelVoList = Arrays.stream(UnitClassLevelType.values()).map(
-                e -> UnitClassLevelVo.builder().level(e.getLevel()).type(e.getType()).build()).toList();
-        return unitClassLevelVoList;
+    public List<UnitClassLevelTypeVo> retrieveExistingUnitClassLevelTypes() {
+        List<UnitClassLevelTypeVo> unitClassLevelTypeVoList = Arrays.stream(UnitClassLevelType.values()).map(
+                e -> UnitClassLevelTypeVo.builder().level(e.getLevel().getName()).type(e.getType().getName()).build()).toList();
+        return unitClassLevelTypeVoList;
     }
 
     @Override

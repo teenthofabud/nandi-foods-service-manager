@@ -1,16 +1,12 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MetricSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.projections.UOMSummaryProjection;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,10 +30,10 @@ public interface UOMJpaRepository extends JpaRepository<UOMEntity, Long>, Paging
         mv.weightUnit)) 
         from UOMEntity u left join UOMMeasuredValuesEntity mv 
         on u.id = mv.uom.id 
-        where mv.metricSystem = :metricSystem
+        where mv.measurementSystem = :measurementSystem
         """
     )
-    public List<UOMSummaryProjection> findAllWithMeasuredValueForMetricSystem(MetricSystem metricSystem);*/
+    public List<UOMSummaryProjection> findAllWithMeasuredValueForMetricSystem(MeasurementSystem measurementSystem);*/
 
     default Specification<UOMEntity> likeProperty(String key, String value) {
         return (root, query, builder) -> builder.like(root.get(key).as(String.class), String.format("%%%s%%", value));

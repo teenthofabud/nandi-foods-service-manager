@@ -26,6 +26,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJp
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMSelfLinkageVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassSelfLinkageVo;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
@@ -54,6 +55,7 @@ public class UnitClassServiceImpl implements UnitClassService {
     private UOMJpaRepository uomJpaRepository;
     private UOMEntityToVoConverter uomEntityToVoConverter;
     private UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter;
+    private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
     private UOMPageDtoToPageableConverter uomPageDtoToPageableConverter;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
@@ -67,6 +69,7 @@ public class UnitClassServiceImpl implements UnitClassService {
                                 UOMEntityToVoConverter uomEntityToVoConverter,
                                 UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
                                 UOMPageDtoToPageableConverter uomPageDtoToPageableConverter,
+                                UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                                 //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                                 @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                                 @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -75,6 +78,7 @@ public class UnitClassServiceImpl implements UnitClassService {
         this.uomJpaRepository = uomJpaRepository;
         this.uomEntityToVoConverter = uomEntityToVoConverter;
         this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
+        this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomPageDtoToPageableConverter = uomPageDtoToPageableConverter;
         this.searchFields = searchFields;
         this.fileNameDateFormat = fileNameDateFormat;
@@ -98,9 +102,11 @@ public class UnitClassServiceImpl implements UnitClassService {
         log.debug("Created specification for UOMEntity using long name: {} and status: {} and page", optionalLongName, uomPageDto.getStatus(), pageable);
         uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            //List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            //uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
             return uomVo;
         }).collect(Collectors.toList());
         UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
@@ -126,9 +132,11 @@ public class UnitClassServiceImpl implements UnitClassService {
             uomEntityPage = uomJpaRepository.findAll(pageable);
         }
         List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            //List<UOMSelfLinkageVo> uomSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToVoConverter.convert(j)).collect(Collectors.toList());
+            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
             UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            //uomVo.setSelfLinksTo(uomSelfLinkageVoList);
+            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
             return uomVo;
         }).collect(Collectors.toList());
         UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
@@ -145,7 +153,7 @@ public class UnitClassServiceImpl implements UnitClassService {
         ColumnPositionNameMappingStrategy<UOMVo> mappingStrategy = new ColumnPositionNameMappingStrategy<UOMVo>(UOMVo.class);
         mappingStrategy.setType(UOMVo.class);
         List<UOMVo> uomVoList = getUOMList();
-        //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MetricSystem.SI);
+        //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MeasurementSystem.SI);
         //List<UOMSummaryVo> uomSummaryVoList = uomSummaryList.stream().map(f -> uomSummaryProjectionToVoConverter.convert(f)).collect(Collectors.toList());
         StatefulBeanToCsv<UOMVo> sbc = new StatefulBeanToCsvBuilder<UOMVo>(writer)
         //StatefulBeanToCsv<UOMSummaryVo> sbc = new StatefulBeanToCsvBuilder<UOMSummaryVo>(writer)

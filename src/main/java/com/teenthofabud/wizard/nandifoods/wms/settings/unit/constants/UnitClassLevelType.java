@@ -13,37 +13,37 @@ import java.util.stream.Collectors;
 @Getter
 public enum UnitClassLevelType implements EnumKeyValue<UnitClassLevelType> {
 
-    @FieldNameConstants.Include LEVEL_1("Level 1", "EACH"),
-    @FieldNameConstants.Include LEVEL_2("Level 2", "BOX"),
-    @FieldNameConstants.Include LEVEL_3("Level 3", "CARTON"),
-    @FieldNameConstants.Include LEVEL_4("Level 4", "CASE"),
-    @FieldNameConstants.Include LEVEL_5("Level 5", "CRATE"),
-    @FieldNameConstants.Include LEVEL_6("Level 6", "T_TOTE"),
-    @FieldNameConstants.Include LEVEL_7("Level 7", "PALLET"),
-    @FieldNameConstants.Include LEVEL_8("Level 8", "TEU");
+    @FieldNameConstants.Include LEVEL_1_EACH(UnitClassLevel.LEVEL_1, UnitClassType.EACH),
+    @FieldNameConstants.Include LEVEL_2_BOX(UnitClassLevel.LEVEL_2, UnitClassType.BOX),
+    @FieldNameConstants.Include LEVEL_3_CARTON(UnitClassLevel.LEVEL_3, UnitClassType.CARTON),
+    @FieldNameConstants.Include LEVEL_4_CASE(UnitClassLevel.LEVEL_4, UnitClassType.CASE),
+    @FieldNameConstants.Include LEVEL_5_CRATE(UnitClassLevel.LEVEL_5, UnitClassType.CRATE),
+    @FieldNameConstants.Include LEVEL_6_T_TOTE(UnitClassLevel.LEVEL_6, UnitClassType.T_TOTE),
+    @FieldNameConstants.Include LEVEL_7_PALLET(UnitClassLevel.LEVEL_7, UnitClassType.PALLET),
+    @FieldNameConstants.Include LEVEL_8_TEU(UnitClassLevel.LEVEL_8, UnitClassType.TEU);
 
-    private String level;
-    private String type;
+    private UnitClassLevel level;
+    private UnitClassType type;
 
-    private UnitClassLevelType(String level, String type) {
+    private UnitClassLevelType(UnitClassLevel level, UnitClassType type) {
         this.level = level;
         this.type = type;
     }
 
     @Override
     public String toString() {
-        return level;
+        return this.getLevel().name() + ": " + this.getType().name();
     }
 
-    public static List<String> getAllLevels() {
+    public static List<UnitClassLevel> getAllLevels() {
         return Arrays.stream(values()).map(v -> v.getLevel()).collect(Collectors.toList());
     }
 
-    public static List<String> getAllTypes() {
+    public static List<UnitClassType> getAllTypes() {
         return Arrays.stream(values()).map(v -> v.getType()).collect(Collectors.toList());
     }
 
-    public static UnitClassLevelType getByLevel(String level) throws NoSuchElementException {
+    public static UnitClassLevelType getByLevel(UnitClassLevel level) throws NoSuchElementException {
         UnitClassLevelType x = null;
         for(UnitClassLevelType t : UnitClassLevelType.values()) {
             if(t.getLevel().compareTo(level) == 0) {
@@ -58,10 +58,40 @@ public enum UnitClassLevelType implements EnumKeyValue<UnitClassLevelType> {
         }
     }
 
+    public static UnitClassLevelType getByLevel(String level) throws NoSuchElementException {
+        UnitClassLevelType x = null;
+        for(UnitClassLevelType t : UnitClassLevelType.values()) {
+            if(t.getLevel().getName().compareTo(level) == 0) {
+                x = t;
+                break;
+            }
+        }
+        if(x != null) {
+            return x;
+        } else {
+            throw new NoSuchElementException("No Unit Level Type available by level: " + level);
+        }
+    }
+
+    public static UnitClassLevelType getByType(UnitClassType type) throws NoSuchElementException {
+        UnitClassLevelType x = null;
+        for(UnitClassLevelType t : UnitClassLevelType.values()) {
+            if(t.getType().compareTo(type) == 0) {
+                x = t;
+                break;
+            }
+        }
+        if(x != null) {
+            return x;
+        } else {
+            throw new NoSuchElementException("No Unit Level Type available by type: " + type);
+        }
+    }
+
     public static UnitClassLevelType getByType(String type) throws NoSuchElementException {
         UnitClassLevelType x = null;
         for(UnitClassLevelType t : UnitClassLevelType.values()) {
-            if(t.getType().compareTo(type.toUpperCase()) == 0) {
+            if(t.getType().getName().compareTo(type.toUpperCase()) == 0) {
                 x = t;
                 break;
             }
@@ -75,12 +105,12 @@ public enum UnitClassLevelType implements EnumKeyValue<UnitClassLevelType> {
 
     @Override
     public String getKey() {
-        return this.level;
+        return this.level.name();
     }
 
     @Override
     public String getValue() {
-        return this.type;
+        return this.type.name();
     }
 
     @Override

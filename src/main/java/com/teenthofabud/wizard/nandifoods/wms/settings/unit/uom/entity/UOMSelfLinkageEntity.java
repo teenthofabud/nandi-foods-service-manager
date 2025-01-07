@@ -1,15 +1,14 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity;
 
-import com.teenthofabud.wizard.nandifoods.wms.audit.Audit;
-import com.teenthofabud.wizard.nandifoods.wms.audit.AuditListener;
-import com.teenthofabud.wizard.nandifoods.wms.audit.Auditable;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.entity.UnitClassLinkageEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.*;
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Entity(name = "UOMSelfLinkageEntity")
 @Table(name = "uom_self_link")
@@ -17,33 +16,13 @@ import org.hibernate.annotations.*;
 @DynamicInsert
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@EntityListeners(AuditListener.class)
+@SuperBuilder
 @org.hibernate.annotations.Cache(
         usage = CacheConcurrencyStrategy.READ_WRITE
 )
 @Getter
 @Setter
-public class UOMSelfLinkageEntity implements Auditable {
-
-    @Embedded
-    protected Audit audit;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    protected Long id;
-
-    @Column(nullable = false)
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    protected Integer quantity;
-
-    @Column(nullable = false)
-    @Version
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    protected Short version;
+public class UOMSelfLinkageEntity extends UnitClassLinkageEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)

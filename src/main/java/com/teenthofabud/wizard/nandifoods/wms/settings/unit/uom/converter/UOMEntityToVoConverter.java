@@ -6,7 +6,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasured
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,11 +34,11 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
     public UOMVo convert(UOMEntity source) {
         List<UnitClassMeasuredValuesVo> measuredValues = source.getUomMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(f)).collect(Collectors.toList());
         UOMVo target = UOMVo.builder()
-                ._class(source.get_class().name())
-                .type(source.getType().getType())
+                ._class(source.get_class())
+                .type(source.getType())
                 .longName(source.getLongName())
                 .shortName(source.getShortName())
-                .level(source.getLevel().getLevel())
+                .level(source.getLevel())
                 .description(source.getDescription())
                 .bulkCode(source.getBulkCode())
                 .dateCreated(source.getAudit().getCreationTime().toLocalDate())
@@ -51,7 +50,7 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
                 .isSales(source.getIsSales())
                 .isPurchase(source.getIsPurchase())
                 .id(source.getId())
-                .status(source.getStatus().name())
+                .status(source.getStatus())
                 .code(source.getCode())
                 .measuredValues(measuredValues)
                 .build();
