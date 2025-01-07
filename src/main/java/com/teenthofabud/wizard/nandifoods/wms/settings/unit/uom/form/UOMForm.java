@@ -25,7 +25,7 @@ public class UOMForm extends UnitClassForm {
 
     // Not editable in edit workflow
     @JsonIgnore
-    private String bulkCode;
+    private String bulkCode = "1";
 
     @NotNull(message = "inventory UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
