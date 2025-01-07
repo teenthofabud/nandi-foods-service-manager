@@ -1,7 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassForm;
@@ -26,7 +25,6 @@ public class UOMForm extends UnitClassForm {
 
     // Not editable in edit workflow
     @JsonIgnore
-    @NotBlank(message = "bulk code value is required")
     private String bulkCode;
 
     @NotNull(message = "inventory UOM is required")
