@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +45,7 @@ public class UOMDtoV2 extends UnitClassDtoV2 {
     @ArraySchema(schema = @Schema(
             implementation = UnitClassSelfLinkageForm.class,
             description = "this UOM is linked to these UOMs"))
+    @DiffIgnore
     private Optional<@Size(min = 1, message = "At least 1 UOM must be linked") Set<@Valid UnitClassSelfLinkageDtoV2>> linkedUOMs = Optional.empty();
 
     @Builder.Default

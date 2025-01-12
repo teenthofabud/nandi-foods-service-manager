@@ -8,6 +8,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.javers.core.metamodel.annotation.Id;
 
 @EqualsAndHashCode
 @SuperBuilder
@@ -26,6 +27,7 @@ public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasure
     @JsonSetter(nulls = Nulls.SKIP)
     @NotNull(message = "id can't be null")
     @Schema(example = "1", description = "Measurement system primary key")
+    @Id
     private Long id;
 
     @JsonSetter(nulls = Nulls.SKIP)

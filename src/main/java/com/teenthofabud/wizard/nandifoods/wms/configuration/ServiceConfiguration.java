@@ -23,6 +23,7 @@ import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.hibernate.validator.HibernateValidator;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
+import org.javers.core.diff.ListCompareAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -75,6 +76,7 @@ public class ServiceConfiguration {
                 .javers()
                 .registerValue(OptionalUnitClassMeasuredValuesDtoCollection.class, new OptionalUnitClassMeasuredValuesDtoCollectionComparator())
                 .registerValue(UnitClassMeasuredValuesDtoCollection.class, new UnitClassMeasuredValuesDtoCollectionComparator())
+                .withListCompareAlgorithm(ListCompareAlgorithm.AS_SET)
                 .build();
     }
 

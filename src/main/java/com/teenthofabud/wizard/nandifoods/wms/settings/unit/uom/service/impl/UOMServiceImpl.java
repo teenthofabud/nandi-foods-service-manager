@@ -55,6 +55,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.BeanUtilsBean2;
+import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
@@ -474,7 +476,7 @@ public class UOMServiceImpl implements UOMService {
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
@@ -484,9 +486,13 @@ public class UOMServiceImpl implements UOMService {
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        Diff diff = javers.compare(sourceUOMDto, targetUOMDto);
-        diff.getChanges().forEach(Errors.rethrow().wrap(p -> {
-            log.debug("{}", p);
+        Diff dtoChanges = javers.compare(targetUOMDto, sourceUOMDto);
+        BeanUtilsBean beanUtilsBean = BeanUtilsBean2.getInstance();
+        log.debug("Diff: {}", dtoChanges.prettyPrint());
+        Changes changes = dtoChanges.getChanges();
+        dtoChanges.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
+            log.debug("{} changed from {} or {} to {}", p.getPropertyNameWithPath(),p.getPropertyName(), p.getLeft(), p.getRight());
+            beanUtilsBean.copyProperty(uomEntity, p.getPropertyNameWithPath(), p.getRight());
         }));
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());

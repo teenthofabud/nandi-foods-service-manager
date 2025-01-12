@@ -8,7 +8,7 @@ public class UnitClassTypeAttributeConverter implements AttributeConverter<UnitC
 
     @Override
     public String convertToDatabaseColumn(UnitClassType attribute) {
-        return attribute.name();
+        return attribute.getName();
     }
 
     @Override
