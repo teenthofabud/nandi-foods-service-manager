@@ -1,24 +1,10 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
-import com.itextpdf.kernel.colors.DeviceGray;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.TextAlignment;
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.*;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import com.teenthofabud.wizard.nandifoods.wms.handler.ColumnPositionNameMappingStrategy;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.entity.HUEntity;
@@ -33,11 +19,17 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCro
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMPULinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToDtoV2Converter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMPageDtoToPageableConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSummaryProjectionToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
@@ -47,40 +39,24 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJp
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMService;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassSelfLinkageVo;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -94,18 +70,14 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter uomToUnitClassMeasuredValuesConverter;
     private UnitClassSelfLinkageToUOMSelfLinkageEntityReducer unitClassSelfLinkageToUOMSelfLinkageEntityReducer;
     private UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository;
-    private UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter;
-    private UOMPageDtoToPageableConverter uomPageDtoToPageableConverter;
     private BeanUtilsBean beanUtilsBean;
     private UnitClassCrossLinkageToUOMPULinkageEntityReducer unitClassCrossLinkageToUOMPULinkageEntityReducer;
     private UnitClassCrossLinkageToUOMHULinkageEntityReducer unitClassCrossLinkageToUOMHULinkageEntityReducer;
-    private UOMCrossLinkageJpaRepository uomCrossLinkageJpaRepository;
     private HURepository huRepository;
     private PURepository puRepository;
     private UOMPULinkageJpaRepository uomPULinkageJpaRepository;
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
     private Javers javers;
-    private UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter;
     private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
     private UOMEntityToDtoV2Converter uomEntityToDtoV2Converter;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
@@ -124,18 +96,14 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter uomToUnitClassMeasuredValuesConverter,
                           UnitClassSelfLinkageToUOMSelfLinkageEntityReducer unitClassSelfLinkageToUOMSelfLinkageEntityReducer,
                           UOMSelfLinkageJpaRepository uomSelfLinkageJpaRepository,
-                          UOMSelfLinkageEntityToVoConverter uomSelfLinkageEntityToVoConverter,
-                          UOMPageDtoToPageableConverter uomPageDtoToPageableConverter,
                           BeanUtilsBean beanUtilsBean,
                           UnitClassCrossLinkageToUOMPULinkageEntityReducer unitClassCrossLinkageToUOMPULinkageEntityReducer,
-                          UOMCrossLinkageJpaRepository uomCrossLinkageJpaRepository,
                           HURepository huRepository,
                           PURepository puRepository,
                           UnitClassCrossLinkageToUOMHULinkageEntityReducer unitClassCrossLinkageToUOMHULinkageEntityReducer,
                           UOMPULinkageJpaRepository uomPULinkageJpaRepository,
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
-                          UOMSummaryProjectionToVoConverter uomSummaryProjectionToVoConverter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
@@ -151,18 +119,14 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.uomToUnitClassMeasuredValuesConverter = uomToUnitClassMeasuredValuesConverter;
         this.unitClassSelfLinkageToUOMSelfLinkageEntityReducer = unitClassSelfLinkageToUOMSelfLinkageEntityReducer;
         this.uomSelfLinkageJpaRepository = uomSelfLinkageJpaRepository;
-        this.uomSelfLinkageEntityToVoConverter = uomSelfLinkageEntityToVoConverter;
-        this.uomPageDtoToPageableConverter = uomPageDtoToPageableConverter;
         this.beanUtilsBean = beanUtilsBean;
         this.unitClassCrossLinkageToUOMPULinkageEntityReducer = unitClassCrossLinkageToUOMPULinkageEntityReducer;
-        this.uomCrossLinkageJpaRepository = uomCrossLinkageJpaRepository;
         this.huRepository = huRepository;
         this.puRepository = puRepository;
         this.unitClassCrossLinkageToUOMHULinkageEntityReducer = unitClassCrossLinkageToUOMHULinkageEntityReducer;
         this.uomPULinkageJpaRepository = uomPULinkageJpaRepository;
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
-        this.uomSummaryProjectionToVoConverter = uomSummaryProjectionToVoConverter;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomEntityToDtoV2Converter = uomEntityToDtoV2Converter;
         this.searchFields = searchFields;
@@ -369,59 +333,6 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM deleted with code: {}", uomEntity.getCode());
     }
 
-    @Transactional
-    @Override
-    public UOMPageImplVo retrieveUOMByLongName(Optional<String> optionalLongName, UOMPageDto uomPageDto) {
-        Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
-        Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
-        Specification<UOMEntity> uomSearchQueryLikeLongNameSpecification = optionalLongName.map(o -> uomJpaRepository.likeProperty("longName", optionalLongName.get()))
-                .orElse(uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-        Specification<UOMEntity> uomSearchQueryEqualStatusSpecification = uomPageDto.getStatus().map(o ->
-                uomJpaRepository.equalsProperty("status", UnitClassStatus.valueOf(uomPageDto.getStatus().get()).getOrdinal()))
-                .orElse(uomJpaRepository.skipThisSpecificationWithEmptyCriteriaConjunction());
-        Specification<UOMEntity> uomSearchQuerySpecification = Specification
-                .where(uomSearchQueryLikeLongNameSpecification).and(uomSearchQueryEqualStatusSpecification);
-        log.debug("Created specification for UOMEntity using long name: {} and status: {} and page", optionalLongName, uomPageDto.getStatus(), pageable);
-        uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
-        List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
-            UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
-            return uomVo;
-        }).collect(Collectors.toList());
-        UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
-        log.debug("Found {} UOM in page {}", uomEntityPage.getTotalElements(), uomPageImplVo.getNumber());
-        return uomPageImplVo;
-    }
-
-    @Transactional
-    @Override
-    public UOMPageImplVo retrieveUOMWithinRange(Optional<String> optionalQuery, @Valid UOMPageDto uomPageDto) {
-        Pageable pageable = uomPageDtoToPageableConverter.convert(uomPageDto);
-        Page<UOMEntity> uomEntityPage = new PageImpl<>(List.of());
-        if(optionalQuery.isPresent()) {
-            String q = optionalQuery.get();
-            List<Specification<UOMEntity>> uomEntitySpecifications = searchFields.stream()
-                    .flatMap(k -> Arrays.stream(q.split("\\s+"))
-                            .map(v -> uomJpaRepository.likeProperty(k, v))).collect(Collectors.toList());
-            Specification<UOMEntity> uomSearchQuerySpecification = Specification.anyOf(uomEntitySpecifications);
-            log.debug("Created specification for UOMEntity using query: {}", q);
-            uomEntityPage = uomJpaRepository.findAll(uomSearchQuerySpecification, pageable);
-        } else {
-            log.debug("Searching UOMEntity with page: {}", pageable);
-            uomEntityPage = uomJpaRepository.findAll(pageable);
-        }
-        List<UOMVo> uomVoList = uomEntityPage.stream().map(i -> {
-            List<UnitClassSelfLinkageVo> unitClassSelfLinkageVoList = i.getFromUOMs().stream().map(j -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(j)).collect(Collectors.toList());
-            UOMVo uomVo = uomEntityToVoConverter.convert(i);
-            uomVo.setSelfLinksTo(unitClassSelfLinkageVoList);
-            return uomVo;
-        }).collect(Collectors.toList());
-        UOMPageImplVo uomPageImplVo = new UOMPageImplVo(uomVoList, uomEntityPage.getPageable(), uomEntityPage.getTotalElements());
-        log.debug("Found {} UOM in page {}", uomEntityPage.getTotalElements(), uomPageImplVo.getNumber());
-        return uomPageImplVo;
-    }
-
     private void uomUpdateHelper(UOMEntity uomEntity, Optional<UOMDto> optionallyPatchedUOMDto) {
         if(optionallyPatchedUOMDto.isPresent()) {
             UOMDto patchedUOMDto = optionallyPatchedUOMDto.get();
@@ -434,20 +345,6 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                 beanUtilsBean.copyProperty(uomEntity, p.getPropertyNameWithPath(), p.getRight());
             }));
         }
-    }
-
-    @Transactional
-    @Override
-    public void updateExistingUOMByCode(String code, UOMDto patchedUOMDto) {
-        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
-        if(optionalUOMEntity.isEmpty()) {
-            throw new IllegalArgumentException("UOM does not exist with code: " + code);
-        }
-        log.debug("UOM does exists with code: {}", code);
-        UOMEntity uomEntity = optionalUOMEntity.get();
-        uomUpdateHelper(uomEntity, Optional.of(patchedUOMDto));
-        uomJpaRepository.save(uomEntity);
-        log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
     @Transactional
@@ -483,88 +380,6 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
         uomJpaRepository.save(uomEntity);
         log.info("Approved UOMEntity with id: {}", uomEntity.getId());
-    }
-
-    @Transactional
-    @Override
-    public FileDto downloadUOMAsCSV() throws IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Writer streamWriter = new OutputStreamWriter(stream);
-        CSVWriter writer = new CSVWriter(streamWriter);
-        ColumnPositionNameMappingStrategy<UOMVo> mappingStrategy = new ColumnPositionNameMappingStrategy<UOMVo>(UOMVo.class);
-        mappingStrategy.setType(UOMVo.class);
-        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
-        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
-        //List<UOMSummaryProjection> uomSummaryList = uomSummaryProjectionRepository.findAllWithMeasuredValueForMetricSystem(MeasurementSystem.SI);
-        //List<UOMSummaryVo> uomSummaryVoList = uomSummaryList.stream().map(f -> uomSummaryProjectionToVoConverter.convert(f)).collect(Collectors.toList());
-        StatefulBeanToCsv<UOMVo> sbc = new StatefulBeanToCsvBuilder<UOMVo>(writer)
-        //StatefulBeanToCsv<UOMSummaryVo> sbc = new StatefulBeanToCsvBuilder<UOMSummaryVo>(writer)
-                .withQuotechar('\'')
-                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
-                .withMappingStrategy(mappingStrategy)
-                .build();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
-        String csvFileName = String.format(csvFileNameFormat, dtf.format(LocalDateTime.now()));
-        try {
-            log.debug("Creating UOM list in CSV with {} UOMs", uomVoList.size());
-            sbc.write(uomVoList);
-            //sbc.write(uomSummaryVoList);
-            streamWriter.flush();
-        } catch (CsvDataTypeMismatchException e) {
-            throw new IllegalArgumentException("CSV bean field not configured properly", e);
-        } catch (CsvRequiredFieldEmptyException e) {
-            throw new IllegalArgumentException("CSV bean field is empty", e);
-        }
-        FileDto fileDto = FileDto.builder()
-                .fileName(csvFileName)
-                .rawContent(new ByteArrayInputStream(stream.toByteArray()))
-                .build();
-        log.info("UOM is available for download in CSV as {}", fileDto.getFileName());
-        return fileDto;
-    }
-
-    @Override
-    public FileDto downloadUOMAsPDF() throws IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        PdfDocument pdfDocument = new PdfDocument(new PdfWriter(stream));
-        Document doc = new Document(pdfDocument);
-
-        List<Field> fields = Stream.concat(
-                Arrays.stream(UOMVo.class.getDeclaredFields()), Arrays.stream(UOMVo.class.getSuperclass().getDeclaredFields()))
-                .filter(f -> f.isAnnotationPresent(CsvBindByName.class) && f.isAnnotationPresent(CsvBindByPosition.class))
-                .collect(Collectors.toList());
-        fields.sort(Comparator.comparing(o -> o.getDeclaredAnnotation(CsvBindByPosition.class).position()));
-        Table table = new Table(fields.size()).useAllAvailableWidth();
-        fields.stream().forEach(f -> table.addHeaderCell(
-                new Cell().add(
-                        new Paragraph(
-                                f.getDeclaredAnnotation(CsvBindByName.class).column()))
-                        .setBackgroundColor(DeviceGray.GRAY))
-                .setTextAlignment(TextAlignment.LEFT));
-
-        List<UOMEntity> uomEntityList = uomJpaRepository.findAll();
-        List<UOMVo> uomVoList = uomEntityList.stream().map(f -> uomEntityToVoConverter.convert(f)).collect(Collectors.toList());
-        log.debug("Creating UOM list in PDF with {} UOMs", uomVoList.size());
-        uomVoList.stream().forEach(f ->
-                fields.stream().forEach(d -> {
-                try {
-                    table.addCell(new Cell().add(new Paragraph(BeanUtils.getProperty(f, d.getName()))));
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
-
-        doc.add(table);
-        doc.close();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(fileNameDateFormat);
-        String pdfFileName = String.format(pdfFileNameFormat, dtf.format(LocalDateTime.now()));
-
-        FileDto fileDto = FileDto.builder()
-                .fileName(pdfFileName)
-                .rawContent(new ByteArrayInputStream(stream.toByteArray()))
-                .build();
-        log.info("UOM is available for download in PDF as {}", fileDto.getFileName());
-        return fileDto;
     }
 
     @Override
