@@ -43,8 +43,8 @@ spring:
           schema-generation:
             create-source: metadata
             scripts:
-#              action: none
-              action: drop-and-create
+              action: none
+#              action: drop-and-create
               drop-target: src/main/resources/sql/dev-pg-drop.sql
               create-target: src/main/resources/sql/dev-pg-ddl.sql
   jackson:

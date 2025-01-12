@@ -23,8 +23,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "payment_terms",
         indexes = {
                 @Index(columnList = "code", name = "idx_payment_terms_code"),
-                @Index(columnList = "name", name = "idx_payment_terms_name"),
-                @Index(columnList = "days_until_due", name = "idx_payment_terms_days_until_due")
+                @Index(columnList = "name", name = "idx_payment_terms_name")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uix_payment_terms_code", columnNames = { "code" })
