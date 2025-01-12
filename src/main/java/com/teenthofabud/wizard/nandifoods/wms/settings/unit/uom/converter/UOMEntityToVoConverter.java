@@ -32,7 +32,7 @@ public class UOMEntityToVoConverter implements Converter<UOMEntity, UOMVo> {
 
     @Override
     public UOMVo convert(UOMEntity source) {
-        List<UnitClassMeasuredValuesVo> measuredValues = source.getUomMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(f)).collect(Collectors.toList());
+        List<UnitClassMeasuredValuesVo> measuredValues = source.getMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter.convert(f)).collect(Collectors.toList());
         UOMVo target = UOMVo.builder()
                 ._class(source.get_class())
                 .type(source.getType())

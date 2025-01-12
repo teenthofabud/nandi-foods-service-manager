@@ -8,6 +8,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,9 +32,12 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
 
     @Override
     public UOMDtoV2 convert(UOMEntity source) {
-        Set<UnitClassMeasuredValuesDtoV2> measuredValues = source.getUomMeasuredValues().stream()
+        /*Set<UnitClassMeasuredValuesDtoV2> measuredValues = source.getUomMeasuredValues().stream()
                 .map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet());*/
+        List<UnitClassMeasuredValuesDtoV2> measuredValues = source.getMeasuredValues().stream()
+                .map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f))
+                .collect(Collectors.toList());
         UOMDtoV2 target = UOMDtoV2.builder()
                 .type(source.getType())
                 .shortName(source.getShortName())

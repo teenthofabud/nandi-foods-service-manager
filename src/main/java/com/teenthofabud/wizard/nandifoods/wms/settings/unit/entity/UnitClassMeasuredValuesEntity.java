@@ -43,7 +43,7 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
 
     @Column(name = "length_value", nullable = false)
     @EqualsAndHashCode.Include
-    private Double lengthValue;
+    private Double length;
 
     @Column(name = "length_unit", columnDefinition = "varchar(50)", nullable = false)
     @Type(value = JSR385LengthType.class)
@@ -52,7 +52,7 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
 
     @Column(name = "width_value", nullable = false)
     @EqualsAndHashCode.Include
-    private Double widthValue;
+    private Double width;
 
     @Column(name = "width_unit", columnDefinition = "varchar(50)", nullable = false)
     @Type(value = JSR385LengthType.class)
@@ -61,7 +61,7 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
 
     @Column(name = "height_value", nullable = false)
     @EqualsAndHashCode.Include
-    private Double heightValue;
+    private Double height;
 
     @Column(name = "height_unit", columnDefinition = "varchar(50)", nullable = false)
     @Type(value = JSR385LengthType.class)
@@ -70,7 +70,7 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
 
     @Column(name = "volume_value", nullable = false)
     @EqualsAndHashCode.Include
-    private Double volumeValue;
+    private Double volume;
 
     @Column(name = "volume_unit", columnDefinition = "varchar(50)", nullable = false)
     @Type(value = JSR385VolumeType.class)
@@ -79,7 +79,7 @@ public abstract class UnitClassMeasuredValuesEntity implements Auditable {
 
     @Column(name = "weight_value", nullable = false)
     @EqualsAndHashCode.Include
-    private Double weightValue;
+    private Double weight;
 
     @Column(name = "weight_unit", columnDefinition = "varchar(50)", nullable = false)
     @Type(value = JSR385MassType.class)

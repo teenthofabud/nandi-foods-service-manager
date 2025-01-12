@@ -25,6 +25,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode
@@ -88,7 +89,7 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
             requiredMode = Schema.RequiredMode.REQUIRED,
             implementation = UnitClassMeasuredValuesDtoV2.class,
             description = "measured values in supported measurement systems"))
-    protected Set<@Valid UnitClassMeasuredValuesDtoV2> measuredValues;
+    protected List<@Valid UnitClassMeasuredValuesDtoV2> measuredValues;
 
     @Override
     public UnitClassLevel getLevel() {

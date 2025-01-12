@@ -112,19 +112,19 @@ public class UOMEntity extends UnitClassEntity {
     )
     @Getter
     @ToString.Include
-    protected List<UOMMeasuredValuesEntity> uomMeasuredValues;
+    protected List<UOMMeasuredValuesEntity> measuredValues;
 
-    public UOMMeasuredValuesEntity addUOMeasuredValue(UOMMeasuredValuesEntity uomMeasuredValue) {
-        if(ObjectUtils.isEmpty(this.uomMeasuredValues)) {
-            this.uomMeasuredValues = new CopyOnWriteArrayList<>();
+    public UOMMeasuredValuesEntity addMeasuredValue(UOMMeasuredValuesEntity measuredValue) {
+        if(ObjectUtils.isEmpty(this.measuredValues)) {
+            this.measuredValues = new CopyOnWriteArrayList<>();
         }
-        this.uomMeasuredValues.add(uomMeasuredValue);
-        return uomMeasuredValue;
+        this.measuredValues.add(measuredValue);
+        return measuredValue;
     }
 
     public void removeUOMMeasuredValue(UOMMeasuredValuesEntity uomMeasuredValue) {
-        if(!ObjectUtils.isEmpty(this.uomMeasuredValues)) {
-            this.uomMeasuredValues.remove(uomMeasuredValue);
+        if(!ObjectUtils.isEmpty(this.measuredValues)) {
+            this.measuredValues.remove(uomMeasuredValue);
         }
     }
 
