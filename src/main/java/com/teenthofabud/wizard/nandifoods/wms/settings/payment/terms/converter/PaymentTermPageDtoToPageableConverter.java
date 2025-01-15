@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaymentTermPageDtoToPageableConverter implements Converter<PaymentTermPageDto, Pageable> {
 
-    @Value("${wms.settings.payment_terms.search.defaultSort}")
+    @Value("${wms.settings.paymentTerms.search.defaultSort}")
     private String defaultSortProperty;
 
-    @Value("${wms.settings.payment_terms.search.defaultLimit}")
+    @Value("${wms.settings.paymentTerms.search.defaultLimit}")
     private Integer defaultLimitProperty;
 
-    @Value("${wms.settings.payment_terms.search.defaultOffset}")
+    @Value("${wms.settings.paymentTerms.search.defaultOffset}")
     private Integer defaultOffsetProperty;
 
     @Override

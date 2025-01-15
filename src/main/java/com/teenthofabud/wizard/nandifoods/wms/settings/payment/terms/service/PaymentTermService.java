@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.service;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.vo.PaymentTermPageImplVo;
@@ -16,7 +17,7 @@ public interface PaymentTermService {
 
     void deletePaymentTermByCode(String code);
 
-    void updatePaymentTermByCode(String code, PaymentTermForm form);
+    void updatePaymentTermByCode(String code, PaymentTermDto paymentTermDto);
 
     PaymentTermPageImplVo retrieveAllPaymentTerms(Optional<String> optionalQuery, PaymentTermPageDto page);
 }

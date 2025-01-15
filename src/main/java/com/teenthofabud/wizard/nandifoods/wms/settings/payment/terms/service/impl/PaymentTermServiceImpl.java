@@ -3,6 +3,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.service.im
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.PaymentTermEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.PaymentTermFormToEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.PaymentTermPageDtoToPageableConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.entity.PaymentTermEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermForm;
@@ -38,7 +39,7 @@ public class PaymentTermServiceImpl implements PaymentTermService {
     private PaymentTermFormToEntityConverter paymentTermFormToEntityConverter;
     @Autowired
     private PaymentTermPageDtoToPageableConverter paymentTermPageDtoToPageableConverter;
-    @Value("#{'${wms.settings.payment_terms.search.fields}'.split(',')}") List<String> searchFields;
+    @Value("#{'${wms.settings.paymentTerms.search.fields}'.split(',')}") List<String> searchFields;
 
     @Transactional
     @Override
@@ -86,14 +87,13 @@ public class PaymentTermServiceImpl implements PaymentTermService {
 
     @Transactional
     @Override
-    public void updatePaymentTermByCode(String code, PaymentTermForm form) {
+    public void updatePaymentTermByCode(String code, PaymentTermDto paymentTermDto) {
         Optional<PaymentTermEntity> optionalPaymentTermsEntity = paymentTermRepository.findByCode(code);
         if(!optionalPaymentTermsEntity.isPresent()) {
             throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
         }
         PaymentTermEntity paymentTermEntity = optionalPaymentTermsEntity.get();
-        paymentTermEntity.setName(form.getName());
-        paymentTermEntity.setDaysUntilDue(form.getDaysUntilDue());
+        paymentTermEntity.setDaysUntilDue(paymentTermDto.getDaysUntilDue());
         paymentTermRepository.save(paymentTermEntity);
         log.info("Payment term updated with code: {}", paymentTermEntity.getCode());
 

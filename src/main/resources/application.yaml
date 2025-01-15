@@ -79,7 +79,7 @@ wms:
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3
-    payment_terms:
+    paymentTerms:
       search:
         fields: code,name
         defaultSort: code
