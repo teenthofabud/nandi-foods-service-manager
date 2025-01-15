@@ -29,7 +29,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
                 @UniqueConstraint(name = "uix_payment_terms_code", columnNames = { "code" })
         }
 )
-public class PaymentTermsEntity implements Auditable {
+public class PaymentTermEntity implements Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
