@@ -131,7 +131,7 @@ public class UOMEntity extends UnitClassEntity {
     }
 
     public UOMSelfLinkageEntity addConversionFromUOM(UOMSelfLinkageEntity from) {
-        if(ObjectUtils.isEmpty(this.fromUOMs)) {
+        if(this.fromUOMs == null) {
             this.fromUOMs = new CopyOnWriteArrayList<>();
         }
         this.fromUOMs.add(from);

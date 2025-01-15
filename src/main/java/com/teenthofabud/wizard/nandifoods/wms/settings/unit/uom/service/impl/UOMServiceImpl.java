@@ -356,19 +356,23 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
         Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
         uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
-        //uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
+        uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
     private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) {
-        if(old.getLinkedUOMs().isEmpty() && _new.getLinkedUOMs().isPresent()) {
+        if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) {
             target.removeLinkedFromUOMs();
-        } else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) { // _new.getLinkedUOMs() is always derived from already saved UOMEntity
+        } else if(old.getLinkedUOMs().isEmpty() && _new.getLinkedUOMs().isPresent()) {
+            List<UnitClassSelfLinkageDtoV2> linkedUOMDto = _new.getLinkedUOMs().get();
+            List<UnitClassSelfLinkageContract> selfLinkageContracts = new ArrayList<>(linkedUOMDto);
+            selfLink(target, Optional.of(selfLinkageContracts));
+        } /*else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) { // _new.getLinkedUOMs() is always derived from already saved UOMEntity
             List<UnitClassSelfLinkageDtoV2> linkedUOMDto = old.getLinkedUOMs().get();
             List<UnitClassSelfLinkageContract> selfLinkageContracts = new ArrayList<>(linkedUOMDto);
             selfLink(target, Optional.of(selfLinkageContracts));
-            /*Collections.binarySearch(target.getFromUOMs(), UOMSelfLinkageEntity.builder().to.build())
+            *//*Collections.binarySearch(target.getFromUOMs(), UOMSelfLinkageEntity.builder().to.build())
             linkedUOMsLeft.stream().map(f -> target.getFromUOMs(). f.getCode().compareTo())
             // directly assign to UOMEntity because no comparison is needed
             linkedUOMsLeft.stream().forEach(f -> {
@@ -376,9 +380,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                 dtoDiff.getChangesByType(ValueChange.class).forEach(Errors.rethrow().wrap(p -> {
                     BeanUtil.pojo.setProperty(target, "", p.getRight());
                 }));
-            });*/
+            });*//*
 
-        } else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isPresent()) {
+        } */else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isPresent()) {
             List<UnitClassSelfLinkageDtoV2> oldLinkedUOMDto = old.getLinkedUOMs().get();
             List<UnitClassSelfLinkageDtoV2> newLinkedUOMDto = _new.getLinkedUOMs().get();
             Diff diffCollections = javers.compareCollections(oldLinkedUOMDto, newLinkedUOMDto, UnitClassSelfLinkageDtoV2.class);
