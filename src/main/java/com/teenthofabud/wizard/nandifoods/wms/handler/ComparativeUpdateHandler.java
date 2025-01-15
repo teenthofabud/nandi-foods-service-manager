@@ -10,7 +10,7 @@ public interface ComparativeUpdateHandler<T> {
 
     static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ComparativeUpdateHandler.class);
 
-    default T comparativeUpdate(Diff diff, T bean) {
+    default T comparativelyUpdateMandatoryFields(Diff diff, T bean, boolean includeCollectionNamePrefix) {
         diff.getChangesByType(ValueChange.class).forEach(Errors.rethrow().wrap(p -> {
             String fqdnPropertyName = p.getPropertyNameWithPath();
             int i = fqdnPropertyName.indexOf("/");
@@ -19,7 +19,7 @@ public interface ComparativeUpdateHandler<T> {
                 String previous = fqdnPropertyName.substring(0, i);
                 String index = String.format("[%s].", fqdnPropertyName.substring(i + 1, j));
                 String next = fqdnPropertyName.substring(j + 1);
-                fqdnPropertyName = String.join("", previous, index, next);
+                fqdnPropertyName = String.join("", includeCollectionNamePrefix ? previous : "", index, next);
             }
             log.debug("{} changed from {} to {}", fqdnPropertyName, p.getLeft(), p.getRight());
             if(fqdnPropertyName.compareTo(p.getPropertyNameWithPath()) == 0) {

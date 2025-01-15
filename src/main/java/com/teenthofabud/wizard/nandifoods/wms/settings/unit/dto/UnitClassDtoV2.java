@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassLevel;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassLevelContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UnitClassLevelTypeValidator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.UntilDays;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.MutuallyInclusiveMeasuredValuesValidator;
 import com.teenthofabud.wizard.nandifoods.wms.validator.order.FirstOrder;
 import com.teenthofabud.wizard.nandifoods.wms.validator.order.SecondOrder;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -19,14 +20,12 @@ import jakarta.validation.GroupSequence;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -84,7 +83,8 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
 
     @Getter
     @Setter
-    @Size(min = 2, max = 2, message = "both of imperial and metric measured values must be specified")
+    //@Size(min = 2, max = 2, message = "both of imperial and metric measured values must be specified")
+    @MutuallyInclusiveMeasuredValuesValidator(measurementSystems = { MeasurementSystem.SI, MeasurementSystem.IMPERIAL })
     @ArraySchema(schema = @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,
             implementation = UnitClassMeasuredValuesDtoV2.class,

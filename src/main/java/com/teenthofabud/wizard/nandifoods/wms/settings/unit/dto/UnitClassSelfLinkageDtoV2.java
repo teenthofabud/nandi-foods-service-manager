@@ -1,8 +1,8 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassSelfLinkageContract;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class UnitClassSelfLinkageDtoV2 extends UnitClassLinkageDtoV2 {
+public class UnitClassSelfLinkageDtoV2 extends UnitClassLinkageDtoV2 implements UnitClassSelfLinkageContract {
 
     @Min(value = 1, message = "minimum quantity value is 1")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "number of UOMs linked to")

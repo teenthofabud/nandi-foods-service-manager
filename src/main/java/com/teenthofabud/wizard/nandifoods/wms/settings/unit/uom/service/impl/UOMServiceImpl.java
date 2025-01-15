@@ -5,6 +5,7 @@ import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.UnitClassSelfLinkageDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.entity.HUEntity;
@@ -20,21 +21,18 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCro
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassSelfLinkageContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToDtoV2Converter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMPageDtoToPageableConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSummaryProjectionToVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMCrossLinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMSelfLinkageJpaRepository;
@@ -50,7 +48,6 @@ import org.javers.core.diff.changetype.PropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -143,12 +140,12 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM code: {} assigned with {} measured values with id: {}", uomEntity.getCode(), form.getMeasurementSystem(), uomMeasuredValuesEntity.getId());
     }
 
-    private void selfLink(UOMEntity from, Optional<List<UnitClassSelfLinkageForm>> optionalUnitClassSelfLinkageForms) {
-        if(optionalUnitClassSelfLinkageForms.isEmpty()) {
+    private void selfLink(UOMEntity from, Optional<List<? extends UnitClassSelfLinkageContract>> optionalUnitClassSelfLinkageCollection) {
+        if(optionalUnitClassSelfLinkageCollection.isEmpty()) {
             log.debug("No UOMs linked! Skipping UOM self linkage logic");
             return;
         }
-        for(UnitClassSelfLinkageForm e : optionalUnitClassSelfLinkageForms.get()) {
+        for(UnitClassSelfLinkageContract e : optionalUnitClassSelfLinkageCollection.get()) {
             Optional<UOMEntity> optionalTo = uomJpaRepository.findByCode(e.getCode());
             if(optionalTo.isEmpty()) {
                 throw new IllegalArgumentException("UOM does not exist with code: " + e.getCode());
@@ -225,7 +222,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public UOMVo createNewUOM(UOMForm form) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(form.getCode());
@@ -244,7 +241,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         uomJpaRepository.save(uomEntity);
 
         // Save linked UOMs
-        selfLink(uomEntity, form.getLinkedUOMs());
+        selfLink(uomEntity, form.getLinkedUOMs().isEmpty() ? Optional.empty() : Optional.of( new ArrayList<>(form.getLinkedUOMs().get())));
 
         // Save linked PU/HU
         crossLink(uomEntity, form.getLinkedPUHUs());
@@ -315,7 +312,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.info("Removed all PU and HU links from UOM with code: {}", from.getCode());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public void deleteExistingUOMByCode(String code) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
@@ -357,10 +354,37 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        Diff dtoChanges = javers.compare(targetUOMDto, sourceUOMDto);
-        uomEntity = comparativeUpdate(dtoChanges, uomEntity);
+        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
+        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
+        //uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
+    }
+
+    private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) {
+        if(old.getLinkedUOMs().isEmpty() && _new.getLinkedUOMs().isPresent()) {
+            target.removeLinkedFromUOMs();
+        } else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) { // _new.getLinkedUOMs() is always derived from already saved UOMEntity
+            List<UnitClassSelfLinkageDtoV2> linkedUOMDto = old.getLinkedUOMs().get();
+            List<UnitClassSelfLinkageContract> selfLinkageContracts = new ArrayList<>(linkedUOMDto);
+            selfLink(target, Optional.of(selfLinkageContracts));
+            /*Collections.binarySearch(target.getFromUOMs(), UOMSelfLinkageEntity.builder().to.build())
+            linkedUOMsLeft.stream().map(f -> target.getFromUOMs(). f.getCode().compareTo())
+            // directly assign to UOMEntity because no comparison is needed
+            linkedUOMsLeft.stream().forEach(f -> {
+                Diff dtoDiff = javers.compare(UnitClassSelfLinkageDtoV2.builder().build(), f);
+                dtoDiff.getChangesByType(ValueChange.class).forEach(Errors.rethrow().wrap(p -> {
+                    BeanUtil.pojo.setProperty(target, "", p.getRight());
+                }));
+            });*/
+
+        } else if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isPresent()) {
+            List<UnitClassSelfLinkageDtoV2> oldLinkedUOMDto = old.getLinkedUOMs().get();
+            List<UnitClassSelfLinkageDtoV2> newLinkedUOMDto = _new.getLinkedUOMs().get();
+            Diff diffCollections = javers.compareCollections(oldLinkedUOMDto, newLinkedUOMDto, UnitClassSelfLinkageDtoV2.class);
+            log.debug(diffCollections.prettyPrint());
+        }
+        return target;
     }
 
     @Transactional

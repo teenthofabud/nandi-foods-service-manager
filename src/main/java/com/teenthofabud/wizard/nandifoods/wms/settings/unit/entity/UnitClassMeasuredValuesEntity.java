@@ -31,7 +31,7 @@ import javax.measure.quantity.Volume;
 @org.hibernate.annotations.Cache(
         usage = CacheConcurrencyStrategy.READ_WRITE
 )
-public abstract class UnitClassMeasuredValuesEntity implements Auditable {
+public abstract class UnitClassMeasuredValuesEntity implements Auditable, Comparable<UnitClassMeasuredValuesEntity> {
 
     @Embedded
     private Audit audit;
