@@ -22,4 +22,9 @@ public class PUMeasuredValuesEntity extends UnitClassMeasuredValuesEntity {
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "pu_measured_values_fk"))
     private PUEntity pu;
 
+    @Override
+    public int compareTo(UnitClassMeasuredValuesEntity o) {
+        return Integer.compare(this.getMeasurementSystem().getOrdinal(), o.getMeasurementSystem().getOrdinal());
+    }
+
 }

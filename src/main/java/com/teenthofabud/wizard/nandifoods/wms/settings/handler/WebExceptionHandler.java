@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 
@@ -39,7 +40,7 @@ public class WebExceptionHandler {
         ErrorVo errorVo = ErrorVo.builder()
                 .message(e.getMessage())
                 .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorVo);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorVo);
     }
 
     @ExceptionHandler(value = IllegalStateException.class)
@@ -76,7 +77,7 @@ public class WebExceptionHandler {
         ErrorVo errorVo = ErrorVo.builder()
                 .message(errors.get(0).getDefaultMessage())
                 .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorVo);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorVo);
     }
 
     @ExceptionHandler(value = ConstraintViolationException.class)
@@ -114,5 +115,14 @@ public class WebExceptionHandler {
                 .message(e.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorVo);
+    }
+
+    @ExceptionHandler(value = NoSuchElementException.class)
+    public ResponseEntity<ErrorVo> handleNoSuchElementException(NoSuchElementException e) {
+        log.error("Unable to perform operation", e);
+        ErrorVo errorVo = ErrorVo.builder()
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorVo);
     }
 }

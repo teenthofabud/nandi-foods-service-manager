@@ -24,4 +24,8 @@ public class UOMMeasuredValuesEntity extends UnitClassMeasuredValuesEntity {
     @JoinColumn(name = "uom_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "uom_measured_values_fk"))
     private UOMEntity uom;
 
+    @Override
+    public int compareTo(UnitClassMeasuredValuesEntity o) {
+        return Integer.compare(this.getMeasurementSystem().getOrdinal(), o.getMeasurementSystem().getOrdinal());
+    }
 }

@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.form;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.MeasuredValuesContract;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UnitClassMeasuredValuesForm implements Comparable<UnitClassMeasuredValuesForm> {
+public class UnitClassMeasuredValuesForm implements Comparable<UnitClassMeasuredValuesForm>, MeasuredValuesContract {
 
     //@EnumValidator(enumClazz = MeasurementSystem.class, message = "Measurement system is invalid")
     @NotNull(message = "measurement system name is required")

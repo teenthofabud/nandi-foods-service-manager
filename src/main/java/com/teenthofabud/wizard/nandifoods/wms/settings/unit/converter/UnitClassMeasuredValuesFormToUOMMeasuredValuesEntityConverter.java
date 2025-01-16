@@ -12,12 +12,12 @@ public class UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter imple
     public UOMMeasuredValuesEntity convert(UnitClassMeasuredValuesForm source) {
         UOMMeasuredValuesEntity target = UOMMeasuredValuesEntity.builder()
                 //.audit() -> automatically set by JPA for first time creation wrt creation related attributes
-                .heightValue(source.getHeightValue())
-                .lengthValue(source.getLengthValue())
+                .height(source.getHeightValue())
+                .length(source.getLengthValue())
                 .measurementSystem(source.getMeasurementSystem())
-                .volumeValue(source.getVolumeValue())
-                .widthValue(source.getWidthValue())
-                .weightValue(source.getWeightValue())
+                .volume(source.getVolumeValue())
+                .width(source.getWidthValue())
+                .weight(source.getWeightValue())
                 .lengthUnit(source.getMeasurementSystem().getLengthUnit())
                 .heightUnit(source.getMeasurementSystem().getHeightUnit())
                 .widthUnit(source.getMeasurementSystem().getWidthUnit())

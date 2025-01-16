@@ -12,7 +12,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
@@ -112,24 +114,24 @@ public class UOMEntity extends UnitClassEntity {
     )
     @Getter
     @ToString.Include
-    protected List<UOMMeasuredValuesEntity> uomMeasuredValues;
+    protected List<UOMMeasuredValuesEntity> measuredValues;
 
-    public UOMMeasuredValuesEntity addUOMeasuredValue(UOMMeasuredValuesEntity uomMeasuredValue) {
-        if(ObjectUtils.isEmpty(this.uomMeasuredValues)) {
-            this.uomMeasuredValues = new CopyOnWriteArrayList<>();
+    public UOMMeasuredValuesEntity addMeasuredValue(UOMMeasuredValuesEntity measuredValue) {
+        if(ObjectUtils.isEmpty(this.measuredValues)) {
+            this.measuredValues = new CopyOnWriteArrayList<>();
         }
-        this.uomMeasuredValues.add(uomMeasuredValue);
-        return uomMeasuredValue;
+        this.measuredValues.add(measuredValue);
+        return measuredValue;
     }
 
     public void removeUOMMeasuredValue(UOMMeasuredValuesEntity uomMeasuredValue) {
-        if(!ObjectUtils.isEmpty(this.uomMeasuredValues)) {
-            this.uomMeasuredValues.remove(uomMeasuredValue);
+        if(!ObjectUtils.isEmpty(this.measuredValues)) {
+            this.measuredValues.remove(uomMeasuredValue);
         }
     }
 
     public UOMSelfLinkageEntity addConversionFromUOM(UOMSelfLinkageEntity from) {
-        if(ObjectUtils.isEmpty(this.fromUOMs)) {
+        if(this.fromUOMs == null) {
             this.fromUOMs = new CopyOnWriteArrayList<>();
         }
         this.fromUOMs.add(from);
@@ -154,6 +156,16 @@ public class UOMEntity extends UnitClassEntity {
     public void removeUOMHULinkage(UOMHULinkageEntity uomHULinkage) {
         if(!ObjectUtils.isEmpty(this.huLinks)) {
             this.huLinks.remove(uomHULinkage);
+        }
+    }
+
+    public void removeLinkedFromUOMs() {
+        if(!ObjectUtils.isEmpty(this.fromUOMs) && !this.fromUOMs.isEmpty()) {
+            this.fromUOMs.stream().forEach(f -> {
+                f.setFromUom(null);
+                f.setToUom(null);
+            });
+            this.fromUOMs = null;
         }
     }
 

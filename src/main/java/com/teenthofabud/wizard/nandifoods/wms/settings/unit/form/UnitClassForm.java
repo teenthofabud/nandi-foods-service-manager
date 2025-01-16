@@ -36,7 +36,6 @@ public abstract class UnitClassForm implements UnitClassLevelContract {
     @Getter
     @Setter
     @JsonProperty("id")
-    //@NotNull(message = "id value is required")
     @Pattern(regexp = "U(100[1-9]|10[1-9][0-9]|1[1-9][0-9]{2}|[2-4][0-9]{3})", message = "id value is invalid")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "U1001", description = "UOM ID")
     protected String code;

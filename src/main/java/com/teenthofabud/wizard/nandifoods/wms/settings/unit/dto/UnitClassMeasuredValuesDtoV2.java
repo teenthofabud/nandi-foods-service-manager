@@ -3,11 +3,13 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.MeasuredValuesContract;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 @EqualsAndHashCode
 @SuperBuilder
@@ -16,16 +18,18 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @Getter
 @Setter
-public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasuredValuesDtoV2> {
+public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasuredValuesDtoV2>, MeasuredValuesContract {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @NotNull(message = "Measurement system can't be null")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Measurement system represented by this values set")
+    // no need to ignore for javers as explicit validation makes sure that the correct measurement system is specified at the correct index
     protected MeasurementSystem measurementSystem;
 
     @JsonSetter(nulls = Nulls.SKIP)
     @NotNull(message = "id can't be null")
     @Schema(example = "1", description = "Measurement system primary key")
+    @DiffIgnore
     private Long id;
 
     @JsonSetter(nulls = Nulls.SKIP)
@@ -57,4 +61,5 @@ public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasure
     public int compareTo(UnitClassMeasuredValuesDtoV2 o) {
         return this.measurementSystem.compareTo(o.getMeasurementSystem());
     }
+
 }
