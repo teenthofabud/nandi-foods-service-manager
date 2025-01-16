@@ -20,7 +20,7 @@ public class PaymentTermDto {
     @JsonIgnore
     private String name;
 
-    @NotNull(message = "The number of days until payment is due (daysUntilDue) is required")
+    @NotNull(message = "The number of days until payment is due is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer daysUntilDue;
 
