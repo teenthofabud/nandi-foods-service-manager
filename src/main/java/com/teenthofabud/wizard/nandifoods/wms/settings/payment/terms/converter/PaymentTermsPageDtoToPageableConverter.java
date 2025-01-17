@@ -1,6 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermPageDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsPageDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PaymentTermPageDtoToPageableConverter implements Converter<PaymentTermPageDto, Pageable> {
+public class PaymentTermsPageDtoToPageableConverter implements Converter<PaymentTermsPageDto, Pageable> {
 
     @Value("${wms.settings.paymentTerms.search.defaultSort}")
     private String defaultSortProperty;
@@ -21,7 +21,7 @@ public class PaymentTermPageDtoToPageableConverter implements Converter<PaymentT
     private Integer defaultOffsetProperty;
 
     @Override
-    public Pageable convert(PaymentTermPageDto source) {
+    public Pageable convert(PaymentTermsPageDto source) {
 
         Sort.Direction direction = source.getAscending().filter(f -> f).map(f -> Sort.Direction.ASC).orElse(Sort.Direction.DESC);
         Sort sort = source.getSort().map(f -> Sort.by(direction, f)).orElse(Sort.by(direction, defaultSortProperty));

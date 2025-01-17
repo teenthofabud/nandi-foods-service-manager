@@ -5,9 +5,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public class PaymentTermPageImplVo extends PageImpl<PaymentTermVo> {
+public class PaymentTermsPageImplVo extends PageImpl<PaymentTermsVo> {
 
-    public PaymentTermPageImplVo(List<PaymentTermVo> content, Pageable pageable, long total) {
+    public PaymentTermsPageImplVo(List<PaymentTermsVo> content, Pageable pageable, long total) {
         super(content, pageable, total);
     }
 }

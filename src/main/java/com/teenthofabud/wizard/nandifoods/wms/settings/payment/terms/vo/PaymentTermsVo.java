@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PaymentTermVo {
+public class PaymentTermsVo {
 
     @Schema(description = "Payment term primary key")
     private Long id;

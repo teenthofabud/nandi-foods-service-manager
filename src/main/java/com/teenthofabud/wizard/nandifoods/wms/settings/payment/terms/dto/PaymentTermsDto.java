@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 @EqualsAndHashCode
 @ToString
@@ -12,12 +13,14 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class PaymentTermDto {
+public class PaymentTermsDto {
 
     @JsonIgnore
+    @DiffIgnore
     private String code;
 
-    @JsonIgnore
+    @NotNull(message = "Payment term name is required")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull(message = "The number of days until payment is due is required")

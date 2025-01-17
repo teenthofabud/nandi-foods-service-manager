@@ -53,7 +53,9 @@ public class OpenApiConfiguration {
     String[] paths = {"/**"};
     String[] packagedToMatch = {
             "com.teenthofabud.wizard.nandifoods.wms.settings.unit",
-            "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom"
+            "com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom",
+            "com.teenthofabud.wizard.nandifoods.wms.settings.payment",
+            "com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms"
     };
     return GroupedOpenApi
       .builder()
