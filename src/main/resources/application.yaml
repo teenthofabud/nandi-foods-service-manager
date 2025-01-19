@@ -79,6 +79,12 @@ wms:
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3
+    paymentTerms:
+      search:
+        fields: code,name
+        defaultSort: code
+        defaultOffset: 0
+        defaultLimit: 3
 
 logging:
   level:
