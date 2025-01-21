@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.teenthofabud.wizard.nandifoods.wms.resource.WMSAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.RightsType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermsForm;
@@ -25,22 +26,11 @@ import org.springframework.http.ResponseEntity;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "PaymentTermsAPI", description = "Payment Terms Management")
-@ApiResponses(value = {
-        @ApiResponse(
-                responseCode = "400", description = "Invalid Payment Terms data",
-                content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class))),
-        @ApiResponse(
-                responseCode = "401", description = "Not permitted to perform this action",
-                content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class))),
-        @ApiResponse(
-                responseCode = "500", description = "Server failure",
-                content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
-})
 @RolesAllowed({
         RightsType.Fields.VIEW_GLOBAL,
         RightsType.Fields.CREATE_EDIT_GLOBAL
 })
-public interface PaymentTermsAPI {
+public interface PaymentTermsAPI extends WMSAPI {
 
     public static final String BASE_URI = "/payment-terms";
 
