@@ -16,12 +16,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 responseCode = "401", description = "Not permitted to perform this action",
                 content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class))),
         @ApiResponse(
-                responseCode = "406", description = "Media type not accepted",
-                content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class))),
-//        @ApiResponse(
-//                responseCode = "409", description = "Conflict : Entity might already exist",
-//                content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class))),
-        @ApiResponse(
                 responseCode = "500", description = "Server failure",
                 content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
 })

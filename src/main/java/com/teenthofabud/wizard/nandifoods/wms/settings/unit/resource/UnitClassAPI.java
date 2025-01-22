@@ -1,6 +1,5 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource;
 
-import com.teenthofabud.wizard.nandifoods.wms.resource.WMSAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
