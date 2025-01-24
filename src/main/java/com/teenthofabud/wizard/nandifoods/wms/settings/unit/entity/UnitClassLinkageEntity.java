@@ -28,6 +28,7 @@ public class UnitClassLinkageEntity implements Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @ToString.Include
     protected Long id;
 
     @Column(nullable = false)
@@ -38,7 +39,6 @@ public class UnitClassLinkageEntity implements Auditable {
     @Column(nullable = false)
     @Version
     @EqualsAndHashCode.Include
-    @ToString.Include
     protected Short version;
 
 }

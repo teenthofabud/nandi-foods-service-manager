@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -79,11 +80,11 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
     @Getter
     @Setter
     @JsonIgnore // not editable
+    @DiffIgnore
     protected String code;
 
     @Getter
     @Setter
-    //@Size(min = 2, max = 2, message = "both of imperial and metric measured values must be specified")
     @MutuallyInclusiveMeasuredValuesValidator(measurementSystems = { MeasurementSystem.SI, MeasurementSystem.IMPERIAL })
     @ArraySchema(schema = @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,

@@ -22,11 +22,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasur
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassSelfLinkageContract;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToDtoV2Converter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMEntityToVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMFormToEntityConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMMeasuredValuesEntityToUnitClassMeasuredValuesVoConverter;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
@@ -75,8 +71,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private UOMPULinkageJpaRepository uomPULinkageJpaRepository;
     private UOMHULinkageJpaRepository uomHULinkageJpaRepository;
     private Javers javers;
-    private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
     private UOMEntityToDtoV2Converter uomEntityToDtoV2Converter;
+    private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+    private UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
     private List<String> searchFields;
@@ -101,8 +98,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMPULinkageJpaRepository uomPULinkageJpaRepository,
                           UOMHULinkageJpaRepository uomHULinkageJpaRepository,
                           Javers javers,
-                          UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
+                          UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
+                          UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -124,12 +122,13 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.uomPULinkageJpaRepository = uomPULinkageJpaRepository;
         this.uomHULinkageJpaRepository = uomHULinkageJpaRepository;
         this.javers = javers;
-        this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomEntityToDtoV2Converter = uomEntityToDtoV2Converter;
         this.searchFields = searchFields;
         this.fileNameDateFormat = fileNameDateFormat;
         this.csvFileNameFormat = csvFileNameFormat;
         this.pdfFileNameFormat = pdfFileNameFormat;
+        this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
+        this.uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter = uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -264,10 +263,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
         UOMVo uomVo = uomEntityToVoConverter.convert(uomEntity);
-        List<UnitClassSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream()
-                .map(e -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(e))
-                .collect(Collectors.toList());
         log.debug("Retrieved all linked UOMs to this UOM with code: {}", uomEntity.getCode());
+        List<UnitClassSelfLinkageVo> fromVos = uomEntity.getFromUOMs().stream().map(e -> uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter.convert(e)).collect(Collectors.toList());
         uomVo.setSelfLinksTo(fromVos);
         log.info("Details available for UOM with code: {}", uomEntity.getCode());
         return uomVo;
@@ -354,6 +351,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
+        targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
         Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
         uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
         uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);

@@ -27,11 +27,13 @@ public class UOMSelfLinkageEntity extends UnitClassLinkageEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "from_id", foreignKey = @ForeignKey(name = "conversion_from_uom_fk"))
+    @ToString.Include
     protected UOMEntity fromUom;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "to_id",  foreignKey = @ForeignKey(name = "conversion_to_uom_fk"))
+    @ToString.Include
     protected UOMEntity toUom;
 
 }

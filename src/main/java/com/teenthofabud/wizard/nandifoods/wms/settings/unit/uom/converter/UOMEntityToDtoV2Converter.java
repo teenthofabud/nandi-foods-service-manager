@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -35,9 +34,7 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
         /*Set<UnitClassMeasuredValuesDtoV2> measuredValues = source.getUomMeasuredValues().stream()
                 .map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f))
                 .collect(Collectors.toSet());*/
-        List<UnitClassMeasuredValuesDtoV2> measuredValues = source.getMeasuredValues().stream()
-                .map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f))
-                .collect(Collectors.toList());
+        List<UnitClassMeasuredValuesDtoV2> measuredValues = source.getMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f)).collect(Collectors.toList());
         UOMDtoV2 target = UOMDtoV2.builder()
                 .type(source.getType())
                 .shortName(source.getShortName())
@@ -50,6 +47,7 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
                 .isPurchase(source.getIsPurchase())
                 .status(source.getStatus())
                 .measuredValues(measuredValues)
+                .code(source.getCode())
                 .build();
         return target;
     }

@@ -19,8 +19,7 @@ public class UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter implements
     @Override
     public UnitClassSelfLinkageDtoV2 convert(UOMSelfLinkageEntity source) {
         UnitClassSelfLinkageDtoV2 target = UnitClassSelfLinkageDtoV2.builder()
-                .code(uomEntityToDtoV2Converter.convert(
-                        UOMSelfLinkageContext.getCascadeLevelContext() ? source.getFromUom() : source.getToUom()).getCode())
+                .code(uomEntityToDtoV2Converter.convert(source.getToUom()).getCode())
                 .quantity(source.getQuantity())
                 .build();
         return target;
