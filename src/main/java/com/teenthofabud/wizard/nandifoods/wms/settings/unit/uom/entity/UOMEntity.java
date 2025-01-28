@@ -163,7 +163,7 @@ public class UOMEntity extends UnitClassEntity {
                 f.setFromUom(null);
                 f.setToUom(null);
             });
-            this.fromUOMs = null;
+            this.fromUOMs.clear();
         }
     }
 

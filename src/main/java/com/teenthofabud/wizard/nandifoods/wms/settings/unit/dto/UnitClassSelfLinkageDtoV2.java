@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.javers.core.metamodel.annotation.TypeName;
+
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -13,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
+@TypeName("unitClassSelfLinkage")
 public class UnitClassSelfLinkageDtoV2 extends UnitClassLinkageDtoV2 implements UnitClassSelfLinkageContract {
 
     @Min(value = 1, message = "minimum quantity value is 1")
