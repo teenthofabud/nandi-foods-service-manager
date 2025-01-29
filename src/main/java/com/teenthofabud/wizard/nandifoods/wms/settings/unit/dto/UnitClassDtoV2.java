@@ -46,7 +46,8 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
     @Getter
     @Setter
     @JsonSetter(nulls = Nulls.SKIP)
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "1 X 4LB", description = "Description of the UOM")
+    @NotNull(message = "status is required")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "ACTIVE", description = "Description of the UOM")
     protected UnitClassStatus status;
 
     @Setter
