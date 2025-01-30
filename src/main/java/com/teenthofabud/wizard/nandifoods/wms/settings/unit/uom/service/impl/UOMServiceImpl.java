@@ -364,7 +364,6 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
 
     private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) {
         target = updateLinkedUOMs(old, _new, target);
-        target = updateMeasuredValues(old,_new,target);
         return target;
     }
 

@@ -86,7 +86,7 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
 
     @Getter
     @Setter
-    @DiffIgnore
+    @DiffIgnore // keeping DiffIgnore until the comparativelyUpdateMandatoryFields() doesn't throw error for measuredValues
     @MutuallyInclusiveMeasuredValuesValidator(measurementSystems = { MeasurementSystem.SI, MeasurementSystem.IMPERIAL })
     @ArraySchema(schema = @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,
