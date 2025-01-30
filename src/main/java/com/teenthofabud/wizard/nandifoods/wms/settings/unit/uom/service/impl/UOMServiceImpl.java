@@ -356,6 +356,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
         targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
         Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
+        log.debug(dtoDiff.prettyPrint());
         uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
         uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
         uomJpaRepository.save(uomEntity);

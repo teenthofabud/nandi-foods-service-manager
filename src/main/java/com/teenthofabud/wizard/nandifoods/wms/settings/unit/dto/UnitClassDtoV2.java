@@ -72,6 +72,12 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
 
     @Getter
     @Setter
+    @Length(min = 8, max = 30, message = "long name should be between 8 and 30 characters")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "U1009 EACH (1 X 4LB)", description = "[UOM ID] [UOM Type] (UOM Description)")
+    protected String longName;
+
+    @Getter
+    @Setter
     @FutureOrPresent(groups = FirstOrder.class)
     @NotNull(message = "effective date is required")
     @UntilDays(mandatory = false, count = 91, groups = SecondOrder.class)
