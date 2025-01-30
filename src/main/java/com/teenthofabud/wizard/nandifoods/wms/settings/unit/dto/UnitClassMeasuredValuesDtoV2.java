@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
@@ -35,26 +36,31 @@ public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasure
     @JsonSetter(nulls = Nulls.SKIP)
     @DecimalMin(value = "0.1", message = "length cannot be zero or less")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Length of this UOM up to 2 decimal places")
+    @JsonProperty("lengthValue")
     private Double length;
 
     @JsonSetter(nulls = Nulls.SKIP)
     @DecimalMin(value = "0.1", message = "width cannot be zero or less")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Width of this UOM up to 2 decimal places")
+    @JsonProperty("widthValue")
     private Double width;
 
     @JsonSetter(nulls = Nulls.SKIP)
     @DecimalMin(value = "0.1", message = "height cannot be zero or less")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Height of this UOM up to 2 decimal places")
+    @JsonProperty("heightValue")
     private Double height;
 
     @JsonSetter(nulls = Nulls.SKIP)
     @DecimalMin(value = "0.1", message = "volume cannot be zero or less")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Volume of this UOM up to 2 decimal places")
+    @JsonProperty("volumeValue")
     private Double volume;
 
     @JsonSetter(nulls = Nulls.SKIP)
     @DecimalMin(value = "0.1", message = "weight cannot be zero or less")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Weight of this UOM up to 2 decimal places")
+    @JsonProperty("weightValue")
     private Double weight;
 
     @Override

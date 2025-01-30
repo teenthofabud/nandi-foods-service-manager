@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.javers.core.metamodel.annotation.Id;
+import org.javers.core.metamodel.annotation.TypeName;
 
 @EqualsAndHashCode
 @ToString
@@ -18,6 +20,7 @@ public abstract class UnitClassLinkageDtoV2 {
 
     @JsonProperty("id")
     @NotNull(message = "id value is required")
+    @Id
     @Pattern(regexp = "U(100[1-9]|10[1-9][0-9]|1[1-9][0-9]{2}|[2-4][0-9]{3})", message = "id value is invalid")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "UOM ID")
     protected String code;

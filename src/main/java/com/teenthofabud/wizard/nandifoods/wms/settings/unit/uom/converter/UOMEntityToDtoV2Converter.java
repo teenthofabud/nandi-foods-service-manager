@@ -48,6 +48,7 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
                 .status(source.getStatus())
                 .measuredValues(measuredValues)
                 .code(source.getCode())
+                .longName(source.getLongName())
                 .build();
         return target;
     }

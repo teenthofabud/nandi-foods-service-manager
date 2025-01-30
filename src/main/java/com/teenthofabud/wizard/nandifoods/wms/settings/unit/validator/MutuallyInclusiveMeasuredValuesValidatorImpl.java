@@ -41,7 +41,7 @@ public class MutuallyInclusiveMeasuredValuesValidatorImpl implements ConstraintV
         // value has elements at the correct index
         boolean hasCorrectIndices = measurementSystems.stream().map(f -> {
             Integer indexOfMeasuredValuesForMeasurementSystem = IntStream.range(0, value.size()).filter(i -> value.get(i).getMeasurementSystem().compareTo(f) == 0).findFirst().getAsInt();
-            return indexOfMeasuredValuesForMeasurementSystem != f.getOrdinal();
+            return indexOfMeasuredValuesForMeasurementSystem == f.getOrdinal();
         }).allMatch(Boolean::booleanValue);
         if(!hasCorrectIndices) {
             context.buildConstraintViolationWithTemplate("Incorrect index of measured values for measurement system").addConstraintViolation();
