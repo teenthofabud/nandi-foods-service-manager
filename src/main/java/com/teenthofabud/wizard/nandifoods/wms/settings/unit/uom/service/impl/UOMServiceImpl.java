@@ -1,6 +1,12 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
@@ -37,6 +43,9 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.UOMServi
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasuredValuesVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassSelfLinkageVo;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.Changes;
@@ -47,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -77,6 +87,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
     private UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
+    private ObjectMapper mapper;
+    private Validator validator;
 
     private List<String> searchFields;
     private String fileNameDateFormat;
@@ -104,6 +116,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
+                          ObjectMapper mapper,
+                          Validator validator,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
                           @Value("${wms.settings.uom.fileNameFormat.csv}") String csvFileNameFormat,
@@ -131,6 +145,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.pdfFileNameFormat = pdfFileNameFormat;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter = uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
+        this.mapper = mapper;
+        this.validator = validator;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -343,9 +359,17 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
     }
 
+    private UOMDtoV2 patchUOM(UOMDtoV2 uomDto,JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
+        JsonNode oldUOMDtoNode = mapper.convertValue(uomDto, JsonNode.class);
+        JsonNode patchedUOMDtoNode = jsonPatch.apply(oldUOMDtoNode);
+        UOMDtoV2 patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDtoV2>() {});
+        log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
+        return patcheUOMDto;
+    }
+
     @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) {
+    public void updateExistingUOMByCode(String code, JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException{
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
@@ -353,107 +377,23 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
-        targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
-        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
-        log.debug(dtoDiff.prettyPrint());
-        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
-        uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
+
+        // Applying json patch
+        Optional<UOMDtoV2> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonPatch) ? Optional.empty() : Optional.of(patchUOM(targetUOMDto,jsonPatch));
+        Set<ConstraintViolation<Optional<UOMDtoV2>>> violations = validator.validate(optionallyPatchedUOMDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        log.debug("{}",optionallyPatchedUOMDto.get());
+
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
-    private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) {
-        target = updateLinkedUOMs(old, _new, target);
-        return target;
-    }
-
-    private UOMEntity updateMeasuredValues(UOMDtoV2 old,UOMDtoV2 _new, UOMEntity target) {
-        List<UnitClassMeasuredValuesDtoV2> oldMeasuredValues = old.getMeasuredValues();
-        List<UnitClassMeasuredValuesDtoV2> newMeasuredValues = _new.getMeasuredValues();
-        oldMeasuredValues.sort((a,b)->a.getMeasurementSystem().getOrdinal() < b.getMeasurementSystem().getOrdinal() ? -1 : 1);
-        newMeasuredValues.sort((a,b)->a.getMeasurementSystem().getOrdinal() < b.getMeasurementSystem().getOrdinal() ? -1 : 1);
-        target.getMeasuredValues().sort((a,b)->a.getMeasurementSystem().getOrdinal() < b.getMeasurementSystem().getOrdinal() ? -1 : 1);
-        Diff diff = javers.compareCollections(oldMeasuredValues,newMeasuredValues,UnitClassMeasuredValuesDtoV2.class);
-        log.debug("measured values diff : {}",diff.prettyPrint());
-        diff.getChangesByType(PropertyChange.class).forEach(Errors.rethrow().wrap(p -> {
-            log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
-            String propPath = p.getPropertyNameWithPath();
-            int currentIndex = Integer.parseInt(propPath.substring(propPath.indexOf("/")+1,propPath.indexOf("/")+2));
-            beanUtilsBean.copyProperty(target.getMeasuredValues().get(currentIndex),p.getPropertyName(),p.getRight());
-        }));
-        return target;
-    }
-
-
-    private UOMEntity updateLinkedUOMs(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) {
-        List<UnitClassSelfLinkageDtoV2> oldLinkedUOMs = old.getLinkedUOMs().orElse(Collections.emptyList());
-        List<UnitClassSelfLinkageDtoV2> newLinkedUOMs = _new.getLinkedUOMs().orElse(Collections.emptyList());
-        if(oldLinkedUOMs.size() > 0 && newLinkedUOMs.size() == 0) {
-            log.debug("clearing all linkedUOMs");
-            target.removeLinkedFromUOMs();
-        } else if(oldLinkedUOMs.size() == 0 && newLinkedUOMs.size() > 0) {
-            log.debug("adding all linkedUOMs");
-            List<UnitClassSelfLinkageContract> selfLinkageContracts = new ArrayList<>(newLinkedUOMs);
-            selfLink(target, Optional.of(selfLinkageContracts));
-
-        }
-        else if(oldLinkedUOMs.size() > 0 && newLinkedUOMs.size() > 0) {
-
-            Diff diffCollections = javers.compareCollections(oldLinkedUOMs, newLinkedUOMs, UnitClassSelfLinkageDtoV2.class);
-            log.debug(diffCollections.prettyPrint());
-            diffCollections.getChangesByType(ValueChange.class).forEach(Errors.rethrow().wrap(p -> {
-
-                if(!(p instanceof InitialValueChange || p instanceof TerminalValueChange) ){
-                    if(p.getPropertyName().equals("quantity")) {
-                        log.debug("{} changed from {} to {}", p.getPropertyNameWithPath(), p.getLeft(), p.getRight());
-                        int newQuantity = Integer.parseInt(p.getRight().toString());
-                        String code = ((UnitClassSelfLinkageDtoV2) p.getAffectedObject().get()).getCode();
-                        target.getFromUOMs().forEach(e -> {
-                            if (e.getToUom().getCode().equals(code)) {
-                                e.setQuantity(newQuantity);
-                            }
-                        });
-                    }
-                }
-            }));
-
-            diffCollections.getChangesByType(NewObject.class).forEach(Errors.rethrow().wrap(p->{
-                UnitClassSelfLinkageDtoV2 elt = (UnitClassSelfLinkageDtoV2) p.getAffectedObject().get();
-                log.debug("new linkedUOM : {}", elt.getCode());
-                Optional<UOMEntity> optionalTo = uomJpaRepository.findByCode(elt.getCode());
-                if(optionalTo.isPresent()){
-                    UOMEntity to = optionalTo.get();
-                    UOMSelfLinkageEntity selfLinkage = UOMSelfLinkageEntity.builder()
-                            .fromUom(target)
-                            .toUom(to)
-                            .quantity(elt.getQuantity())
-                            .build();
-                    target.addConversionFromUOM(selfLinkage);
-                }
-            }));
-
-            diffCollections.getChangesByType(ObjectRemoved.class).forEach(Errors.rethrow().wrap(p->{
-                UnitClassSelfLinkageDtoV2 elt = (UnitClassSelfLinkageDtoV2) p.getAffectedObject().get();
-                List<UOMSelfLinkageEntity> linkedUOMsRef = target.getFromUOMs();
-                log.debug("removed linkedUOM : {}",elt.getCode());
-                int toRemove = -1;
-                for(int i = 0; i < linkedUOMsRef.size(); i++){
-                    if(linkedUOMsRef.get(i).getToUom().getCode().equals(elt.getCode())){
-                        toRemove = i;
-                        break;
-                    }
-                }
-                if(toRemove!=-1)
-                    linkedUOMsRef.remove(toRemove);
-            }));
-        }
-        return target;
-    }
 
     @Transactional
     @Override
-    public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) {
+    public void approveSavedUOMByCode(String code, JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
@@ -462,7 +402,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         if(uomEntity.getStatus().compareTo(UnitClassStatus.ACTIVE) == 0) {
             throw new IllegalStateException("UOM already approved with id: " + code);
         }
-        uomUpdateHelper(uomEntity, optionallyPatchedUOMDto);
+
         LocalDateTime approvalTime = LocalDateTime.now();
         uomEntity.setStatus(UnitClassStatus.ACTIVE);
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());

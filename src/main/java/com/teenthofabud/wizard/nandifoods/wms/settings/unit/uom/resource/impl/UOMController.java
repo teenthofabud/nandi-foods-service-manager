@@ -64,30 +64,18 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.created(location).build();
     }
 
-    private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
-        JsonNode blankUOMDtoNode = mapper.convertValue(UOMDto.builder().build(), JsonNode.class);
-        JsonNode patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
-        UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDto>() {});
-        log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
-        return patcheUOMDto;
-    }
 
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException {
-        uomService.updateExistingUOMByCode(code, sourceUOMDto);
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        uomService.updateExistingUOMByCode(code, jsonPatch);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping(path = "/{id}/approve", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
     public ResponseEntity<Void> approveSavedUOMById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
-        Optional<UOMDto> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonPatch) ? Optional.empty() : Optional.of(patchUOM(jsonPatch));
-        Set<ConstraintViolation<Optional<UOMDto>>> violations = validator.validate(optionallyPatchedUOMDto);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-        uomService.approveSavedUOMByCode(code, optionallyPatchedUOMDto);
+        uomService.approveSavedUOMByCode(code, jsonPatch);
         return ResponseEntity.noContent().build();
     }
 
