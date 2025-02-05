@@ -1,0 +1,17 @@
+@startuml
+
+participant client as c
+participant SubDomain as subd
+participant SubDomainExceptionHandler as sdeh
+participant WMSExceptionHandler as weh
+participant MessageSource as msg
+
+c -> subd : Incoming request
+subd -> sdeh : Throws new SubDomainException with subDomainErrorCode and parameters
+note left : Request leads to an exception
+sdeh -> weh : Invokes parseExceptionToResponse() on parent
+weh -> msg : Get appropriate message based on errorCode
+msg --> weh : Return appropriate error message
+weh --> sdeh : Return proper error ResponseEntity with message
+sdeh --> c : Final error response
+@enduml

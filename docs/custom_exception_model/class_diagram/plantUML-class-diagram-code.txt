@@ -1,0 +1,49 @@
+@startuml
+abstract class WMSBaseException extends Exception{
+    WMSErrorCode errorCode
+    Object []  parameters
+    WMSBaseException(WMSErrorCode errorCode, Object []  parameters)
+    abstract String getSubDomain()
+}
+
+
+class SubDomainException extends WMSBaseException {
+  WMSErrorCode subDomainErrorCode
+  SubDomainException(WMSErrorCode errorCode, Object []  parameters)
+  String getSubDomain()
+
+}
+
+
+interface WMSErrorCode{
+    String getErrorCode()
+    Integer getHttpStatusCode()
+    String getDomain()
+}
+
+SubDomainException o-- WMSErrorCode
+
+enum SubDomainErrorCode implements WMSErrorCode{
+    String errorCode
+    int httpStatusCode
+    SUBDOMAIN_NOT_FOUND("WMS-SUBDOMAIN-004", 404)
+    String getErrorCode()
+    Integer getHttpStatusCode()
+    String getDomain()
+}
+
+class SubDomainExceptionHandler extends WMSExceptionHandler{
+    ResponseEntity handleSubDomainException(WMSBaseException e)
+}
+
+interface WMSExceptionHandler{
+    WMSMessageSource messageSource
+    ResponseEntity parseExceptionToResponse(WMSBaseException e)
+}
+
+class WMSMessageSource{
+    String getMessage()
+}
+
+WMSExceptionHandler o--WMSMessageSource
+@enduml
