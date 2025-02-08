@@ -8,6 +8,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
@@ -54,7 +55,7 @@ public class UOMController implements UOMAPI {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<Void> postUOM(@RequestBody @Valid UOMForm form) {
+    public ResponseEntity<Void> postUOM(@RequestBody @Valid UOMForm form) throws UnitException {
         UOMVo uomVo = uomService.createNewUOM(form);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -74,7 +75,7 @@ public class UOMController implements UOMAPI {
 
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException {
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException, UnitException {
         uomService.updateExistingUOMByCode(code, sourceUOMDto);
         return ResponseEntity.noContent().build();
     }
@@ -93,7 +94,7 @@ public class UOMController implements UOMAPI {
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<UOMVo> getUOMByCode(@PathVariable(name = "id") String code) {
+    public ResponseEntity<UOMVo> getUOMByCode(@PathVariable(name = "id") String code) throws UnitException {
         UOMVo uomVo = uomService.retrieveExistingUOMByCode(code);
         return ResponseEntity.ok(uomVo);
     }

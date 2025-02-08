@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @Builder
-public class ErrorVo {
+public class
+ErrorVo {
 
     @Schema(example = "brand is invalid", allowableValues = {"%s is invalid", "Unauthorized access", "No meeting found for %s", "%s is missing", "Service failure: %s"},
             description = "if a specific attribute is causing the issue, the name of the attribute will be used in the message template. Otherwise the template placeholder will " +
@@ -25,4 +26,5 @@ public class ErrorVo {
     @Schema(example = "1234-4567-8456", description = "provide this id to ensure efficent error tracing")
     private String traceId;
 
+    private String domain;
 }
