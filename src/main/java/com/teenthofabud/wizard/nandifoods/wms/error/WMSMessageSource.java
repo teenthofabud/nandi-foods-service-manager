@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Properties;
 
-@Component
 @Slf4j
 public class WMSMessageSource extends ReloadableResourceBundleMessageSource{
 
     private static final String PROPERTIES_SUFFIX = ".properties";
 
     private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
 
     @Override
     protected ReloadableResourceBundleMessageSource.PropertiesHolder refreshProperties(String filename, ReloadableResourceBundleMessageSource.PropertiesHolder propHolder) {

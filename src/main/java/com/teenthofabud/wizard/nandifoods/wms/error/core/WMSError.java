@@ -6,5 +6,4 @@ public interface WMSError {
 
     Integer getHttpStatusCode();
 
-    String getDomain();
 }

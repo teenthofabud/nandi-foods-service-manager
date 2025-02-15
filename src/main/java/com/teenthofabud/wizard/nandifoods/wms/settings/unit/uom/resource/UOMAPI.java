@@ -5,9 +5,9 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error.UOMException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
@@ -39,7 +39,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     public ResponseEntity<Void> postUOM(@RequestBody(description = "UOM form", required = true,
-            content = @Content(schema = @Schema(implementation = UOMForm.class))) UOMForm form) throws UnitException;
+            content = @Content(schema = @Schema(implementation = UOMForm.class))) UOMForm form) throws UOMException;
 
 
 
@@ -49,7 +49,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "UOM dto", required = true,
-            content = @Content(schema = @Schema(implementation = UOMDtoV2.class))) UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException, UnitException;
+            content = @Content(schema = @Schema(implementation = UOMDtoV2.class))) UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException, UOMException;
 
 
 
@@ -76,7 +76,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     )
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<UOMVo> getUOMByCode(String code) throws UnitException;
+    public ResponseEntity<UOMVo> getUOMByCode(String code) throws UOMException;
 
 
     @Operation(method = "DELETE", summary = "Delete UOM by Id", description = "deleteUOMById")

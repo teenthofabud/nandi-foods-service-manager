@@ -27,4 +27,6 @@ ErrorVo {
     private String traceId;
 
     private String domain;
+
+    private String subDomain;
 }
