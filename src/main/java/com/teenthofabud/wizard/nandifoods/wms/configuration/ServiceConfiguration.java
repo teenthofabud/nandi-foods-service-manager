@@ -30,6 +30,8 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
@@ -87,11 +89,12 @@ public class ServiceConfiguration {
     }
 
     @Bean
-    public WMSMessageSource wmsMessageSource() {
+    public WMSMessageSource wmsMessageSource() throws IOException {
         WMSMessageSource messageSource = new WMSMessageSource();
         messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setBasename("file:"+messagesLocation+"messages");
-//        messageSource.setResourceLoader(new FileSystemResourceLoader());
+        // change to an apt refresh interval
+        messageSource.setCacheMillis(10000);
+        messageSource.setBasename("file:"+messagesLocation+"/messages");
         return messageSource;
     }
 
