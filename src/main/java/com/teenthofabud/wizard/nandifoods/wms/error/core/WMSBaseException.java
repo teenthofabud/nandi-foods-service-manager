@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.error.core;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

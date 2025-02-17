@@ -15,9 +15,11 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ColumnPositionNameMappingStrategy;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitClassService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
@@ -146,7 +148,7 @@ public class UnitClassServiceImpl implements UnitClassService {
 
     @Transactional
     @Override
-    public FileDto downloadUOMAsCSV() throws IOException {
+    public FileDto downloadUOMAsCSV() throws IOException, UnitException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Writer streamWriter = new OutputStreamWriter(stream);
         CSVWriter writer = new CSVWriter(streamWriter);
@@ -169,9 +171,11 @@ public class UnitClassServiceImpl implements UnitClassService {
             //sbc.write(uomSummaryVoList);
             streamWriter.flush();
         } catch (CsvDataTypeMismatchException e) {
-            throw new IllegalArgumentException("CSV bean field not configured properly", e);
+//            throw new IllegalArgumentException("CSV bean field not configured properly", e);
+            throw new UnitException(WMSErrorCode.WMS_ATTRIBUTE_UNEXPECTED,new Object[]{"CSV field type"});
         } catch (CsvRequiredFieldEmptyException e) {
-            throw new IllegalArgumentException("CSV bean field is empty", e);
+//            throw new IllegalArgumentException("CSV bean field is empty", e);
+            throw new UnitException(WMSErrorCode.WMS_ATTRIBUTE_MISSING,new Object[]{"CSV field","CSV generation"});
         }
         FileDto fileDto = FileDto.builder()
                 .fileName(csvFileName)

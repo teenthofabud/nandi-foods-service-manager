@@ -5,6 +5,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsPageDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.error.PaymentTermsException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermsForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.resource.PaymentTermsAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.service.PaymentTermsService;
@@ -41,7 +42,7 @@ public class PaymentTermsController implements PaymentTermsAPI {
 
     @Override
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> postPaymentTerms(@RequestBody @Valid PaymentTermsForm form) {
+    public ResponseEntity<Void> postPaymentTerms(@RequestBody @Valid PaymentTermsForm form) throws PaymentTermsException {
         PaymentTermsVo paymentTermsVo = paymentTermsService.createNewPaymentTerms(form);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -53,21 +54,21 @@ public class PaymentTermsController implements PaymentTermsAPI {
 
     @Override
     @PatchMapping(path = "/{code}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
-    public ResponseEntity<Void> patchPaymentTermsByCode(@PathVariable String code, @RequestBody PaymentTermsDto sourceUOMDto) throws JsonPatchException, JsonProcessingException {
+    public ResponseEntity<Void> patchPaymentTermsByCode(@PathVariable String code, @RequestBody PaymentTermsDto sourceUOMDto) throws JsonPatchException, JsonProcessingException, PaymentTermsException {
         paymentTermsService.updatePaymentTermsByCode(code, sourceUOMDto);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     @GetMapping(path = "/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PaymentTermsVo> getPaymentTermsByCode(@PathVariable String code) {
+    public ResponseEntity<PaymentTermsVo> getPaymentTermsByCode(@PathVariable String code) throws PaymentTermsException {
         return ResponseEntity.ok(paymentTermsService.retrieveExistingPaymentTermsByCode(code));
     }
 
 
     @Override
     @DeleteMapping(path = "/{code}")
-    public ResponseEntity<Void> deletePaymentTermsById(@PathVariable  String code) {
+    public ResponseEntity<Void> deletePaymentTermsById(@PathVariable  String code) throws PaymentTermsException {
         paymentTermsService.deletePaymentTermsByCode(code);
         return ResponseEntity.noContent().build();
     }

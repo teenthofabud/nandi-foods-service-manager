@@ -1,6 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.error.converter;
 
-import com.teenthofabud.wizard.nandifoods.wms.error.WMSMessageSource;
+import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSMessageSource;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSBaseException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class WMSExceptionToErrorVoConverter implements Converter<WMSBaseExceptio
         if (source.getParameters() != null) {
             Deque<Object> parameters = new ArrayDeque(Arrays.asList(source.getParameters()));
             // Setting first parameter as the domain and subdomain info always
-            String domainAndSubdomain = STR."\{source.getDomain()} - \{source.getSubDomain()}";
+            String domainAndSubdomain = "%s - %s".formatted(source.getDomain(), source.getSubDomain());
             parameters.addFirst(domainAndSubdomain);
             msg = String.format(msg, parameters.toArray(new Object[parameters.size()]));
         }

@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error;
+package com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.error;
 
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSBaseException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSError;
@@ -9,12 +9,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UOMException extends WMSBaseException{
+public class HUException extends WMSBaseException{
 
     @ToString.Include
     private transient WMSError error;
 
-    public UOMException(WMSError error, Object[] parameters) {
+    public HUException(WMSError error, Object[] parameters) {
         super(error, parameters);
         this.error = error;
     }
@@ -26,7 +26,7 @@ public class UOMException extends WMSBaseException{
 
     @Override
     public String getSubDomain() {
-        return "Unit -> UOM";
+        return "Unit -> HU";
     }
 
 

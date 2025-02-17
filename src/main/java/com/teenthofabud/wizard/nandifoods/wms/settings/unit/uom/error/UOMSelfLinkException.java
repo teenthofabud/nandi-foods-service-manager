@@ -9,12 +9,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UOMException extends WMSBaseException{
+public class UOMSelfLinkException extends WMSBaseException{
 
     @ToString.Include
     private transient WMSError error;
 
-    public UOMException(WMSError error, Object[] parameters) {
+    public UOMSelfLinkException(WMSError error, Object[] parameters) {
         super(error, parameters);
         this.error = error;
     }
@@ -26,7 +26,7 @@ public class UOMException extends WMSBaseException{
 
     @Override
     public String getSubDomain() {
-        return "Unit -> UOM";
+        return "Unit -> UOM Self Linkage";
     }
 
 

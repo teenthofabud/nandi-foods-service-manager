@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.RightsType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.error.PaymentTermsException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermsForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.vo.PaymentTermsPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.vo.PaymentTermsVo;
@@ -53,7 +54,7 @@ public interface PaymentTermsAPI {
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     public ResponseEntity<Void> postPaymentTerms(@RequestBody(description = "Payment Terms form", required = true,
-            content = @Content(schema = @Schema(implementation = PaymentTermsForm.class))) PaymentTermsForm form);
+            content = @Content(schema = @Schema(implementation = PaymentTermsForm.class))) PaymentTermsForm form) throws PaymentTermsException;
 
 
     @Operation(method = "PATCH", summary = "Payment Terms edit", description = "patchPaymentTermsById")
@@ -63,7 +64,7 @@ public interface PaymentTermsAPI {
     })
     @Parameter(description = "Payment Terms Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<Void> patchPaymentTermsByCode(String code, @RequestBody(description = "Payment Terms dto", required = true,
-            content = @Content(schema = @Schema(implementation = PaymentTermsDto.class))) PaymentTermsDto sourceUOMDto) throws JsonPatchException, JsonProcessingException;
+            content = @Content(schema = @Schema(implementation = PaymentTermsDto.class))) PaymentTermsDto sourceUOMDto) throws JsonPatchException, JsonProcessingException, PaymentTermsException;
 
 
 
@@ -74,7 +75,7 @@ public interface PaymentTermsAPI {
             )
     })
     @Parameter(description = "Payment Terms Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<PaymentTermsVo> getPaymentTermsByCode(String code);
+    public ResponseEntity<PaymentTermsVo> getPaymentTermsByCode(String code) throws PaymentTermsException;
 
 
     @Operation(method = "DELETE", summary = "Delete Payment Terms by Id", description = "deletePaymentTermsById")
@@ -82,7 +83,7 @@ public interface PaymentTermsAPI {
             @ApiResponse(responseCode = "204", description = "Payment Terms edited")
     })
     @Parameter(description = "Payment Terms Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<Void> deletePaymentTermsById(String code);
+    public ResponseEntity<Void> deletePaymentTermsById(String code) throws PaymentTermsException;
 
 
     @Operation(method = "GET", summary = "Search Payment Terms by query within range", description = "searchPaymentTermsByQuery")

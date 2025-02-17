@@ -10,7 +10,10 @@ public enum WMSErrorCode implements WMSError {
     WMS_ATTRIBUTE_UNEXPECTED("VC-PR-007", 422), // semantic
     WMS_EXISTS("VC-PR-005", 409),
     WMS_INACTIVE("VC-PR-008", 400),
-    WMS_ACTION_FAILURE("VC-PR-001", 500);
+    WMS_ACTION_FAILURE("VC-PR-001", 500),
+    WMS_DUPLICATE_ATTRIBUTES("VC-PR-009", 409),
+    WMS_ACTION_REPEATED("VC-PR-010", 409),
+    WMS_ATTRIBUTE_MISSING("VC-PR-004",400 );
 
     private String errorCode;
     private int httpStatusCode;
@@ -24,7 +27,7 @@ public enum WMSErrorCode implements WMSError {
 
     @Override
     public String toString() {
-        return STR."WMSErrorCode{\{this.name()} -> errorCode='\{errorCode}\{'\''}, httpStatusCode=\{httpStatusCode}\{'}'}";
+        return "WMSErrorCode %s -> errorCode=%s, httpStatusCode=%s".formatted(this.name(),errorCode,httpStatusCode);
     }
 
     @Override

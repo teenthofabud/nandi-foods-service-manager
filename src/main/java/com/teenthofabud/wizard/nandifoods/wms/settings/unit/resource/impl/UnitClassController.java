@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.impl;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.UnitClassAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.service.UnitClassService;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
@@ -47,7 +48,7 @@ public class UnitClassController implements UnitClassAPI {
     @GetMapping(path = "/download",
             produces = { MediaType.APPLICATION_PDF_VALUE, HttpMediaType.TEXT_CSV })
     @Override
-    public StreamingResponseBody downloadUnitClass(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException {
+    public StreamingResponseBody downloadUnitClass(@RequestHeader(name = HttpHeaders.ACCEPT, required = false) String accept, HttpServletResponse response) throws IOException, UnitException {
         IllegalArgumentException e = new IllegalArgumentException("Accept type header should be either " + MediaType.APPLICATION_PDF_VALUE + " or " + HttpMediaType.TEXT_CSV);
         if(!StringUtils.hasText(accept)) {
             throw e;

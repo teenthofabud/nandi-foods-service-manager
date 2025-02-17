@@ -1,4 +1,4 @@
-package com.teenthofabud.wizard.nandifoods.wms.error;
+package com.teenthofabud.wizard.nandifoods.wms.error.handler;
 
 import com.teenthofabud.wizard.nandifoods.wms.error.converter.WMSExceptionToErrorVoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSBaseException;

@@ -11,10 +11,13 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassCrossL
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassSelfLinkageForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.entity.HUEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.entity.UOMHULinkageEntity;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.error.HUException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.repository.HURepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.hu.repository.UOMHULinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.entity.PUEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.entity.UOMPULinkageEntity;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.MeasurementSystemException;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.error.PUException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.repository.PURepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.pu.repository.UOMPULinkageJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCrossLinkageToUOMHULinkageEntityReducer;
@@ -34,6 +37,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error.UOMException;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error.UOMSelfLinkException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMJpaRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository.UOMMeasuredValuesJpaRepository;
@@ -159,10 +163,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
     }
 
-    private void puLink(UOMEntity from, UnitClassCrossLinkageForm e) {
+    private void puLink(UOMEntity from, UnitClassCrossLinkageForm e) throws MeasurementSystemException, PUException {
         Optional<PUEntity> optionalTo = puRepository.findByCode(e.getCode());
         if(optionalTo.isEmpty()) {
-            throw new IllegalArgumentException("PU does not exist with code: " + e.getCode());
+            throw new PUException(WMSErrorCode.WMS_NOT_FOUND,new Object[]{e.getCode()});
         }
         PUEntity to = optionalTo.get();
         UOMPULinkageEntity uomPULinkageEntity = unitClassCrossLinkageToUOMPULinkageEntityReducer.reduce(e, from, to);
@@ -170,10 +174,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM with code: {} linked to PU with code: {}", from.getCode(), to.getCode());
     }
 
-    private void huLink(UOMEntity from, UnitClassCrossLinkageForm e) {
+    private void huLink(UOMEntity from, UnitClassCrossLinkageForm e) throws HUException {
         Optional<HUEntity> optionalTo = huRepository.findByCode(e.getCode());
         if(optionalTo.isEmpty()) {
-            throw new IllegalArgumentException("HU does not exist with code: " + e.getCode());
+            throw new HUException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{e.getCode()});
         }
         HUEntity to = optionalTo.get();
         UOMHULinkageEntity uomHULinkageEntity = unitClassCrossLinkageToUOMHULinkageEntityReducer.reduce(e, from, to);
@@ -189,8 +193,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             return;
         }
         List<UnitClassCrossLinkageForm> linkedPUHUs = optionalUnitClassCrossLinkageForms.get();
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.PU) == 0).forEach(e -> puLink(from, e));
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.HU) == 0).forEach(e -> huLink(from, e));
+        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.PU) == 0).forEach(Errors.rethrow().wrap(e -> {
+            puLink(from, e);
+        }));
+        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.HU) == 0).forEach(Errors.rethrow().wrap(e -> {huLink(from, e);}));
     }
 
     private UnitClassMeasuredValuesVo getUnitClassMeasuredValuesFor(UOMEntity uomEntity, MeasurementSystem measurementSystem) {
@@ -203,30 +209,32 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         return unitClassMeasuredValuesVo;
     }
 
-    private void validateMutualRelationsBetweenCollectionItems(UOMForm form) {
+    private void validateMutualRelationsBetweenCollectionItems(UOMForm form) throws UOMSelfLinkException, MeasurementSystemException {
         if(form.getLinkedUOMs().isPresent()) {
             List<UnitClassSelfLinkageForm> selfLinksList = form.getLinkedUOMs().get();
             Set<UnitClassSelfLinkageForm> selfLinksSet = selfLinksList.stream().collect(Collectors.toSet());
             if(selfLinksList.size() != selfLinksSet.size()) {
                 log.debug("Same UOM is being tried to linked multiple times");
-                throw new IllegalStateException("Duplicate UOM self links");
+//                throw new IllegalStateException("Duplicate UOM self links");
+                throw new UOMSelfLinkException(WMSErrorCode.WMS_DUPLICATE_ATTRIBUTES, new Object[]{form.getCode()+" linked UOMs"});
             }
         }
         validateMutualRelationsBetweenMeasuredValues(form, MeasurementSystem.IMPERIAL);
         validateMutualRelationsBetweenMeasuredValues(form, MeasurementSystem.SI);
     }
 
-    private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MeasurementSystem measurementSystem) {
+    private void validateMutualRelationsBetweenMeasuredValues(UOMForm form, MeasurementSystem measurementSystem) throws MeasurementSystemException {
        Long countMeasuredValues = form.getMeasuredValues().stream().filter(f -> f.getMeasurementSystem().compareTo(measurementSystem) == 0).count();
         if(countMeasuredValues != 1l) {
             log.debug("Invalid number : {} of measured values for {} metric system", countMeasuredValues, measurementSystem);
-            throw new IllegalArgumentException("Invalid count of " + measurementSystem.name() + " measured values");
+//            throw new IllegalArgumentException("Invalid count of " + measurementSystem.name() + " measured values");
+            throw new MeasurementSystemException(WMSErrorCode.WMS_ATTRIBUTE_INVALID,new Object[]{"Measured values : "+measurementSystem.name()});
         }
     }
 
     @Transactional
     @Override
-    public UOMVo createNewUOM(UOMForm form) throws UOMException {
+    public UOMVo createNewUOM(UOMForm form) throws UOMException, MeasurementSystemException, UOMSelfLinkException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(form.getCode());
         if(optionalUOMEntity.isPresent()) {
             throw new UOMException(WMSErrorCode.WMS_EXISTS,new Object[]{form.getCode()});
@@ -262,7 +270,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
 //            throw new IllegalArgumentException("UOM does not exist with code: " + code);
-            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND,new Object[]{"UOM",code});
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND,new Object[]{code});
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
@@ -317,10 +325,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
 
     @Transactional
     @Override
-    public void deleteExistingUOMByCode(String code) {
+    public void deleteExistingUOMByCode(String code) throws UOMException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
-            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         log.debug("UOM found with code: {}", uomEntity.getCode());
@@ -352,7 +360,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) throws UOMException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
-            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
@@ -396,14 +404,15 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
 
     @Transactional
     @Override
-    public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) {
+    public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) throws UOMException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
-            throw new IllegalArgumentException("UOM does not exist with code: " + code);
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
         }
         UOMEntity uomEntity = optionalUOMEntity.get();
         if(uomEntity.getStatus().compareTo(UnitClassStatus.ACTIVE) == 0) {
-            throw new IllegalStateException("UOM already approved with id: " + code);
+//            throw new IllegalStateException("UOM already approved with id: " + code);
+            throw new UOMException(WMSErrorCode.WMS_ACTION_REPEATED,new Object[]{"code"});
         }
         uomUpdateHelper(uomEntity, optionallyPatchedUOMDto);
         LocalDateTime approvalTime = LocalDateTime.now();

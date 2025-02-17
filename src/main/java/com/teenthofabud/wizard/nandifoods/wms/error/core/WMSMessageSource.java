@@ -1,13 +1,16 @@
-package com.teenthofabud.wizard.nandifoods.wms.error;
+package com.teenthofabud.wizard.nandifoods.wms.error.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 @Slf4j
 public class WMSMessageSource extends ReloadableResourceBundleMessageSource{

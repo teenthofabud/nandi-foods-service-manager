@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.service.impl;
 
+import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.PaymentTermsEntityToDtoConverter;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.PaymentTermsEntityToVoConverter;
@@ -8,6 +9,7 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.converter.P
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.dto.PaymentTermsPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.entity.PaymentTermsEntity;
+import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.error.PaymentTermsException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.form.PaymentTermsForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.repository.PaymentTermsRepository;
 import com.teenthofabud.wizard.nandifoods.wms.settings.payment.terms.service.PaymentTermsService;
@@ -55,11 +57,13 @@ public class PaymentTermsServiceImpl implements PaymentTermsService, Comparative
 
     @Transactional
     @Override
-    public PaymentTermsVo createNewPaymentTerms(PaymentTermsForm form) {
+    public PaymentTermsVo createNewPaymentTerms(PaymentTermsForm form) throws PaymentTermsException {
         Optional<PaymentTermsEntity> optionalPaymentTermsEntity = paymentTermsRepository.findByCode(form.getCode());
         if(optionalPaymentTermsEntity.isPresent()) {
-            throw new IllegalStateException("Payment Term already exists with id: " + form.getCode());
+//            throw new IllegalStateException("Payment Term already exists with id: " + form.getCode());
+            throw new PaymentTermsException(WMSErrorCode.WMS_EXISTS,new Object[]{form.getCode()});
         }
+
 
         PaymentTermsEntity paymentTermsEntity = paymentTermsFormToEntityConverter.convert(form);
 
@@ -72,10 +76,11 @@ public class PaymentTermsServiceImpl implements PaymentTermsService, Comparative
     }
 
     @Override
-    public PaymentTermsVo retrieveExistingPaymentTermsByCode(String code) {
+    public PaymentTermsVo retrieveExistingPaymentTermsByCode(String code) throws PaymentTermsException {
         Optional<PaymentTermsEntity> optionalPaymentTermsEntity = paymentTermsRepository.findByCode(code);
         if(!optionalPaymentTermsEntity.isPresent()) {
-            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+//            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+            throw new PaymentTermsException(WMSErrorCode.WMS_EXISTS,new Object[]{code});
         }
         PaymentTermsEntity paymentTermsEntity = optionalPaymentTermsEntity.get();
         log.debug("Payment term found with code: {}", paymentTermsEntity.getCode());
@@ -85,10 +90,11 @@ public class PaymentTermsServiceImpl implements PaymentTermsService, Comparative
 
     @Transactional
     @Override
-    public void deletePaymentTermsByCode(String code) {
+    public void deletePaymentTermsByCode(String code) throws PaymentTermsException {
         Optional<PaymentTermsEntity> optionalPaymentTermsEntity = paymentTermsRepository.findByCode(code);
         if(!optionalPaymentTermsEntity.isPresent()) {
-            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+//            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+            throw new PaymentTermsException(WMSErrorCode.WMS_NOT_FOUND,new Object[]{code});
         }
         PaymentTermsEntity paymentTermsEntity = optionalPaymentTermsEntity.get();
         log.debug("Payment term found with code: {}", paymentTermsEntity.getCode());
@@ -99,10 +105,11 @@ public class PaymentTermsServiceImpl implements PaymentTermsService, Comparative
 
     @Transactional
     @Override
-    public void updatePaymentTermsByCode(String code, PaymentTermsDto sourceDto) {
+    public void updatePaymentTermsByCode(String code, PaymentTermsDto sourceDto) throws PaymentTermsException {
         Optional<PaymentTermsEntity> optionalPaymentTermsEntity = paymentTermsRepository.findByCode(code);
         if(!optionalPaymentTermsEntity.isPresent()) {
-            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+//            throw new IllegalStateException("Payment Term doesn't exist with code : " + code);
+            throw new PaymentTermsException(WMSErrorCode.WMS_NOT_FOUND,new Object[]{code});
         }
         PaymentTermsEntity paymentTermsEntity = optionalPaymentTermsEntity.get();
         PaymentTermsDto targetDto = paymentTermsEntityToDtoConverter.convert(paymentTermsEntity);

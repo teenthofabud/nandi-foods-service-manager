@@ -54,6 +54,8 @@ spring:
   mvc:
     media-types:
       csv: text/csv
+  config:
+    location: file:config/messages/
 
 server:
   forward-headers-strategy: FRAMEWORK
@@ -85,6 +87,8 @@ wms:
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3
+  messages:
+    location: ../../../config/messages/
 
 logging:
   level:

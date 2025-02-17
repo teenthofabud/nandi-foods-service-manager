@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -42,7 +43,7 @@ public interface UnitClassAPI extends BaseUnitClassAPI {
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     @Parameter(description = "Document type for Unit Class list", name = "Accept", schema = @Schema(implementation = String.class), in = ParameterIn.HEADER, required = true)
-    public StreamingResponseBody downloadUnitClass(String accept, HttpServletResponse response) throws IOException;
+    public StreamingResponseBody downloadUnitClass(String accept, HttpServletResponse response) throws IOException, UnitException;
 
     @Operation(method = "POST", summary = "Upload Unit Class list", description = "uploadUnitClass")
     @ApiResponses(value = {
