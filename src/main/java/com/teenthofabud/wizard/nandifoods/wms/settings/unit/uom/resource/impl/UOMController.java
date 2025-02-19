@@ -62,20 +62,14 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.created(location).build();
     }
 
-    private UOMDto patchUOM(JsonPatch jsonPatch) throws UOMException {
+    private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         JsonNode blankUOMDtoNode = mapper.convertValue(UOMDto.builder().build(), JsonNode.class);
         JsonNode patchedUOMDtoNode = null;
         UOMDto patcheUOMDto = null;
-        try {
+
             patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
             patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDto>() {});
             log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
-        } catch (JsonPatchException e) {
-            throw new UOMException(WMSErrorCode.WMS_ACTION_FAILURE,new Object[]{"Editing", "invalid changes"});
-
-        } catch (JsonProcessingException e) {
-            throw new UOMException(WMSErrorCode.WMS_ACTION_FAILURE,new Object[]{"JSON Processing", "invalid JSON"});
-        }
 
         return patcheUOMDto;
     }
@@ -89,7 +83,7 @@ public class UOMController implements UOMAPI {
 
     @PatchMapping(path = "/{id}/approve", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> approveSavedUOMById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws UOMException {
+    public ResponseEntity<Void> approveSavedUOMById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
         Optional<UOMDto> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonPatch) ? Optional.empty() : Optional.of(patchUOM(jsonPatch));
         Set<ConstraintViolation<Optional<UOMDto>>> violations = validator.validate(optionallyPatchedUOMDto);
         if (!violations.isEmpty()) {

@@ -67,7 +67,7 @@ public interface UOMAPI extends BaseUnitClassAPI {
             content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
                     array = @ArraySchema(
                             schema = @Schema(implementation = JsonPatchOperation.class)
-                    ))) JsonPatch jsonPatch) throws UOMException;
+                    ))) JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException;
 
 
 

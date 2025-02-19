@@ -54,13 +54,12 @@ spring:
   mvc:
     media-types:
       csv: text/csv
-  config:
-    location: file:config/messages/
 
 server:
   forward-headers-strategy: FRAMEWORK
   port: 8081
   shutdown: graceful
+
 
 wms:
   cors:
@@ -87,8 +86,7 @@ wms:
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3
-  messages:
-    location: ./config/messages/
+
 
 logging:
   level:

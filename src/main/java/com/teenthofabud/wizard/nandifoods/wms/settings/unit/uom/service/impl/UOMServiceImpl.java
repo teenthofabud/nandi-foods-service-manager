@@ -193,10 +193,14 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             return;
         }
         List<UnitClassCrossLinkageForm> linkedPUHUs = optionalUnitClassCrossLinkageForms.get();
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.PU) == 0).forEach(Errors.rethrow().wrap(e -> {
-            puLink(from, e);
+        linkedPUHUs.stream().forEach(Errors.rethrow().wrap(e -> {
+            if (e.getType().compareTo(UnitClass.PU) == 0) {
+                puLink(from, e);
+            } else {
+                huLink(from, e);
+            }
         }));
-        linkedPUHUs.stream().filter(e -> e.getType().compareTo(UnitClass.HU) == 0).forEach(Errors.rethrow().wrap(e -> {huLink(from, e);}));
+
     }
 
     private UnitClassMeasuredValuesVo getUnitClassMeasuredValuesFor(UOMEntity uomEntity, MeasurementSystem measurementSystem) {
@@ -216,7 +220,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             if(selfLinksList.size() != selfLinksSet.size()) {
                 log.debug("Same UOM is being tried to linked multiple times");
 //                throw new IllegalStateException("Duplicate UOM self links");
-                throw new UOMSelfLinkException(WMSErrorCode.WMS_DUPLICATE_ATTRIBUTES, new Object[]{form.getCode()+" linked UOMs"});
+                throw new UOMSelfLinkException(WMSErrorCode.WMS_DUPLICATE_ATTRIBUTES, new Object[]{form.getCode()});
             }
         }
         validateMutualRelationsBetweenMeasuredValues(form, MeasurementSystem.IMPERIAL);
@@ -228,7 +232,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         if(countMeasuredValues != 1l) {
             log.debug("Invalid number : {} of measured values for {} metric system", countMeasuredValues, measurementSystem);
 //            throw new IllegalArgumentException("Invalid count of " + measurementSystem.name() + " measured values");
-            throw new MeasurementSystemException(WMSErrorCode.WMS_ATTRIBUTE_INVALID,new Object[]{"Measured values : "+measurementSystem.name()});
+            throw new MeasurementSystemException(WMSErrorCode.WMS_ATTRIBUTE_INVALID,new Object[]{measurementSystem.name()});
         }
     }
 

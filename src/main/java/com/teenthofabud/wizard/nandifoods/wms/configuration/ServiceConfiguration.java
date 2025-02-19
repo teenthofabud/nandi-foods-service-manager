@@ -42,9 +42,6 @@ public class ServiceConfiguration {
     @Value("${wms.settings.unit.approvalTimeFormat}}")
     private String unitApprovalTimeFormat;
 
-    @Value("${wms.messages.location}")
-    private String messagesLocation;
-
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = JsonMapper.builder()
@@ -92,9 +89,7 @@ public class ServiceConfiguration {
     public WMSMessageSource wmsMessageSource() throws IOException {
         WMSMessageSource messageSource = new WMSMessageSource();
         messageSource.setDefaultEncoding("UTF-8");
-        // change to an apt refresh interval
-        messageSource.setCacheMillis(10000);
-        messageSource.setBasename("file:"+messagesLocation+"/messages");
+        messageSource.setBasenames("messages");
         return messageSource;
     }
 

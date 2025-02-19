@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.error;
 
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSBaseException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSError;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
