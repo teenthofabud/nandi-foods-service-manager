@@ -26,7 +26,7 @@ public class HUException extends WMSBaseException{
 
     @Override
     public String getSubDomain() {
-        return "Unit -> HU";
+        return "Unit : HU";
     }
 
 

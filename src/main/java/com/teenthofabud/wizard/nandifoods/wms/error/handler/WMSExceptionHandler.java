@@ -6,12 +6,22 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.ErrorVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
-public abstract class WMSExceptionHandler {
+@ControllerAdvice
+public class WMSExceptionHandler {
 
     @Autowired
     private WMSExceptionToErrorVoConverter wmsExceptionToErrorVoConverter;
+
+    @ExceptionHandler(value = { WMSBaseException.class })
+    public ResponseEntity<ErrorVo> handleCategorySubDomainExceptions(WMSBaseException e) {
+        ResponseEntity<ErrorVo>  response = parseExceptionToResponse(e);
+        log.error(response.getBody().getMessage(),e);
+        return response;
+    }
 
     public ResponseEntity<ErrorVo> parseExceptionToResponse(WMSBaseException e) {
 

@@ -26,7 +26,7 @@ public class UOMException extends WMSBaseException{
 
     @Override
     public String getSubDomain() {
-        return "Unit -> UOM";
+        return "Unit : UOM";
     }
 
 
