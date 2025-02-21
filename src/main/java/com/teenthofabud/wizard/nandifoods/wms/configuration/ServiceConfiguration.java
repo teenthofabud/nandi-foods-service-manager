@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSMessageSource;
 import com.teenthofabud.wizard.nandifoods.wms.handler.OptionalUnitClassMeasuredValuesDtoCollectionComparator;
 import com.teenthofabud.wizard.nandifoods.wms.handler.UnitClassMeasuredValuesDtoCollectionComparator;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.OptionalUnitClassMeasuredValuesDtoCollection;
@@ -21,13 +22,16 @@ import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.hibernate.validator.HibernateValidator;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
-import org.javers.core.diff.ListCompareAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +83,14 @@ public class ServiceConfiguration {
                                                       .buildValidatorFactory();
         Validator validator = validatorFactory.getValidator();
         return validator;
+    }
+
+    @Bean
+    public WMSMessageSource wmsMessageSource() throws IOException {
+        WMSMessageSource messageSource = new WMSMessageSource();
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setBasenames("messages");
+        return messageSource;
     }
 
 }

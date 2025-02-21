@@ -60,6 +60,7 @@ server:
   port: 8081
   shutdown: graceful
 
+
 wms:
   cors:
     allowedOrigins: http://localhost
@@ -85,6 +86,7 @@ wms:
         defaultSort: code
         defaultOffset: 0
         defaultLimit: 3
+
 
 logging:
   level:

@@ -1,6 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.service;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.UnitException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMPageDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.vo.UOMPageImplVo;
 
@@ -13,7 +14,7 @@ public interface UnitClassService {
 
     public UOMPageImplVo retrieveUOMWithinRange(Optional<String> optionalQuery, UOMPageDto uomPageDto);
 
-    public FileDto downloadUOMAsCSV() throws IOException;
+    public FileDto downloadUOMAsCSV() throws IOException, UnitException;
 
     public FileDto downloadUOMAsPDF() throws IOException;
 
