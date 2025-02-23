@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto.FileDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
@@ -64,26 +65,30 @@ public class UOMController implements UOMAPI {
         return ResponseEntity.created(location).build();
     }
 
-    private UOMDto patchUOM(JsonPatch jsonPatch) throws JsonProcessingException, JsonPatchException {
-        JsonNode blankUOMDtoNode = mapper.convertValue(UOMDto.builder().build(), JsonNode.class);
-        JsonNode patchedUOMDtoNode = jsonPatch.apply(blankUOMDtoNode);
-        UOMDto patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDto>() {});
-        log.debug("patchedUOMDtoNode: {}", mapper.writeValueAsString(patcheUOMDto));
+    private UOMDtoV2 mergePatchUOM(JsonMergePatch jsonMergePatch) throws JsonPatchException, JsonProcessingException {
+        JsonNode blankUOMDtoNode = mapper.convertValue(UOMDtoV2.builder().build(), JsonNode.class);
+        JsonNode patchedUOMDtoNode = jsonMergePatch.apply(blankUOMDtoNode);
+        UOMDtoV2 patcheUOMDto = mapper.treeToValue(patchedUOMDtoNode, new TypeReference<UOMDtoV2>() {});
         return patcheUOMDto;
     }
 
-    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_MERGE_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException {
-        uomService.updateExistingUOMByCode(code, sourceUOMDto);
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody JsonMergePatch jsonMergePatch) throws JsonPatchException, JsonProcessingException {
+        Optional<UOMDtoV2> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonMergePatch) ? Optional.empty() : Optional.of(mergePatchUOM(jsonMergePatch));
+        Set<ConstraintViolation<Optional<UOMDtoV2>>> violations = validator.validate(optionallyPatchedUOMDto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        uomService.updateExistingUOMByCode(code, optionallyPatchedUOMDto);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(path = "/{id}/approve", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @PatchMapping(path = "/{id}/approve", consumes = HttpMediaType.APPLICATION_JSON_MERGE_PATCH)
     @Override
-    public ResponseEntity<Void> approveSavedUOMById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
-        Optional<UOMDto> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonPatch) ? Optional.empty() : Optional.of(patchUOM(jsonPatch));
-        Set<ConstraintViolation<Optional<UOMDto>>> violations = validator.validate(optionallyPatchedUOMDto);
+    public ResponseEntity<Void> approveSavedUOMById(@PathVariable(name = "id") String code, @RequestBody(required = false) JsonMergePatch jsonMergePatch) throws JsonPatchException, JsonProcessingException {
+        Optional<UOMDtoV2> optionallyPatchedUOMDto = ObjectUtils.isEmpty(jsonMergePatch) ? Optional.empty() : Optional.of(mergePatchUOM(jsonMergePatch));
+        Set<ConstraintViolation<Optional<UOMDtoV2>>> violations = validator.validate(optionallyPatchedUOMDto);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
+import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.teenthofabud.wizard.nandifoods.wms.settings.constants.HttpMediaType;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.resource.BaseUnitClassAPI;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
@@ -47,8 +48,8 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @ApiResponse(responseCode = "204", description = "UOM edited")
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "UOM dto", required = true,
-            content = @Content(schema = @Schema(implementation = UOMDtoV2.class))) UOMDtoV2 sourceUOMDto) throws JsonPatchException, JsonProcessingException;
+    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "JsonMergePatch", required = true,
+            content = @Content(schema = @Schema(implementation = JsonMergePatch.class))) JsonMergePatch jsonMergePatch) throws JsonPatchException, JsonProcessingException;
 
 
 
@@ -60,11 +61,8 @@ public interface UOMAPI extends BaseUnitClassAPI {
                     content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)))
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
-    public ResponseEntity<Void> approveSavedUOMById(String code, @RequestBody(description = "JsonPatch", required = false,
-            content = @Content(mediaType = HttpMediaType.APPLICATION_JSON_PATCH,
-                    array = @ArraySchema(
-                            schema = @Schema(implementation = JsonPatchOperation.class)
-                    ))) JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException;
+    public ResponseEntity<Void> approveSavedUOMById(String code, @RequestBody(description = "JsonMergePatch", required = false,
+            content = @Content(schema = @Schema(implementation = JsonMergePatch.class))) JsonMergePatch jsonMergePatch) throws JsonPatchException, JsonProcessingException;
 
 
 

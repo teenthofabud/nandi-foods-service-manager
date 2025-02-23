@@ -15,8 +15,8 @@ public interface UOMService {
 
     public void deleteExistingUOMByCode(String code);
 
-    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto);
+    public void updateExistingUOMByCode(String code, Optional<UOMDtoV2> optionallyPatchedUOMDto);
 
-    public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto);
+    public void approveSavedUOMByCode(String code, Optional<UOMDtoV2> optionallyPatchedUOMDto);
 
 }
