@@ -30,19 +30,19 @@ public class UOMDtoV2 extends UnitClassDtoV2 {
 
     @NotNull(message = "inventory UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean isInventory;
+    private Optional<Boolean> isInventory  = Optional.ofNullable(null);;
 
     @NotNull(message = "purchase UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean isPurchase;
+    private Optional<Boolean> isPurchase = Optional.ofNullable(null);;
 
     @NotNull(message = "sales UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean isSales;
+    private Optional<Boolean> isSales = Optional.ofNullable(null);;
 
     @NotNull(message = "production UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Boolean isProduction;
+    private Optional<Boolean> isProduction = Optional.ofNullable(null);;
 
     @Builder.Default
     @ArraySchema(schema = @Schema(

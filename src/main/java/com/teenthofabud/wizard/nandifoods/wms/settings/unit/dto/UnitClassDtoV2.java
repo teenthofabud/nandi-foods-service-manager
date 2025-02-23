@@ -26,7 +26,9 @@ import org.hibernate.validator.constraints.Length;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -41,40 +43,40 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
     @JsonSetter(nulls = Nulls.SKIP)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "UOM Level")
     // validated by class level annotation @UnitClassLevelTypeValidator
-    protected UnitClassLevel level;
+    protected Optional<UnitClassLevel> level = Optional.ofNullable(null);;
 
     @Getter
     @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @NotNull(message = "status is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "ACTIVE", description = "Description of the UOM")
-    protected UnitClassStatus status;
+    protected Optional<UnitClassStatus> status = Optional.ofNullable(null);;
 
     @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("name")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED,description = "UOM Type")
     // validated by class level annotation @UnitClassLevelTypeValidator
-    protected UnitClassType type;
+    protected Optional<UnitClassType> type = Optional.ofNullable(null);;
 
     @Getter
     @Setter
     @JsonSetter(nulls = Nulls.SKIP)
     @Length(min = 1, message = "description should be at least 1 character long")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "1 X 4LB", description = "Description of the UOM")
-    protected String description;
+    protected Optional<String> description = Optional.ofNullable(null);;
 
     @Getter
     @Setter
     @Length(min = 8, max = 15, message = "short name should be between 8 and 15 characters")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "EACH (U1009)", description = "[UOM Type] (UOM ID)")
-    protected String shortName;
+    protected Optional<String> shortName = Optional.ofNullable(null);;
 
     @Getter
     @Setter
     @Length(min = 8, max = 30, message = "long name should be between 8 and 30 characters")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "U1009 EACH (1 X 4LB)", description = "[UOM ID] [UOM Type] (UOM Description)")
-    protected String longName;
+    protected Optional<String> longName = Optional.ofNullable(null);;
 
     @Getter
     @Setter
@@ -82,7 +84,7 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
     @NotNull(message = "effective date is required")
     @UntilDays(mandatory = false, count = 91, groups = SecondOrder.class)
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "yyy-MM-dd")
-    protected LocalDate effectiveDate;
+    protected Optional<LocalDate> effectiveDate = Optional.ofNullable(null);;
 
     @Getter
     @Setter
@@ -98,16 +100,16 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
             requiredMode = Schema.RequiredMode.REQUIRED,
             implementation = UnitClassMeasuredValuesDtoV2.class,
             description = "measured values in supported measurement systems"))
-    protected List<@Valid UnitClassMeasuredValuesDtoV2> measuredValues;
+    protected List<@Valid UnitClassMeasuredValuesDtoV2> measuredValues = new ArrayList<>();
 
     @Override
     public UnitClassLevel getLevel() {
-        return this.level;
+        return this.level.get();
     }
 
     @Override
     public UnitClassType getType() {
-        return this.type;
+        return this.type.get();
     }
 
 }
