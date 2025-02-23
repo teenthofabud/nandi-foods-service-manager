@@ -339,10 +339,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
-        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
-        targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
+//        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
 
+        
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }

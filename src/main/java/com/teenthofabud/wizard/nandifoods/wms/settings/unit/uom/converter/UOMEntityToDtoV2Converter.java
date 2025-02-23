@@ -53,6 +53,7 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
                 .isPurchase(Optional.of(source.getIsPurchase()))
                 .status(Optional.of(source.getStatus()))
                 .measuredValues(measuredValues)
+                .linkedUOMs(linkedUOMs)
                 .code(source.getCode())
                 .longName(Optional.of(source.getLongName()))
                 .build();
