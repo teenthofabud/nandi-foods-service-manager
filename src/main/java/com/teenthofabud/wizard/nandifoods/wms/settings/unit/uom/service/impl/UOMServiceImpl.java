@@ -339,11 +339,11 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
-        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-//        UOMDtoV2 targetUOMDto = UOMDtoV2.builder().build()
+//        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        UOMDtoV2 targetUOMDto = UOMDtoV2.builder().build();
         Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
         uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
-        log.debug("All changes : ",dtoDiff.prettyPrint());
+        log.debug(dtoDiff.prettyPrint());
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }

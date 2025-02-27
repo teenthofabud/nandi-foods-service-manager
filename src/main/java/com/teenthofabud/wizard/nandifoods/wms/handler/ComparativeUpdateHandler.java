@@ -24,7 +24,8 @@ public interface ComparativeUpdateHandler<T> {
                 fqdnPropertyName = String.join("", includeCollectionNamePrefix ? previous : "", index, next);
             }
 
-            log.debug("{} changed from {} to {}", fqdnPropertyName, p.getLeft(), p.getRight());
+//            log.debug("{} changed from {} to {}", fqdnPropertyName, p.getLeft(), p.getRight());
+            log.debug("{} changed to {}", fqdnPropertyName,p.getRight());
             if(fqdnPropertyName.compareTo(p.getPropertyNameWithPath()) == 0) {
                 getBeanUtilsBean().copyProperty(bean, fqdnPropertyName, p.getRight());
             } else {
