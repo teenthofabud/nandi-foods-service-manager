@@ -7,7 +7,6 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -42,21 +41,22 @@ public class UOMEntityToDtoV2Converter implements Converter<UOMEntity, UOMDtoV2>
         List<UnitClassMeasuredValuesDtoV2> measuredValues = source.getMeasuredValues().stream().map(f -> uomMeasuredValuesEntityToUnitClassMeasuredValuesDtoV2Converter.convert(f)).collect(Collectors.toList());
         List<UnitClassSelfLinkageDtoV2> linkedUOMs = source.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
         UOMDtoV2 target = UOMDtoV2.builder()
-                .type(Optional.of(source.getType()))
-                .shortName(Optional.of(source.getShortName()))
-                .level(Optional.of(source.getLevel()))
-                .description(Optional.of(source.getDescription()))
-                .effectiveDate(Optional.of(source.getEffectiveDate()))
-                .isInventory(Optional.of(source.getIsInventory()))
-                .isProduction(Optional.of(source.getIsProduction()))
-                .isSales(Optional.of(source.getIsSales()))
-                .isPurchase(Optional.of(source.getIsPurchase()))
-                .status(Optional.of(source.getStatus()))
+                .type(source.getType())
+                .shortName(source.getShortName())
+                .level(source.getLevel())
+                .description(source.getDescription())
+                .effectiveDate(source.getEffectiveDate())
+                .isInventory(source.getIsInventory())
+                .isProduction(source.getIsProduction())
+                .isSales(source.getIsSales())
+                .isPurchase(source.getIsPurchase())
+                .status(source.getStatus())
                 .measuredValues(measuredValues)
                 .linkedUOMs(linkedUOMs)
                 .code(source.getCode())
-                .longName(Optional.of(source.getLongName()))
+                .longName(source.getLongName())
                 .build();
+
         return target;
     }
 }

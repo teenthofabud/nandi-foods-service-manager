@@ -6,6 +6,8 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.ValueChange;
 
+import java.util.Optional;
+
 public interface ComparativeUpdateHandler<T> {
 
     static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ComparativeUpdateHandler.class);
@@ -21,6 +23,7 @@ public interface ComparativeUpdateHandler<T> {
                 String next = fqdnPropertyName.substring(j + 1);
                 fqdnPropertyName = String.join("", includeCollectionNamePrefix ? previous : "", index, next);
             }
+
             log.debug("{} changed from {} to {}", fqdnPropertyName, p.getLeft(), p.getRight());
             if(fqdnPropertyName.compareTo(p.getPropertyNameWithPath()) == 0) {
                 getBeanUtilsBean().copyProperty(bean, fqdnPropertyName, p.getRight());

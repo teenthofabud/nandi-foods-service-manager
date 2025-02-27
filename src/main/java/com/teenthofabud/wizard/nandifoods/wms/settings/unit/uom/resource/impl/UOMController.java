@@ -80,7 +80,8 @@ public class UOMController implements UOMAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        uomService.updateExistingUOMByCode(code, optionallyPatchedUOMDto);
+        if(optionallyPatchedUOMDto.isPresent())
+        uomService.updateExistingUOMByCode(code, optionallyPatchedUOMDto.get());
         return ResponseEntity.noContent().build();
     }
 
@@ -92,7 +93,8 @@ public class UOMController implements UOMAPI {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        uomService.approveSavedUOMByCode(code, optionallyPatchedUOMDto);
+        if(optionallyPatchedUOMDto.isPresent())
+        uomService.approveSavedUOMByCode(code, optionallyPatchedUOMDto.get());
         return ResponseEntity.noContent().build();
     }
 

@@ -30,19 +30,19 @@ public class UOMDtoV2 extends UnitClassDtoV2 {
 
     @NotNull(message = "inventory UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Optional<Boolean> isInventory  = Optional.ofNullable(null);;
+    private Boolean isInventory;
 
     @NotNull(message = "purchase UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Optional<Boolean> isPurchase = Optional.ofNullable(null);;
+    private Boolean isPurchase;
 
     @NotNull(message = "sales UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Optional<Boolean> isSales = Optional.ofNullable(null);;
+    private Boolean isSales;
 
     @NotNull(message = "production UOM is required")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private Optional<Boolean> isProduction = Optional.ofNullable(null);;
+    private Boolean isProduction;
 
     @Builder.Default
     @ArraySchema(schema = @Schema(
@@ -51,6 +51,7 @@ public class UOMDtoV2 extends UnitClassDtoV2 {
     @DiffIgnore
     private @Size(min = 1, message = "At least 1 UOM must be linked") List<@Valid UnitClassSelfLinkageDtoV2> linkedUOMs = new ArrayList<>();
 
+    @DiffIgnore
     @Builder.Default
     private @Size(min = 1, message = "At least 1 PU/HU must be linked") List<@Valid UnitClassCrossLinkageDtoV2> linkedPUHUs = new ArrayList<>();
 

@@ -332,23 +332,25 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
 
     @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, Optional<UOMDtoV2> optionallyPatchedUOMDto) {
+    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
-//        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-
-        
+        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+//        UOMDtoV2 targetUOMDto = UOMDtoV2.builder().build()
+        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
+        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
+        log.debug("All changes : ",dtoDiff.prettyPrint());
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
     @Transactional
     @Override
-    public void approveSavedUOMByCode(String code, Optional<UOMDtoV2> optionallyPatchedUOMDto) {
+    public void approveSavedUOMByCode(String code, UOMDtoV2 sourceUOMDto) {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new IllegalArgumentException("UOM does not exist with code: " + code);
