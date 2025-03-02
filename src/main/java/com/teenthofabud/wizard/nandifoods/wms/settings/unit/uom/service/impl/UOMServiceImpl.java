@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
+import com.teenthofabud.wizard.nandifoods.wms.dto.ComparisonConfigDto;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparitveCollectionUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
@@ -330,6 +331,34 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM deleted with code: {}", uomEntity.getCode());
     }
 
+    private UOMEntity uomUpdateHelper(UOMEntity uomEntity, UOMDtoV2 sourceUOMDto) {
+        UOMDtoV2 oldUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        UOMDtoV2 blankUOMDto = UOMDtoV2.builder().build();
+        // Since merge patch is used, all fields aren't there in sourceDto,
+        // so comparison has to be done with a blankDto
+        Diff dtoDiff = javers.compare(blankUOMDto, sourceUOMDto);
+        log.debug(dtoDiff.prettyPrint());
+        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
+        //linkedUOMs update
+        ComparisonConfigDto linkedUOMComparisonConfig = ComparisonConfigDto.<UnitClassSelfLinkageDtoV2,UOMSelfLinkageEntity>builder()
+                .reducer(unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2)
+                .sourceClass(UnitClassSelfLinkageDtoV2.class)
+                .oldCollection(oldUOMDto.getLinkedUOMs())
+                .newCollection(sourceUOMDto.getLinkedUOMs())
+                .entityCollectionField(uomEntity.getFromUOMs())
+                .build();
+        comparativelyUpdateCollectionFields(linkedUOMComparisonConfig);
+        //measuredValues update
+        ComparisonConfigDto measuredValuesComparisonConfig = ComparisonConfigDto.<UnitClassMeasuredValuesDtoV2,UOMMeasuredValuesEntity>builder()
+                .reducer(null)
+                .sourceClass(UnitClassMeasuredValuesDtoV2.class)
+                .oldCollection(oldUOMDto.getMeasuredValues())
+                .newCollection(sourceUOMDto.getMeasuredValues())
+                .entityCollectionField(uomEntity.getMeasuredValues())
+                .build();
+        comparativelyUpdateCollectionFields(measuredValuesComparisonConfig);
+        return uomEntity;
+    }
 
     @Transactional
     @Override
@@ -340,23 +369,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
-        UOMDtoV2 oldUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        UOMDtoV2 blankUOMDto = UOMDtoV2.builder().build();
-        // Since merge patch is used, all fields aren't there in sourceDto,
-        // so comparison has to be done with a blankDto
-        Diff dtoDiff = javers.compare(blankUOMDto, sourceUOMDto);
-        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
-
-        if(sourceUOMDto.getLinkedUOMs()!=null) {
-            Diff linkedUOMDiff = javers.compareCollections(oldUOMDto.getLinkedUOMs(), sourceUOMDto.getLinkedUOMs(), UnitClassSelfLinkageDtoV2.class);
-            comparativelyUpdateCollectionFields(linkedUOMDiff, uomEntity.getFromUOMs(), unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2, UnitClassSelfLinkageDtoV2.class);
-        }
-        if(sourceUOMDto.getMeasuredValues()!=null) {
-            Diff measuredValuesDiff = javers.compareCollections(oldUOMDto.getMeasuredValues(), sourceUOMDto.getMeasuredValues(), UnitClassMeasuredValuesDtoV2.class);
-            comparativelyUpdateCollectionFields(measuredValuesDiff, uomEntity.getMeasuredValues(), null, UnitClassMeasuredValuesDtoV2.class);
-        }
-
-        log.debug(dtoDiff.prettyPrint());
+        uomEntity = uomUpdateHelper(uomEntity,sourceUOMDto);
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
@@ -372,7 +385,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         if(uomEntity.getStatus().compareTo(UnitClassStatus.ACTIVE) == 0) {
             throw new IllegalStateException("UOM already approved with id: " + code);
         }
-
+        uomEntity = uomUpdateHelper(uomEntity,sourceUOMDto);
         LocalDateTime approvalTime = LocalDateTime.now();
         uomEntity.setStatus(UnitClassStatus.ACTIVE);
         log.debug("UOMEntity with id: {} will be activated", uomEntity.getId());
