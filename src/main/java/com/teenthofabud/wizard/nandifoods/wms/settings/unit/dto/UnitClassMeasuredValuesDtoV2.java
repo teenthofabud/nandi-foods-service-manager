@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.MeasuredValuesContract;
+import com.teenthofabud.wizard.nandifoods.wms.type.IdentifiableCollectionItem;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.javers.core.metamodel.annotation.DiffIgnore;
+import org.javers.core.metamodel.annotation.Id;
 
 @EqualsAndHashCode
 @SuperBuilder
@@ -19,7 +21,7 @@ import org.javers.core.metamodel.annotation.DiffIgnore;
 @ToString
 @Getter
 @Setter
-public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasuredValuesDtoV2>, MeasuredValuesContract {
+public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasuredValuesDtoV2>, MeasuredValuesContract, IdentifiableCollectionItem<Long> {
 
     @JsonSetter(nulls = Nulls.SKIP)
     @NotNull(message = "Measurement system can't be null")
@@ -31,6 +33,7 @@ public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasure
     @NotNull(message = "id can't be null")
     @Schema(example = "1", description = "Measurement system primary key")
     @DiffIgnore
+    @Id
     private Long id;
 
     @JsonSetter(nulls = Nulls.SKIP)
@@ -68,4 +71,8 @@ public class UnitClassMeasuredValuesDtoV2 implements Comparable<UnitClassMeasure
         return this.measurementSystem.compareTo(o.getMeasurementSystem());
     }
 
+    @Override
+    public Long getID() {
+        return this.id;
+    }
 }

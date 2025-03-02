@@ -14,8 +14,8 @@ import org.springframework.util.ObjectUtils;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
-@ToString(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Entity(name = "UOMEntity")
 @DynamicUpdate
 @DynamicInsert

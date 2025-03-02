@@ -25,4 +25,11 @@ public abstract class UnitClassLinkageDtoV2 {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "UOM ID")
     protected String code;
 
+    @JsonProperty("fromId")
+    @NotNull(message = "id value of from entity is required")
+    @Id
+    @Pattern(regexp = "U(100[1-9]|10[1-9][0-9]|1[1-9][0-9]{2}|[2-4][0-9]{3})", message = "id of from entity is invalid")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "FROM UOM ID")
+    protected String fromCode;
+
 }

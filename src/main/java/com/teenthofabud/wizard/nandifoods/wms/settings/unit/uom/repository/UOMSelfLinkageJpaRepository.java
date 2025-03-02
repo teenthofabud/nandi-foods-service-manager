@@ -1,5 +1,6 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.repository;
 
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMSelfLinkageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,5 +10,5 @@ public interface UOMSelfLinkageJpaRepository extends JpaRepository<UOMSelfLinkag
 
     public void deleteByFromUomId(Long id);
     public void deleteByToUomId(Long id);
-
+    public UOMSelfLinkageEntity findByFromUomAndToUom(UOMEntity fromUOM, UOMEntity toUOM);
 }

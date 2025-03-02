@@ -44,16 +44,16 @@ public class UOMDtoV2 extends UnitClassDtoV2 {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean isProduction;
 
-    @Builder.Default
+//    @Builder.Default
     @ArraySchema(schema = @Schema(
             implementation = UnitClassSelfLinkageForm.class,
             description = "this UOM is linked to these UOMs"))
     @DiffIgnore
-    private @Size(min = 1, message = "At least 1 UOM must be linked") List<@Valid UnitClassSelfLinkageDtoV2> linkedUOMs = new ArrayList<>();
+    private @Size(min = 1, message = "At least 1 UOM must be linked") List<@Valid UnitClassSelfLinkageDtoV2> linkedUOMs;
 
     @DiffIgnore
-    @Builder.Default
-    private @Size(min = 1, message = "At least 1 PU/HU must be linked") List<@Valid UnitClassCrossLinkageDtoV2> linkedPUHUs = new ArrayList<>();
+//    @Builder.Default
+    private @Size(min = 1, message = "At least 1 PU/HU must be linked") List<@Valid UnitClassCrossLinkageDtoV2> linkedPUHUs;
 
 
 }

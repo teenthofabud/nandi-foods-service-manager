@@ -13,6 +13,7 @@ public class UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter implements
     public UnitClassSelfLinkageDtoV2 convert(UOMSelfLinkageEntity source) {
         UnitClassSelfLinkageDtoV2 target = UnitClassSelfLinkageDtoV2.builder()
                 .code(source.getToUom().getCode())
+                .fromCode(source.getFromUom().getCode())
                 .quantity(source.getQuantity())
                 .build();
         return target;

@@ -2,6 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.dto;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.validator.CrossLinkageUnitClassType;
+import com.teenthofabud.wizard.nandifoods.wms.type.IdentifiableCollectionItem;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class UnitClassCrossLinkageDtoV2 extends UnitClassLinkageDtoV2 {
+public class UnitClassCrossLinkageDtoV2 extends UnitClassLinkageDtoV2 implements IdentifiableCollectionItem<String> {
 
     @CrossLinkageUnitClassType(anyOf = { UnitClass.PU, UnitClass.HU })
     protected UnitClass type;
@@ -27,4 +28,8 @@ public class UnitClassCrossLinkageDtoV2 extends UnitClassLinkageDtoV2 {
     @Min(value = 1, message = "minimum value for maximum quantity is 1")
     protected Integer maximumQuantity;
 
+    @Override
+    public String getID() {
+        return this.getCode();
+    }
 }

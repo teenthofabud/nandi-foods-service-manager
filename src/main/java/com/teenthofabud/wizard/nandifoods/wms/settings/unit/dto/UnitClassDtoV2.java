@@ -99,7 +99,7 @@ public abstract class UnitClassDtoV2 implements UnitClassLevelContract {
             requiredMode = Schema.RequiredMode.REQUIRED,
             implementation = UnitClassMeasuredValuesDtoV2.class,
             description = "measured values in supported measurement systems"))
-    protected List<@Valid UnitClassMeasuredValuesDtoV2> measuredValues = new ArrayList<>();
+    protected List<@Valid UnitClassMeasuredValuesDtoV2> measuredValues;
 
     @Override
     public UnitClassLevel getLevel() {

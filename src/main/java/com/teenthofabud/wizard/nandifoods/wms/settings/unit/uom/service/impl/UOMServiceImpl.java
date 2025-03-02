@@ -1,7 +1,7 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
-import com.diffplug.common.base.Errors;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
+import com.teenthofabud.wizard.nandifoods.wms.handler.ComparitveCollectionUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClassStatus;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.UnitClass;
@@ -22,9 +22,9 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassCro
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.form.UnitClassMeasuredValuesForm;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.converter.UnitClassMeasuredValuesFormToUOMMeasuredValuesEntityConverter;
+import com.teenthofabud.wizard.nandifoods.wms.settings.unit.reducer.UnitClassSelfLinkageDtoV2ToUOMSelfLinkageEntityReducer;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.type.UnitClassSelfLinkageContract;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter.*;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMMeasuredValuesEntity;
@@ -39,10 +39,8 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassMeasured
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.vo.UnitClassSelfLinkageVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
-import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
-import org.javers.core.diff.changetype.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -55,7 +53,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOMEntity> {
+public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOMEntity>, ComparitveCollectionUpdateHandler {
 
     private UOMJpaRepository uomJpaRepository;
     private UOMFormToEntityConverter uomFormToEntityConverter;
@@ -76,6 +74,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private UOMEntityToDtoV2Converter uomEntityToDtoV2Converter;
     private UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
     private UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
+    private UnitClassSelfLinkageDtoV2ToUOMSelfLinkageEntityReducer unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2;
     //private UOMSummaryProjectionRepository uomSummaryProjectionRepository;
 
     private List<String> searchFields;
@@ -103,6 +102,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter,
+                          UnitClassSelfLinkageDtoV2ToUOMSelfLinkageEntityReducer unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -131,6 +131,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.pdfFileNameFormat = pdfFileNameFormat;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter = uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
+        this.unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2 = unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -339,10 +340,22 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         }
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
-//        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        UOMDtoV2 targetUOMDto = UOMDtoV2.builder().build();
-        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
+        UOMDtoV2 oldUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        UOMDtoV2 blankUOMDto = UOMDtoV2.builder().build();
+        // Since merge patch is used, all fields aren't there in sourceDto,
+        // so comparison has to be done with a blankDto
+        Diff dtoDiff = javers.compare(blankUOMDto, sourceUOMDto);
         uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
+
+        if(sourceUOMDto.getLinkedUOMs()!=null) {
+            Diff linkedUOMDiff = javers.compareCollections(oldUOMDto.getLinkedUOMs(), sourceUOMDto.getLinkedUOMs(), UnitClassSelfLinkageDtoV2.class);
+            comparativelyUpdateCollectionFields(linkedUOMDiff, uomEntity.getFromUOMs(), unitClassSelfLinkageToUOMSelfLinkageEntityReducerV2, UnitClassSelfLinkageDtoV2.class);
+        }
+        if(sourceUOMDto.getMeasuredValues()!=null) {
+            Diff measuredValuesDiff = javers.compareCollections(oldUOMDto.getMeasuredValues(), sourceUOMDto.getMeasuredValues(), UnitClassMeasuredValuesDtoV2.class);
+            comparativelyUpdateCollectionFields(measuredValuesDiff, uomEntity.getMeasuredValues(), null, UnitClassMeasuredValuesDtoV2.class);
+        }
+
         log.debug(dtoDiff.prettyPrint());
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
