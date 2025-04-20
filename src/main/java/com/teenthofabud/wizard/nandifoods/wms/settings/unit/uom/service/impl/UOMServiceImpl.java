@@ -1,6 +1,11 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
@@ -86,6 +91,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private String fileNameDateFormat;
     private String csvFileNameFormat;
     private String pdfFileNameFormat;
+    private ObjectMapper objectMapper;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -355,10 +361,25 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             }));
         }
     }
+    private UOMEntity patchUOMtoEntity (UOMEntity uomEntity, UOMDtoV2 patchUOM){
+        if (patchUOM.getIsInventory()!=null){
+            uomEntity.setIsInventory(patchUOM.getIsInventory());
+        }
+        if (patchUOM.getIsPurchase()!=null){
+            uomEntity.setIsPurchase(patchUOM.getIsPurchase());
+        }
+        if (patchUOM.getIsSales()!=null){
+            uomEntity.setIsSales(patchUOM.getIsSales());
+        }
+        if (patchUOM.getIsProduction()!=null){
+            uomEntity.setIsProduction(patchUOM.getIsProduction());
+        }
+        return uomEntity;
+    }
 
     @Transactional
     @Override
-    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) throws UOMException {
+    public void updateExistingUOMByCode(String code, JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
             throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
@@ -368,10 +389,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
         List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
         targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
-        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
-        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
-        uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
-        uomJpaRepository.save(uomEntity);
+        JsonNode patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
+        UOMDtoV2 patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
+        uomJpaRepository.save(patchUOMtoEntity(uomEntity, patchedUOMDto));
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 

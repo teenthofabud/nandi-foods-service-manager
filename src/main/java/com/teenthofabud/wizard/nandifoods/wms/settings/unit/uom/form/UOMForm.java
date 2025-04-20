@@ -43,6 +43,8 @@ public class UOMForm extends UnitClassForm {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean isProduction;
 
+
+    //Creates a UOM link that must have atleast one value. Each values are validated. If no values provided it gives null object by default.
     @Builder.Default
     @ArraySchema(schema = @Schema(
             implementation = UnitClassSelfLinkageForm.class,

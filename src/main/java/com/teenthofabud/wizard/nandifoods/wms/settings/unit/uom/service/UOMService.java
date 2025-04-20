@@ -1,8 +1,10 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.error.MeasurementSystemException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDto;
-import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error.UOMException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.error.UOMSelfLinkException;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.form.UOMForm;
@@ -18,7 +20,7 @@ public interface UOMService {
 
     public void deleteExistingUOMByCode(String code) throws UOMException;
 
-    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) throws UOMException;
+    public void updateExistingUOMByCode(String code, JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException;
 
     public void approveSavedUOMByCode(String code, Optional<UOMDto> optionallyPatchedUOMDto) throws UOMException;
 
