@@ -92,6 +92,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private String csvFileNameFormat;
     private String pdfFileNameFormat;
     private ObjectMapper objectMapper;
+    private UOMDtoV2toUOMEntityPatcher uomDtoV2toUOMEntityPatcher;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -113,6 +114,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter,
+                          ObjectMapper objectMapper,
+                            UOMDtoV2toUOMEntityPatcher uomDtoV2toUOMEntityPatcher,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -141,6 +144,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.pdfFileNameFormat = pdfFileNameFormat;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter = uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
+        this.objectMapper=objectMapper;
+        this.uomDtoV2toUOMEntityPatcher = uomDtoV2toUOMEntityPatcher;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -248,7 +253,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         if(optionalUOMEntity.isPresent()) {
             throw new UOMException(WMSErrorCode.WMS_EXISTS,new Object[]{form.getCode()});
         }
-
+        log.debug(form.toString());
         validateMutualRelationsBetweenCollectionItems(form);
 
         // Save UOM
@@ -361,21 +366,6 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             }));
         }
     }
-    private UOMEntity patchUOMtoEntity (UOMEntity uomEntity, UOMDtoV2 patchUOM){
-        if (patchUOM.getIsInventory()!=null){
-            uomEntity.setIsInventory(patchUOM.getIsInventory());
-        }
-        if (patchUOM.getIsPurchase()!=null){
-            uomEntity.setIsPurchase(patchUOM.getIsPurchase());
-        }
-        if (patchUOM.getIsSales()!=null){
-            uomEntity.setIsSales(patchUOM.getIsSales());
-        }
-        if (patchUOM.getIsProduction()!=null){
-            uomEntity.setIsProduction(patchUOM.getIsProduction());
-        }
-        return uomEntity;
-    }
 
     @Transactional
     @Override
@@ -387,11 +377,9 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
-        targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
         JsonNode patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
         UOMDtoV2 patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
-        uomJpaRepository.save(patchUOMtoEntity(uomEntity, patchedUOMDto));
+        uomJpaRepository.save(uomDtoV2toUOMEntityPatcher.scalerPatcher(patchedUOMDto,uomEntity));
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
 
