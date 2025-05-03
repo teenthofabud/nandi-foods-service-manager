@@ -2,9 +2,7 @@ package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.converter;
 
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class UOMDtoV2toEntityScalerPatcher implements UOMDtoV2toUOMEntityPatcher{
 
     @Override
