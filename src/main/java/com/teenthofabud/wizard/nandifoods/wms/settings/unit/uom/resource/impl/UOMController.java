@@ -74,9 +74,16 @@ public class UOMController implements UOMAPI {
         return patcheUOMDto;
     }
 
+//    @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
+    @Override
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid UOMDtoV2 sourceUOMDto) throws UOMException {
+        uomService.updateExistingUOMByCode(code, sourceUOMDto);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping(path = "/{id}", consumes = HttpMediaType.APPLICATION_JSON_PATCH)
     @Override
-    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
+    public ResponseEntity<Void> patchUOMByCode(@PathVariable(name = "id") String code, @RequestBody @Valid JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
         uomService.updateExistingUOMByCode(code, jsonPatch);
         return ResponseEntity.noContent().build();
     }

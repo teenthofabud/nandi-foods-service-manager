@@ -50,8 +50,19 @@ public interface UOMAPI extends BaseUnitClassAPI {
             @ApiResponse(responseCode = "204", description = "UOM edited")
     })
     @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
+    public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "UOM dto", required = true,
+            content = @Content(schema = @Schema(implementation = UOMDtoV2.class))) UOMDtoV2 sourceUOMDto) throws UOMException;
+
+
+
+
+    @Operation(method = "PATCH", summary = "UOM edit", description = "patchUOMById")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "UOM edited")
+    })
+    @Parameter(description = "UOM Identifier", name = "Id", schema = @Schema(implementation = String.class), in = ParameterIn.PATH, required = true)
     public ResponseEntity<Void> patchUOMByCode(String code, @RequestBody(description = "JsonPatch", required = true,
-            content = @Content(schema = @Schema(implementation = JsonPatchOperation.class))) JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException;
+            content = @Content(schema = @Schema(implementation = JsonPatch.class))) JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException;
 
 
 

@@ -253,7 +253,7 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         if(optionalUOMEntity.isPresent()) {
             throw new UOMException(WMSErrorCode.WMS_EXISTS,new Object[]{form.getCode()});
         }
-        log.debug(form.toString());
+
         validateMutualRelationsBetweenCollectionItems(form);
 
         // Save UOM
@@ -369,6 +369,26 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
 
     @Transactional
     @Override
+    public void updateExistingUOMByCode(String code, UOMDtoV2 sourceUOMDto) throws UOMException {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
+        if(optionalUOMEntity.isEmpty()) {
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
+        }
+        log.debug("UOM does exists with code: {}", code);
+        UOMEntity uomEntity = optionalUOMEntity.get();
+        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        List<UnitClassSelfLinkageDtoV2> linkedUOMs = uomEntity.getFromUOMs().stream().map(f -> uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter.convert(f)).collect(Collectors.toList());
+        targetUOMDto.setLinkedUOMs(Optional.of(linkedUOMs));
+        Diff dtoDiff = javers.compare(targetUOMDto, sourceUOMDto);
+        uomEntity = comparativelyUpdateMandatoryFields(dtoDiff, uomEntity, true);
+        uomEntity = comparativelyUpdateMandatoryCollection(targetUOMDto, sourceUOMDto, uomEntity);
+        uomJpaRepository.save(uomEntity);
+        log.info("Updated UOMEntity with id: {}", uomEntity.getId());
+    }
+
+
+    @Transactional
+    @Override
     public void updateExistingUOMByCode(String code, JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
         Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
         if(optionalUOMEntity.isEmpty()) {
@@ -380,8 +400,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         JsonNode patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
         UOMDtoV2 patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
         uomJpaRepository.save(uomDtoV2toUOMEntityPatcher.scalerPatcher(patchedUOMDto,uomEntity));
+        uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
+
 
     private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) throws UOMException {
         if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) {
