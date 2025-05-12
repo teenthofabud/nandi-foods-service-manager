@@ -4,6 +4,7 @@ import com.diffplug.common.base.Errors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
@@ -397,8 +398,14 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         log.debug("UOM does exists with code: {}", code);
         UOMEntity uomEntity = optionalUOMEntity.get();
         UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
-        JsonNode patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
-        UOMDtoV2 patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
+        JsonNode patchedUOMNode = null;
+        UOMDtoV2 patchedUOMDto = null;
+        try {
+            patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
+            patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
+        } catch (InvalidFormatException e) {
+            throw new UOMException(WMSErrorCode.WMS_ATTRIBUTE_INVALID, new Object[]{"Invalid value Provided"});
+        }
         uomJpaRepository.save(uomDtoV2toUOMEntityPatcher.scalerPatcher(patchedUOMDto,uomEntity));
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
