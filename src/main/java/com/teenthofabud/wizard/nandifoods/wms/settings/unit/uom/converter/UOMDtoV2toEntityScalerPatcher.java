@@ -4,13 +4,11 @@ import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.dto.UOMDtoV2;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.entity.UOMEntity;
 import org.springframework.stereotype.Component;
 
-
 /*
  * It provides the scalerPatcher method, which selectively updates non-null fields
  * from a UOMDtoV2 object to a UOMEntity object. This ensures only the provided fields in the DTO are patched
  * into the entity, leaving other fields unchanged.
  */
-
 
 @Component
 public class UOMDtoV2toEntityScalerPatcher implements UOMDtoV2toUOMEntityPatcher{
