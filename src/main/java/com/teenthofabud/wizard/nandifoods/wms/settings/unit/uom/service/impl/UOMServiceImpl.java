@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
@@ -403,7 +404,10 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         try {
             patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
             patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
-        } catch (InvalidFormatException e) {
+        }catch (InvalidTypeIdException jsonPatchException) {
+            log.error("Invalid JsonPatch provided : {}", jsonPatchException.getCause().getMessage());
+            throw new UOMException((WMSErrorCode.WMS_ACTION_FAILURE), new Object[]{jsonPatchException.getCause().getMessage()});
+        }catch (InvalidFormatException e) {
             log.error("Invalid Value Provided for attribute: {}", e.getValue());
             throw new UOMException(WMSErrorCode.WMS_ATTRIBUTE_INVALID, new Object[]{e.getValue()});
         }
