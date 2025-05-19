@@ -404,7 +404,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
             patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
             patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
         } catch (InvalidFormatException e) {
-            throw new UOMException(WMSErrorCode.WMS_ATTRIBUTE_INVALID, new Object[]{"Invalid value Provided"});
+            log.error("Invalid Value Provided for attribute: {}", e.getValue());
+            throw new UOMException(WMSErrorCode.WMS_ATTRIBUTE_INVALID, new Object[]{e.getValue()});
         }
         uomJpaRepository.save(uomDtoV2toUOMEntityPatcher.scalerPatcher(patchedUOMDto,uomEntity));
         uomJpaRepository.save(uomEntity);
