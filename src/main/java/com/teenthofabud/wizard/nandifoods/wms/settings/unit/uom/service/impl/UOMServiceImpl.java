@@ -1,6 +1,13 @@
 package com.teenthofabud.wizard.nandifoods.wms.settings.unit.uom.service.impl;
 
 import com.diffplug.common.base.Errors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.wizard.nandifoods.wms.error.core.WMSErrorCode;
 import com.teenthofabud.wizard.nandifoods.wms.handler.ComparativeUpdateHandler;
 import com.teenthofabud.wizard.nandifoods.wms.settings.unit.constants.MeasurementSystem;
@@ -86,6 +93,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
     private String fileNameDateFormat;
     private String csvFileNameFormat;
     private String pdfFileNameFormat;
+    private ObjectMapper objectMapper;
+    private UOMDtoV2toUOMEntityPatcher uomDtoV2toUOMEntityPatcher;
 
     @Autowired
     public UOMServiceImpl(UOMJpaRepository uomJpaRepository,
@@ -107,6 +116,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
                           UOMEntityToDtoV2Converter uomEntityToDtoV2Converter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageVoConverter uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter,
                           UOMSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter,
+                          ObjectMapper objectMapper,
+                            UOMDtoV2toUOMEntityPatcher uomDtoV2toUOMEntityPatcher,
                           //UOMSummaryProjectionRepository uomSummaryProjectionRepository,
                           @Value("#{'${wms.settings.uom.search.fields}'.split(',')}") List<String> searchFields,
                           @Value("${wms.settings.unit.fileNameDateTimeFormat}") String fileNameDateFormat,
@@ -135,6 +146,8 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         this.pdfFileNameFormat = pdfFileNameFormat;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter = uomSelfLinkageEntityToUnitClassSelfLinkageVoConverter;
         this.uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter = uomSelfLinkageEntityToUnitClassSelfLinkageDtoV2Converter;
+        this.objectMapper=objectMapper;
+        this.uomDtoV2toUOMEntityPatcher = uomDtoV2toUOMEntityPatcher;
         //this.uomSummaryProjectionRepository = uomSummaryProjectionRepository;
     }
 
@@ -374,6 +387,35 @@ public class UOMServiceImpl implements UOMService, ComparativeUpdateHandler<UOME
         uomJpaRepository.save(uomEntity);
         log.info("Updated UOMEntity with id: {}", uomEntity.getId());
     }
+
+
+    @Transactional
+    @Override
+    public void updateExistingUOMByCode(String code, JsonPatch jsonPatch) throws UOMException, JsonPatchException, JsonProcessingException {
+        Optional<UOMEntity> optionalUOMEntity = uomJpaRepository.findByCode(code);
+        if(optionalUOMEntity.isEmpty()) {
+            throw new UOMException(WMSErrorCode.WMS_NOT_FOUND, new Object[]{code});
+        }
+        log.debug("UOM does exists with code: {}", code);
+        UOMEntity uomEntity = optionalUOMEntity.get();
+        UOMDtoV2 targetUOMDto = uomEntityToDtoV2Converter.convert(uomEntity);
+        JsonNode patchedUOMNode = null;
+        UOMDtoV2 patchedUOMDto = null;
+        try {
+            patchedUOMNode = jsonPatch.apply(objectMapper.convertValue(targetUOMDto, JsonNode.class));
+            patchedUOMDto = objectMapper.treeToValue(patchedUOMNode, UOMDtoV2.class);
+        }catch (InvalidTypeIdException jsonPatchException) {
+            log.error("Invalid JsonPatch provided : {}", jsonPatchException.getCause().getMessage());
+            throw new UOMException((WMSErrorCode.WMS_ACTION_FAILURE), new Object[]{jsonPatchException.getCause().getMessage()});
+        }catch (InvalidFormatException e) {
+            log.error("Invalid Value Provided for attribute: {}", e.getValue());
+            throw new UOMException(WMSErrorCode.WMS_ATTRIBUTE_INVALID, new Object[]{e.getValue()});
+        }
+        uomJpaRepository.save(uomDtoV2toUOMEntityPatcher.scalerPatcher(patchedUOMDto,uomEntity));
+        uomJpaRepository.save(uomEntity);
+        log.info("Updated UOMEntity with id: {}", uomEntity.getId());
+    }
+
 
     private UOMEntity comparativelyUpdateMandatoryCollection(UOMDtoV2 old, UOMDtoV2 _new, UOMEntity target) throws UOMException {
         if(old.getLinkedUOMs().isPresent() && _new.getLinkedUOMs().isEmpty()) {
